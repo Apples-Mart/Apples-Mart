@@ -1,0 +1,73 @@
+async function uploadProductsToFirestore() {
+    // الرابط الخاص بملف المنتجات على GitHub
+    const productsJsonUrl = "https://raw.githubusercontent.com/Apples-Mart/Apples-Mart/refs/heads/main/p.json";
+    
+    // اسم المجموعة (Collection) في Firestore التي تريد رفع الأصناف إليها
+    const collectionName = "items";
+
+    console.log("...بدء عملية الرفع إلى Firestore");
+
+    try {
+        // التأكد من أن دوال Firestore موجودة في الصفحة
+        if (typeof db === 'undefined' || typeof doc === 'undefined' || typeof writeBatch === 'undefined') {
+            throw new Error("لم يتم العثور على دوال Firestore! تأكد من أنك قمت بتسجيل الدخول للتطبيق.");
+        }
+
+        console.log(`1. جاري جلب ملف المنتجات من الرابط...`);
+        const response = await fetch(productsJsonUrl);
+        if (!response.ok) throw new Error(`!فشل تحميل الملف. الحالة: ${response.status}`);
+        
+        const productsArray = await response.json();
+        console.log(`2. تم تحميل ${productsArray.length} صنف بنجاح.`);
+
+        if (productsArray.length === 0) {
+            console.log("الملف فارغ، لا يوجد ما يتم رفعه.");
+            return;
+        }
+
+        // استخدام WriteBatch لرفع البيانات دفعة واحدة (أكثر كفاءة)
+        // Firestore يسمح بـ 500 عملية في الدفعة الواحدة، لذا سنقوم بتقسيمها إذا لزم الأمر
+        const batchSize = 499;
+        let batch = writeBatch(db);
+        let operationsCount = 0;
+
+        console.log("3. بدء تجهيز البيانات لرفعها...");
+        for (let i = 0; i < productsArray.length; i++) {
+            const product = productsArray[i];
+            
+            // يجب أن يكون لكل صنف معرّف (ID) فريد. سنستخدم الباركود كمعرّف.
+            if (!product.barcode1) {
+                console.warn(`تحذير: الصنف رقم ${i + 1} بدون باركود (barcode1)، سيتم تجاهله.`);
+                continue;
+            }
+            
+            // تحديد مرجع المستند في Firestore
+            const docRef = doc(db, collectionName, String(product.barcode1));
+            
+            // إضافة عملية الكتابة إلى الدفعة
+            batch.set(docRef, product);
+            operationsCount++;
+
+            // إذا وصلت الدفعة للحد الأقصى، قم بتنفيذها وابدأ دفعة جديدة
+            if (operationsCount === batchSize) {
+                await batch.commit();
+                console.log(`تم رفع دفعة من ${operationsCount} صنف...`);
+                batch = writeBatch(db); // دفعة جديدة
+                operationsCount = 0;
+            }
+        }
+
+        // تنفيذ أي عمليات متبقية في الدفعة الأخيرة
+        if (operationsCount > 0) {
+            await batch.commit();
+        }
+
+        console.log(`%c✔ ✔ ✔ اكتمل رفع جميع الأصناف (${productsArray.length}) إلى Firestore بنجاح!`, "color: green; font-size: 1.2em; font-weight: bold;");
+
+    } catch (error) {
+        console.error("%c✖ حدث خطأ فادح:", "color: red; font-size: 1.2em; font-weight: bold;", error);
+    }
+}
+
+// استدعاء الدالة لبدء العملية
+uploadProductsToFirestore();
