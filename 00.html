@@ -190,23 +190,7 @@
 
   <main>
     <section id="items">
-      <h2><i class="fas fa-box"></i> إدارة الأصناف</h2>
-      <div class="form-group flex-container">
-        <input type="text" id="itemCode" placeholder="الباركود (المعرّف الأساسي)" />
-        <button id="scanBarcodeBtn" class="btn-success"><i class="fas fa-barcode"></i> مسح</button>
-        <input type="text" id="itemBarcode2" placeholder="باركود 2 (اختياري)" />
-        <input type="text" id="itemName" placeholder="اسم الصنف" />
-      </div>
-       <div class="form-group flex-container">
-        <input type="text" id="itemUnit" placeholder="الوحدة (مثال: قطعة، علبة)" />
-        <input type="number" id="itemPrice" placeholder="السعر" min="0" step="0.01" />
-        <input type="number" id="itemStock" placeholder="الكمية / المخزون" min="0" />
-        <div class="flex-container" style="flex-grow: 1;">
-          <select id="itemCategorySelect" style="flex-grow: 1;"><option value="">اختر فئة</option></select>
-          <input type="text" id="newItemCategory" placeholder="أو أضف فئة جديدة" style="flex-grow: 1; min-width: 120px; display: none;" />
-        </div>
-        <button id="saveItemBtn"><i class="fas fa-save"></i> حفظ الصنف</button>
-      </div>
+      <h2><i class="fas fa-box"></i> عرض الأصناف</h2>
       <div style="overflow-x:auto;">
       <table>
           <thead>
@@ -460,7 +444,7 @@ window.getDocument = async (collectionName, docId) => { const d = await getDoc(d
 const DOM = {
     appContainer: document.getElementById("app-container"), loginContainer: document.getElementById("login-container"), loginForm: document.getElementById("login-form"), usernameInput: document.getElementById("usernameInput"), passwordInput: document.getElementById("passwordInput"),
     navButtons: document.querySelectorAll("nav button"), sections: document.querySelectorAll("main section"), logoutBtn: document.getElementById("logoutBtn"),
-    itemCode: document.getElementById("itemCode"), itemBarcode2: document.getElementById("itemBarcode2"), itemName: document.getElementById("itemName"), itemUnit: document.getElementById("itemUnit"), itemPrice: document.getElementById("itemPrice"), itemStock: document.getElementById("itemStock"), itemCategorySelect: document.getElementById("itemCategorySelect"), newItemCategory: document.getElementById("newItemCategory"), saveItemBtn: document.getElementById("saveItemBtn"), itemsTable: document.getElementById("itemsTable"),
+    itemsTable: document.getElementById("itemsTable"),
     scanBarcodeBtn: document.getElementById("scanBarcodeBtn"),
     filterBarcode1: document.getElementById("filterBarcode1"), filterBarcode2: document.getElementById("filterBarcode2"), filterName: document.getElementById("filterName"), filterUnit: document.getElementById("filterUnit"), filterSku: document.getElementById("filterSku"), filterPrice: document.getElementById("filterPrice"), filterStock: document.getElementById("filterStock"), filterCategory: document.getElementById("filterCategory"),
     newCustomerId: document.getElementById("newCustomerId"), newCustomerName: document.getElementById("newCustomerName"), newCustomerAddress: document.getElementById("newCustomerAddress"), saveCustomerBtn: document.getElementById("saveCustomerBtn"), customersTableBody: document.getElementById("customersTableBody"),
@@ -492,7 +476,6 @@ const Helpers = {
     showNotification: (message, duration = 3000) => { const n = document.createElement("div"); n.className = "notification"; n.textContent = message; DOM.notificationContainer.appendChild(n); setTimeout(() => n.classList.add("show"), 10); setTimeout(() => { n.classList.remove("show"); setTimeout(() => n.remove(), 500); }, duration); },
     switchTab: (tabId) => { document.querySelectorAll("main section").forEach(s => s.classList.remove("active")); document.getElementById(tabId)?.classList.add("active"); App.onTabSwitch(tabId); },
     updateNavButtons: (activeButton) => { DOM.navButtons.forEach(btn => btn.classList.remove("active")); activeButton.classList.add("active"); },
-    clearItemForm: () => { DOM.itemCode.value = ''; DOM.itemBarcode2.value = ''; DOM.itemName.value = ''; DOM.itemUnit.value = ''; DOM.itemPrice.value = ''; DOM.itemStock.value = ''; DOM.itemCategorySelect.value = ''; DOM.newItemCategory.value = ''; DOM.newItemCategory.style.display = 'none'; appState.editingItemId = null; DOM.saveItemBtn.innerHTML = '<i class="fas fa-save"></i> حفظ الصنف'; },
     calculateChange: () => { const total = parseFloat(DOM.invoiceTotal.textContent) || 0; const paid = parseFloat(DOM.amountPaidInput.value) || 0; const change = paid - total; if (change >= 0) { DOM.changeText.textContent = "الباقي للعميل:"; DOM.changeAmount.textContent = change.toFixed(2); } else { DOM.changeText.textContent = "المطلوب منه:"; DOM.changeAmount.textContent = Math.abs(change).toFixed(2); } },
     openModal: (modal) => { modal.style.display = 'flex'; },
     closeModal: (modal) => { modal.style.display = 'none'; },
@@ -559,35 +542,7 @@ const ItemsController = {
             <td>${item.category || 'غير محدد'}</td>
           </tr>
         `).join("");
-    },
-    save: async () => {
-        const newCategory = DOM.newItemCategory.value.trim();
-        const selectedCategory = DOM.itemCategorySelect.value;
-        const finalCategory = newCategory || selectedCategory;
-        if (!finalCategory) {
-          Helpers.showNotification("يرجى اختيار أو إضافة فئة.");
-          return;
-        }
-        const itemData = {
-            barcode1: DOM.itemCode.value.trim(),
-            barcode2: DOM.itemBarcode2.value.trim() || '',
-            name: DOM.itemName.value.trim(),
-            unit: DOM.itemUnit.value.trim(),
-            price: parseFloat(DOM.itemPrice.value) || 0,
-            qunt: parseFloat(DOM.itemStock.value) || 0,
-            category: finalCategory,
-            sku: DOM.itemCode.value.trim() // Assuming SKU is same as barcode1
-        };
-        if (!itemData.barcode1 || !itemData.name || !itemData.unit) { Helpers.showNotification("يرجى ملء الحقول الأساسية."); return; }
-        try {
-            const docRef = doc(db, "items", itemData.barcode1);
-            await updateDoc(docRef, itemData, { merge: true });
-            Helpers.showNotification("تم إضافة الصنف بنجاح.");
-            Helpers.clearItemForm();
-        } catch (e) { console.error("Error saving item: ", e); Helpers.showNotification("حدث خطأ أثناء الحفظ."); }
-    },
-    edit: () => { Helpers.showNotification("تعديل الأصناف غير متاح في هذا الوضع."); },
-    delete: () => { Helpers.showNotification("حذف الأصناف غير متاح في هذا الوضع."); }
+    }
 };
 // #endregion
 
@@ -669,26 +624,24 @@ const SalesController = {
         };
         
         try {
-            const batch = writeBatch(db);
-            const invoiceRef = doc(collection(db, "invoices"));
-            batch.set(invoiceRef, data);
-
+            // Check stock locally and update local state
             let stockError = false;
             for (const ci of appState.currentInvoice) {
-                const itemRef = doc(db, "items", ci.id);
                 const stockItem = appState.items.find(i => i.id === ci.id);
                 if (!stockItem || stockItem.qunt < ci.qty) {
                     Helpers.showNotification(`المخزون غير كافٍ للصنف: ${ci.name}`);
                     stockError = true;
                     break;
                 }
-                batch.update(itemRef, { qunt: increment(-ci.qty) });
             }
-
             if (stockError) {
                 DOM.saveInvoiceBtn.disabled = false;
                 return;
             }
+
+            const batch = writeBatch(db);
+            const invoiceRef = doc(collection(db, "invoices"));
+            batch.set(invoiceRef, data);
             
             const paid = parseFloat(DOM.amountPaidInput.value) || 0;
             if (paid > 0) {
@@ -703,6 +656,14 @@ const SalesController = {
             }
 
             await batch.commit();
+
+            // Update local stock after successful commit
+            appState.currentInvoice.forEach(ci => {
+                const stockItem = appState.items.find(i => i.id === ci.id);
+                if (stockItem) {
+                    stockItem.qunt -= ci.qty;
+                }
+            });
             
             Helpers.showNotification("تم حفظ الفاتورة بنجاح!");
             
@@ -711,6 +672,7 @@ const SalesController = {
             DOM.customerPhone.value = "";
             DOM.amountPaidInput.value = "";
             SalesController.renderInvoice();
+            ItemsController.render(); // Re-render items to show updated local stock
         } catch (e) {
             console.error("Save Invoice Error:", e);
             Helpers.showNotification("فشل الحفظ. تحقق من اتصالك بالانترنت.", 5000);
@@ -746,18 +708,13 @@ const SalesController = {
 // #region Scanner Controller
 const ScannerController = {
     onScanSuccess: (decodedText, decodedResult) => {
-        if (appState.scannerMode === 'items') {
-            DOM.itemCode.value = decodedText;
-            Helpers.showNotification("تم مسح الباركود بنجاح.");
-            ScannerController.stop(); 
-        } else { // scannerMode === 'sales'
-            const product = appState.items.find(p => p.sku === decodedText || p.barcode1 === decodedText || p.barcode2 === decodedText);
-            if (product) {
-                SalesController.addToInvoice(product);
-                Helpers.showNotification(`تمت إضافة: ${product.name}`);
-            } else {
-                Helpers.showNotification("الصنف غير موجود بهذا الباركود.");
-            }
+        // Scanner is now only for sales
+        const product = appState.items.find(p => p.sku === decodedText || p.barcode1 === decodedText || p.barcode2 === decodedText);
+        if (product) {
+            SalesController.addToInvoice(product);
+            Helpers.showNotification(`تمت إضافة: ${product.name}`);
+        } else {
+            Helpers.showNotification("الصنف غير موجود بهذا الباركود.");
         }
     },
     start: () => {
@@ -1169,36 +1126,36 @@ const App = {
         const today = new Date().toISOString().split('T')[0];
         DOM.vacationStartDate.value = today;
         DOM.vacationEndDate.value = today;
-        
-        DOM.itemCategorySelect.addEventListener('change', () => {
-            if (DOM.itemCategorySelect.value === 'new') {
-                DOM.newItemCategory.style.display = 'inline-block';
-            } else {
-                DOM.newItemCategory.style.display = 'none';
-                DOM.newItemCategory.value = '';
-            }
-        });
-        
-        DOM.newItemCategory.style.display = 'none';
     },
     
-    listenToFirebase: () => {
-        Object.values(appState.unsubscribe).forEach(unsub => unsub());
-        
-        appState.unsubscribe.items = window.readCollection("items", (data) => {
-            appState.items = data.map(item => ({ ...item, id: item.id }));
+    loadItemsFromJSON: async () => {
+        try {
+            const response = await fetch('p.json'); 
+            if (!response.ok) {
+                throw new Error('فشل في تحميل ملف الأصناف');
+            }
+            const itemsData = await response.json();
+            appState.items = itemsData.map(item => ({
+                ...item,
+                id: String(item.barcode1 || item.id || '') 
+            }));
+
             const categories = [...new Set(appState.items.map(i => i.category))].filter(Boolean);
             const categoryOptions = `<option value="all">جميع الفئات</option>` + categories.map(c => `<option value="${c}">${c}</option>`).join('');
             DOM.salesCategoryFilters.innerHTML = categories.map(c => `<button class="btn-small" data-category="${c}">${c}</button>`).join('');
             DOM.filterCategory.innerHTML = categoryOptions;
-            DOM.itemCategorySelect.innerHTML = `<option value="">اختر فئة</option><option value="new">إضافة فئة جديدة</option>` + categories.map(c => `<option value="${c}">${c}</option>`).join('');
-            if (document.getElementById('items').classList.contains('active')) {
-                ItemsController.render();
-            }
-            if (document.getElementById('summary').classList.contains('active')) {
-                ReportsController.render();
-            }
-        }, "name", "asc");
+            ItemsController.render();
+            Helpers.showNotification("تم تحميل الأصناف محلياً.");
+        } catch (error) {
+            console.error("Error loading items from JSON:", error);
+            Helpers.showNotification("خطأ: لم يتم العثور على ملف الأصناف p.json");
+        }
+    },
+
+    listenToFirebase: () => {
+        Object.values(appState.unsubscribe).forEach(unsub => unsub());
+        
+        App.loadItemsFromJSON();
         
         appState.unsubscribe.customers = window.readCollection("customers", (data) => { 
             appState.customers = data; 
@@ -1331,8 +1288,6 @@ const App = {
         DOM.amountPaidInput.addEventListener("input", Helpers.calculateChange);
         DOM.increaseDeliveryBtn.addEventListener("click", () => { appState.deliveryFee += 5; SalesController.updateTotals(); });
         DOM.decreaseDeliveryBtn.addEventListener("click", () => { appState.deliveryFee = Math.max(0, appState.deliveryFee - 5); SalesController.updateTotals(); });
-
-        DOM.saveItemBtn.addEventListener("click", ItemsController.save);
         
         const filterInputs = [DOM.filterBarcode1, DOM.filterBarcode2, DOM.filterName, DOM.filterUnit, DOM.filterSku, DOM.filterPrice, DOM.filterStock, DOM.filterCategory];
         filterInputs.forEach(input => input.addEventListener("input", ItemsController.render));
@@ -1350,8 +1305,11 @@ const App = {
         DOM.restoreBtn.addEventListener("click", () => DOM.restoreInput.click());
         DOM.restoreInput.addEventListener("change", (e) => ReportsController.restore(e.target.files[0]));
         
-        DOM.scanBarcodeBtn.addEventListener("click", () => { appState.scannerMode = 'items'; ScannerController.start(); });
-        DOM.startScannerBtn.addEventListener("click", () => { appState.scannerMode = 'sales'; ScannerController.start(); });
+        // Removed scan button from Items tab logic
+        DOM.startScannerBtn.addEventListener("click", () => {
+            appState.scannerMode = 'sales'; 
+            ScannerController.start();
+        });
         DOM.scannerContainer.addEventListener("click", (e) => { if(e.target === DOM.scannerContainer) ScannerController.stop(); });
         
         DOM.saveWorkerBtn.addEventListener('click', WorkersController.save);
