@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Apples-Mart - Firebase</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="style.css">
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+</head>
+<body>
+
+<div id="app-container">
+  <header>
+    <span>Apples-Mart </span>
+    <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> خروج</button>
+  </header>
+  <nav>
+    <button data-tab="items"><i class="fas fa-box"></i> الأصناف</button>
+    <button data-tab="customers"><i class="fas fa-users"></i> العملاء</button>
+    <button class="active" data-tab="sales"><i class="fas fa-cash-register"></i> المبيعات</button>
+    <button data-tab="invoices"><i class="fas fa-file-invoice"></i> الفواتير</button>
+    <button data-tab="summary"><i class="fas fa-chart-bar"></i> التقارير</button>
+    <button data-tab="users" class="hidden"><i class="fas fa-user-shield"></i> إدارة المستخدمين</button>
+  </nav>
+
+  <main>
+    <section id="items">
+      <h2><i class="fas fa-box"></i> إدارة الأصناف</h2>
+      <div class="form-group flex-container">
+        <input type="text" id="itemCode" placeholder="الباركود (المعرّف الأساسي)" />
+        <input type="text" id="itemName" placeholder="اسم الصنف" />
+        <input type="text" id="itemUnit" placeholder="الوحدة (مثال: قطعة، علبة)" />
+      </div>
+       <div class="form-group flex-container">
+        <input type="text" id="itemSku" placeholder="كود SKU (اختياري للكاميرا)" />
+        <input type="number" id="itemPrice" placeholder="السعر" min="0" step="0.01" />
+        <input type="number" id="itemStock" placeholder="الكمية / المخزون" min="0" />
+        <button id="saveItemBtn"><i class="fas fa-save"></i> حفظ الصنف</button>
+      </div>
+      <div class="form-group flex-container" style="margin-top: 20px;">
+        <label for="filterCategorySelect" style="flex-grow: 0; margin-right: 10px;">تصفية حسب الفئة:</label>
+        <select id="filterCategorySelect"><option value="all">جميع الفئات</option></select>
+      </div>
+      <table>
+          <thead><tr><th>باركود</th><th>اسم</th><th>وحدة</th><th>SKU</th><th>سعر</th><th>كمية</th><th>فئة</th><th>تعديل/حذف</th></tr></thead>
+          <tbody id="itemsTable"></tbody>
+      </table>
+      
+    </section>
+
+    <section id="customers">
+      <h2><i class="fas fa-users"></i> إدارة العملاء</h2>
+      <div class="form-group flex-container"><input type="text" id="newCustomerId" placeholder="رقم هاتف العميل" /><input type="text" id="newCustomerName" placeholder="اسم العميل" /><button id="saveCustomerBtn"><i class="fas fa-save"></i> حفظ العميل</button></div>
+      <div id="customersList"></div>
+    </section>
+    
+    <section id="sales" class="active" style="position: relative;">
+      <h2><i class="fas fa-cash-register"></i> عملية بيع</h2>
+      <div id="sales-header">
+        <div class="form-group">
+          <div class="search-group"><input type="text" id="searchItem" placeholder="بحث بالاسم أو الباركود" autocomplete="off" /><button id="startScannerBtn" title="فتح ماسح الكاميرا (SKU)"><i class="fas fa-barcode"></i></button></div>
+          <div id="searchResults"></div>
+        </div>
+        <div class="form-group">
+          <input type="text" id="customerName" placeholder="اسم العميل (اختياري)" autocomplete="off" />
+          <div id="customerSuggestions"></div>
+        </div>
+        <div class="form-group"><input type="tel" id="customerPhone" placeholder="رقم هاتف العميل" /></div>
+      </div>
+      <button id="toggleItemsGridBtn" class="btn-warning" style="width: 100%; margin-bottom: 15px;"><i class="fas fa-th-large"></i> عرض الأصناف حسب الفئة</button>
+      <div id="categoryScrollerContainer"><div id="salesCategoryFilters"></div></div>
+      <div id="itemGrid"></div>
+      <h3><i class="fas fa-file-invoice"></i> تفاصيل الفاتورة</h3>
+      <table><thead><tr><th>اسم الصنف</th><th>كمية</th><th>سعر الوحدة</th><th>الإجمالي</th><th>حذف</th></tr></thead><tbody id="invoiceTable"></tbody></table>
+      <div class="summary-box" style="padding: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3><i class="fas fa-truck"></i> خدمة التوصيل: <span id="deliveryFeeValue">30.00</span> ج.م</h3>
+            <div class="delivery-controls"><button id="increaseDeliveryBtn" class="btn-small btn-success">+5</button><button id="decreaseDeliveryBtn" class="btn-small btn-danger">-5</button></div>
+        </div>
+        <hr style="margin: 10px 0;">
+        <h3 style="text-align: left; margin: 0;">إجمالي الفاتورة: <span id="invoiceTotal">0.00</span> ج.م</h3>
+      </div>
+      
+      <div id="sales-footer">
+          <div class="payment-options"><label>طريقة الدفع:</label><label><input type="radio" name="paymentMethod" value="cash" checked> نقداً</label><label><input type="radio" name="paymentMethod" value="visa"> فيزا</label><label><input type="radio" name="paymentMethod" value="wallet"> محفظة</label></div>
+          <div class="sales-footer-row">
+            <div class="form-group">
+              <input type="number" id="amountPaidInput" placeholder="المبلغ المدفوع" min="0" step="0.01" />
+              <div class="change-due-container"><span id="changeText">الباقي للعميل:</span> <span id="changeAmount">0.00</span> ج.م</div>
+            </div>
+          </div>
+          <div class="sales-footer-row">
+              <div class="btn-group"><button id="sendWhatsAppBtn" class="btn-whatsapp"><i class="fab fa-whatsapp"></i> واتساب</button><button id="printInvoiceBtn" class="btn-success"><i class="fas fa-print"></i> طباعة</button><button id="saveInvoiceBtn"><i class="fas fa-save"></i> حفظ</button></div>
+          </div>
+      </div>
+    </section>
+
+    <section id="invoices"><h2><i class="fas fa-file-invoice-dollar"></i> الفواتير المحفوظة</h2><div id="invoicesList"></div></section>
+    
+    <section id="summary">
+      <h2><i class="fas fa-chart-bar"></i> التقارير والنسخ الاحتياطي</h2>
+      <div class="form-group flex-container"><label for="summaryGroupSelect">تجميع حسب:</label><select id="summaryGroupSelect"><option value="day">اليوم</option><option value="week">الأسبوع</option><option value="month">الشهر</option></select></div>
+      <div class="summary-box"><i class="fas fa-coins"></i> <strong>المجموع الكلي للمبيعات:</strong> <span id="totalSalesAmount">0.00</span> ج.م</div>
+      <table><thead><tr><th>الفترة</th><th>عدد الفواتير</th><th>المبلغ</th></tr></thead><tbody id="salesSummaryTable"></tbody></table>
+      <div style="margin-top: 30px;"><h3><i class="fas fa-star"></i> الأصناف الأكثر مبيعًا</h3><div id="bestSellingItems" class="summary-box"><p>لا توجد بيانات متاحة.</p></div></div>
+      <div class="flex-container flex-end" style="margin-top: 20px; gap: 15px;">
+        <button id="backupBtn" class="btn-success"><i class="fas fa-download"></i> نسخة احتياطية</button>
+        <button id="restoreBtn" class="btn-warning"><i class="fas fa-upload"></i> استعادة نسخة</button>
+        <button id="resetInvoicesBtn" class="btn-danger"><i class="fas fa-trash-alt"></i> حذف جميع الفواتير</button>
+        <input type="file" id="restoreInput" accept=".json" style="display: none;" />
+      </div>
+    </section>
+
+    <section id="users">
+      <h2><i class="fas fa-user-shield"></i> إدارة المستخدمين</h2>
+      <div class="form-group flex-container"><input type="text" id="newUsernameInput" placeholder="اسم المستخدم" /><input type="password" id="newUserPasswordInput" placeholder="كلمة المرور" /><select id="newUserRoleSelect"><option value="user">مستخدم عادي</option><option value="worker">عامل</option></select><button id="saveUserBtn"><i class="fas fa-plus-circle"></i> إضافة مستخدم</button></div>
+      <div id="usersList"></div>
+      
+      <hr>
+      
+            <h3><i class="fas fa-hard-hat"></i> إدارة العمال</h3>
+      <div class="form-group flex-container">
+        <input type="text" id="workerNameInput" placeholder="اسم العامل" />
+        <input type="tel" id="workerPhoneInput" placeholder="رقم الهاتف" />
+        <input type="text" id="workerAddressInput" placeholder="العنوان" />
+        <input type="number" id="workerSalaryInput" placeholder="الراتب الأساسي" min="0" step="0.01" />
+        <button id="saveWorkerBtn"><i class="fas fa-save"></i> حفظ العامل</button>
+      </div>
+      <div id="workersList"></div>
+      
+      <hr>
+      
+      <div id="changePinSection">
+        <h4><i class="fas fa-key"></i> تغيير كلمة مرور المدير العام</h4>
+        <div class="form-group flex-container">
+          <input type="password" id="oldPinInput" placeholder="الكلمة القديمة" />
+          <input type="password" id="newPinInput" placeholder="الكلمة الجديدة" />
+          <button id="changePinBtn" class="btn-warning"><i class="fas fa-sync-alt"></i> تغيير الكلمة</button>
+        </div>
+      </div>
+      <div class="flex-container flex-end" style="margin-top: 20px;">
+        <button id="fullResetBtn" class="btn-danger"><i class="fas fa-exclamation-triangle"></i> إعادة ضبط كاملة للنظام</button>
+      </div>
+    </section>
+  </main>
+</div>
+<div id="login-container">
+    <form id="login-form">
+        <h2><i class="fas fa-lock"></i> تسجيل الدخول</h2>
+        <div class="form-group"><input type="text" id="usernameInput" placeholder="البريد الإلكتروني" required /></div>
+        <div class="form-group"><input type="password" id="passwordInput" placeholder="كلمة المرور" required /></div>
+        <button type="submit" id="loginBtn"><i class="fas fa-sign-in-alt"></i> دخول</button>
+    </form>
+</div>
+<div id="scanner-container"><div id="reader"></div></div>
+<div id="notification-container"></div>
+
+<div id="advanceModal" class="modal">
+  <div class="modal-content">
+    <h3><i class="fas fa-money-bill-wave"></i> إضافة سلفة للعامل</h3>
+    <div class="form-group">
+      <label for="advanceAmount">المبلغ:</label>
+      <input type="number" id="advanceAmount" placeholder="المبلغ" min="0" step="0.01" />
+    </div>
+    <div class="form-group">
+      <label for="advanceNotes">ملاحظات:</label>
+      <textarea id="advanceNotes" placeholder="ملاحظات حول السلفة" rows="3"></textarea>
+    </div>
+    <div class="flex-container flex-end">
+      <button id="saveAdvanceBtn" class="btn-success"><i class="fas fa-save"></i> حفظ</button>
+      <button id="cancelAdvanceBtn" class="btn-danger"><i class="fas fa-times"></i> إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<div id="vacationModal" class="modal">
+  <div class="modal-content">
+    <h3><i class="fas fa-calendar-alt"></i> إضافة إجازة للعامل</h3>
+    <div class="form-group">
+      <label for="vacationStartDate">تاريخ البدء:</label>
+      <input type="date" id="vacationStartDate" />
+    </div>
+    <div class="form-group">
+      <label for="vacationEndDate">تاريخ الانتهاء:</label>
+      <input type="date" id="vacationEndDate" />
+    </div>
+    <div class="form-group">
+      <label for="vacationNotes">ملاحظات:</label>
+      <textarea id="vacationNotes" placeholder="ملاحظات حول الإجازة" rows="3"></textarea>
+    </div>
+    <div class="flex-container flex-end">
+      <button id="saveVacationBtn" class="btn-success"><i class="fas fa-save"></i> حفظ</button>
+      <button id="cancelVacationBtn" class="btn-danger"><i class="fas fa-times"></i> إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<div id="settlementModal" class="modal">
+  <div class="modal-content">
+    <h3><i class="fas fa-money-check"></i> تسوية الفاتورة</h3>
+    <div class="form-group">
+      <p>رقم الفاتورة: <span id="settlementInvoiceId"></span></p>
+      <p>العميل: <span id="settlementCustomerName"></span></p>
+      <p>إجمالي الفاتورة: <span id="settlementTotal"></span> ج.م</p>
+      <p>المدفوع سابقاً: <span id="settlementPaid"></span> ج.م</p>
+      <p>المتبقي: <span id="settlementBalance"></span> ج.م</p>
+    </div>
+    <div class="form-group">
+      <label for="settlementAmount">المبلغ المدفوع:</label>
+      <input type="number" id="settlementAmount" placeholder="المبلغ المدفوع" min="0" step="0.01" />
+    </div>
+    <div class="form-group">
+      <label for="settlementNotes">ملاحظات:</label>
+      <textarea id="settlementNotes" placeholder="ملاحظات حول الدفع" rows="3"></textarea>
+      <div id="loadMoreItemsBtn" class="form-group" style="text-align:center; display:none;">
+        <button class="btn-primary" id="loadMoreBtn">عرض المزيد</button>
+      </div>
+    </div>
+    <div class="flex-container flex-end">
+      <button id="saveSettlementBtn" class="btn-success"><i class="fas fa-save"></i> حفظ</button>
+      <button id="cancelSettlementBtn" class="btn-danger"><i class="fas fa-times"></i> إلغاء</button>
+    </div>
+  </div>
+  
+</div>
+
+<script type="module" src="app.js"></script>
+
+</body>
+</html>
