@@ -1136,7 +1136,9 @@ const App = {
             const itemsData = await response.json();
             appState.items = itemsData.map(item => ({
                 ...item,
-                id: String(item.barcode1 || item.id || '') 
+                id: String(item.barcode1 || item.id || ''),
+                price: parseFloat(item.price) || 0,
+                qunt: parseInt(item.qunt) || 0
             }));
 
             const categories = [...new Set(appState.items.map(i => i.category))].filter(Boolean);
