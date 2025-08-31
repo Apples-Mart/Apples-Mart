@@ -192,7 +192,7 @@
       <h2><i class="fas fa-box"></i> إدارة الأصناف</h2>
       <div class="form-group flex-container">
         <input type="text" id="itemCode" placeholder="الباركود (المعرّف الأساسي)" />
-        <button id="scanBarcodeBtn"><i class="fas fa-barcode"></i> مسح</button>
+        <button id="scanBarcodeBtn" class="btn-success"><i class="fas fa-barcode"></i> مسح</button>
         <input type="text" id="itemBarcode2" placeholder="باركود 2 (اختياري)" />
         <input type="text" id="itemName" placeholder="اسم الصنف" />
       </div>
@@ -202,7 +202,7 @@
         <input type="number" id="itemStock" placeholder="الكمية / المخزون" min="0" />
         <div class="flex-container" style="flex-grow: 1;">
           <select id="itemCategorySelect" style="flex-grow: 1;"><option value="">اختر فئة</option></select>
-          <input type="text" id="newItemCategory" placeholder="أو أضف فئة جديدة" style="flex-grow: 1; min-width: 120px;" />
+          <input type="text" id="newItemCategory" placeholder="أو أضف فئة جديدة" style="flex-grow: 1; min-width: 120px; display: none;" />
         </div>
         <button id="saveItemBtn"><i class="fas fa-save"></i> حفظ الصنف</button>
       </div>
@@ -211,7 +211,7 @@
           <thead>
             <tr>
               <th><input type="text" id="filterBarcode1" placeholder="فلترة بالباركود" /></th>
-              <th><input type="text" id="filterBarcode2" placeholder="فلترة بالباركود 2" /></th>
+              <th><input type="text" id="filterBarcode2" placeholder="فلترة بـ باركود 2" /></th>
               <th><input type="text" id="filterName" placeholder="فلترة بالاسم" /></th>
               <th><input type="text" id="filterUnit" placeholder="فلترة بالوحدة" /></th>
               <th><input type="text" id="filterSku" placeholder="فلترة بـ SKU" /></th>
@@ -258,7 +258,7 @@
             <div class="delivery-controls"><button id="increaseDeliveryBtn" class="btn-small btn-success">+5</button><button id="decreaseDeliveryBtn" class="btn-small btn-danger">-5</button></div>
         </div>
         <hr style="margin: 10px 0;">
-        <h3 style="text-align: left; margin: 0;">إجمالي الفاتورة: <span id="invoiceTotal">0.00</span> ج.م</h3>
+        <h3 style="text-align: left; margin: 0;">إجمالي الفاتورة: <span id="invoiceTotal">0.00</span> ج.م</span></h3>
       </div>
       
       <div id="sales-footer">
@@ -280,7 +280,7 @@
     <section id="summary">
       <h2><i class="fas fa-chart-bar"></i> التقارير والنسخ الاحتياطي</h2>
       <div class="form-group flex-container"><label for="summaryGroupSelect">تجميع حسب:</label><select id="summaryGroupSelect"><option value="day">اليوم</option><option value="week">الأسبوع</option><option value="month">الشهر</option></select></div>
-      <div class="summary-box"><i class="fas fa-coins"></i> <strong>المجموع الكلي للمبيعات:</strong> <span id="totalSalesAmount">0.00</span> ج.م</div>
+      <div class="summary-box"><i class="fas fa-coins"></i> <strong>المجموع الكلي للمبيعات:</strong> <span id="totalSalesAmount">0.00</span> ج.م</span></div>
       <table><thead><tr><th>الفترة</th><th>عدد الفواتير</th><th>المبلغ</th></tr></thead><tbody id="salesSummaryTable"></tbody></table>
       <div style="margin-top: 30px;"><h3><i class="fas fa-star"></i> الأصناف الأكثر مبيعًا</h3><div id="bestSellingItems" class="summary-box"><p>لا توجد بيانات متاحة.</p></div></div>
       <div class="flex-container flex-end" style="margin-top: 20px; gap: 15px;">
@@ -458,7 +458,7 @@ const Helpers = {
     showNotification: (message, duration = 3000) => { const n = document.createElement("div"); n.className = "notification"; n.textContent = message; DOM.notificationContainer.appendChild(n); setTimeout(() => n.classList.add("show"), 10); setTimeout(() => { n.classList.remove("show"); setTimeout(() => n.remove(), 500); }, duration); },
     switchTab: (tabId) => { document.querySelectorAll("main section").forEach(s => s.classList.remove("active")); document.getElementById(tabId)?.classList.add("active"); App.onTabSwitch(tabId); },
     updateNavButtons: (activeButton) => { DOM.navButtons.forEach(btn => btn.classList.remove("active")); activeButton.classList.add("active"); },
-    clearItemForm: () => { DOM.itemCode.value = ''; DOM.itemBarcode2.value = ''; DOM.itemName.value = ''; DOM.itemUnit.value = ''; DOM.itemPrice.value = ''; DOM.itemStock.value = ''; DOM.itemCategorySelect.value = ''; DOM.newItemCategory.value = ''; appState.editingItemId = null; DOM.saveItemBtn.innerHTML = '<i class="fas fa-save"></i> حفظ الصنف'; DOM.itemCode.disabled = false; },
+    clearItemForm: () => { DOM.itemCode.value = ''; DOM.itemBarcode2.value = ''; DOM.itemName.value = ''; DOM.itemUnit.value = ''; DOM.itemPrice.value = ''; DOM.itemStock.value = ''; DOM.itemCategorySelect.value = ''; DOM.newItemCategory.value = ''; DOM.newItemCategory.style.display = 'none'; appState.editingItemId = null; DOM.saveItemBtn.innerHTML = '<i class="fas fa-save"></i> حفظ الصنف'; },
     calculateChange: () => { const total = parseFloat(DOM.invoiceTotal.textContent) || 0; const paid = parseFloat(DOM.amountPaidInput.value) || 0; const change = paid - total; if (change >= 0) { DOM.changeText.textContent = "الباقي للعميل:"; DOM.changeAmount.textContent = change.toFixed(2); } else { DOM.changeText.textContent = "المطلوب منه:"; DOM.changeAmount.textContent = Math.abs(change).toFixed(2); } },
     openModal: (modal) => { modal.style.display = 'flex'; },
     closeModal: (modal) => { modal.style.display = 'none'; },
@@ -770,7 +770,6 @@ const WorkersController = {
                         <p>هاتف: ${worker.phone} | عنوان: ${worker.address}</p>
                         <p>الراتب الأساسي: ${worker.salary} ج.م</p>
                         <p>إجمالي السلف: ${totalAdvances.toFixed(2)} ج.م</p>
-                        <p>عدد الإجازات: ${workerVacations.length}</p>
                     </div>
                     <div class="worker-actions">
                         <button class="btn-small btn-warning edit-worker-btn" data-id="${worker.id}"><i class="fas fa-edit"></i></button>
@@ -1166,7 +1165,6 @@ const App = {
             }
         });
         
-        // إخفاء حقل الفئة الجديدة عند التحميل
         DOM.newItemCategory.style.display = 'none';
     },
     
