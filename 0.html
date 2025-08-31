@@ -1025,7 +1025,13 @@ const ReportsController = {
             const data = {};
             const collections = ["items", "customers", "invoices", "users", "workers", "advances", "vacations", "settlements"];
             
-            for (const collectionName of collections) {
+            // جلب الأصناف من ملف JSON المحلي
+            const itemsResponse = await fetch('p.json');
+            data.items = await itemsResponse.json();
+            
+            // جلب باقي المجموعات من Firebase
+            const firebaseCollections = ["customers", "invoices", "users", "workers", "advances", "vacations", "settlements"];
+            for (const collectionName of firebaseCollections) {
                 const snapshot = await getDocs(collection(db, collectionName));
                 data[collectionName] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             }
@@ -1116,7 +1122,12 @@ const App = {
         
         // جلب الأصناف من ملف p.json
         fetch('p.json')
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('فشل في جلب ملف p.json');
+                }
+                return response.json();
+            })
             .then(data => {
                 appState.items = data.map(item => ({
                     id: String(item.id || ''),
@@ -1203,7 +1214,25 @@ const App = {
         // --- Login/Logout ---
         DOM.loginForm.addEventListener("submit", (e) => { e.preventDefault(); Auth.login(DOM.usernameInput.value, DOM.passwordInput.value); });
         DOM.logoutBtn.addEventListener("click", Auth.logout);
-        DOM.navButtons.forEach(btn => btn.addEventListener("click", () => { Helpers.updateNavButtons(btn); Helpers.switchTab(btn.dataset.tab); }));
+
+        // --- منطق إدارة التبويبات (تم التعديل عليه) ---
+        DOM.navButtons.forEach(btn => {
+            btn.addEventListener("click", () => {
+                // إزالة حالة "نشط" من جميع الأزرار
+                DOM.navButtons.forEach(b => b.classList.remove("active"));
+                // إضافة حالة "نشط" للزر الحالي
+                btn.classList.add("active");
+                // إخفاء جميع الأقسام
+                DOM.sections.forEach(s => s.classList.remove("active"));
+                // عرض القسم الموافق
+                const tabId = btn.dataset.tab;
+                const activeSection = document.getElementById(tabId);
+                if (activeSection) {
+                    activeSection.classList.add("active");
+                    App.onTabSwitch(tabId);
+                }
+            });
+        });
 
         // --- Sales Tab (Search and Grids) ---
         DOM.searchItem.addEventListener("input", () => {
