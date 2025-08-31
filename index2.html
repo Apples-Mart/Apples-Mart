@@ -7,397 +7,397 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <style>
-  :root {
-    --primary-color: #007bff; --secondary-color: #343a40; --success-color: #28a745;
-    --danger-color: #dc3545; --warning-color: #ffc107; --text-dark: #222;
-    --bg-light: #f8f9fa; --white: #fff; --border-color: #dee2e6;
-    --shadow-light: 0 0 6px rgba(0, 0, 0, 0.1); --whatsapp-color: #25D366;
-  }
-  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: var(--bg-light); color: var(--text-dark); direction: rtl; }
-  #app-container { display: none; }
-  header { background: var(--primary-color); color: var(--white); padding: 15px; text-align: center; font-size: 24px; display: flex; justify-content: space-between; align-items: center; }
-  nav { display: flex; background: var(--secondary-color); overflow-x: auto; }
-  nav button { flex: 1; flex-shrink: 0; padding: 12px 10px; border: none; background: var(--secondary-color); color: var(--white); font-size: 16px; cursor: pointer; transition: background 0.3s; }
-  nav button.active, nav button:hover { background: #0056b3; }
-  nav button.hidden { display: none; }
-  main { padding: 15px; max-width: 900px; margin: auto; }
-  section { display: none; }
-  section.active { display: block; }
-  input, select, button, table { font-size: 16px; }
-  input, select { width: 100%; padding: 10px; margin: 6px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-  input:disabled { background-color: #e9ecef; cursor: not-allowed; }
-  input[type="number"] { -moz-appearance: textfield; }
-  input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  button { background: var(--primary-color); color: var(--white); border: none; padding: 10px; border-radius: 4px; cursor: pointer; transition: background 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-  button:disabled { background: #6c757d; cursor: not-allowed; }
-  button:hover:not(:disabled) { background: #0056b3; }
-  table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-  th, td { border: 1px solid var(--border-color); padding: 10px; text-align: center; vertical-align: middle; }
-  th { background: #e9ecef; }
-  .btn-small { padding: 5px 10px; font-size: 14px; margin: 0 2px; border-radius: 3px; }
-  .btn-danger { background: var(--danger-color); }
-  .btn-danger:hover:not(:disabled) { background: #a71d2a; }
-  .btn-success { background: var(--success-color); }
-  .btn-success:hover:not(:disabled) { background: #1e7e34; }
-  .btn-whatsapp { background: var(--whatsapp-color); }
-  .btn-whatsapp:hover:not(:disabled) { background: #128C7E; }
-  .btn-warning { background: var(--warning-color); color: var(--text-dark); }
-  .btn-warning:hover:not(:disabled) { background: #d39e00; }
-  .summary-box, .customer-card, .user-card { background: var(--white); padding: 15px; margin: 15px 0; border-radius: 6px; box-shadow: var(--shadow-light); }
-  #searchResults, #customerSuggestions { background: var(--white); max-height: 180px; overflow-y: auto; border: 1px solid #ccc; border-top: none; display: none; position: absolute; z-index: 1000; width: 100%; box-sizing: border-box; }
-  #searchResults div, #customerSuggestions div { padding: 8px; cursor: pointer; border-bottom: 1px solid #ddd; }
-  #searchResults div:hover, #customerSuggestions div:hover { background: var(--primary-color); color: var(--white); }
-  .customer-card, .user-card { margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
-  .action-buttons { display: flex; justify-content: center; align-items: center; }
-  .form-group { margin-bottom: 15px; }
-  .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
-  .flex-container { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
-  .flex-end { justify-content: flex-end; }
-  #notification-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; max-width: 90%; }
-  .notification { background-color: rgba(0, 0, 0, 0.8); color: white; padding: 15px 25px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); text-align: center; font-size: 16px; opacity: 0; transition: opacity 0.5s ease-in-out; }
-  .notification.show { opacity: 1; }
-  #login-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #e9ecef; }
-  #login-form { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 350px; text-align: center; }
-  #logoutBtn { background: var(--danger-color); }
-  .item-card { border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--white); box-shadow: var(--shadow-light); flex-shrink: 0; width: 120px; }
-  .item-card:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-color: var(--primary-color); }
-  .item-card h5 { margin: 5px 0; font-size: 14px; height: 40px; overflow: hidden; }
-  .item-card p { margin: 5px 0; font-size: 12px; color: var(--success-color); font-weight: bold; }
-  #categoryScrollerContainer { display: none; margin-bottom: 15px; width: 100%; }
-  #salesCategoryFilters { display: grid; grid-auto-flow: column; grid-template-rows: repeat(4, auto); gap: 8px; overflow-x: auto; padding: 10px; background: #e9ecef; border-radius: 6px; }
-  #salesCategoryFilters button { width: auto; padding: 5px 10px; white-space: nowrap; background-color: var(--primary-color); }
-  #salesCategoryFilters button.active { background-color: var(--success-color); color: white; }
-  #itemGrid { display: none; grid-auto-flow: column; grid-template-rows: repeat(3, auto); gap: 10px; overflow-x: auto; padding: 10px; background: #e9ecef; border-radius: 6px; }
-  #scanner-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 10001; display: none; justify-content: center; align-items: flex-start; padding-top: 10vh; }
-  #reader { width: 300px; height: 300px; max-width: 80vw; max-height: 80vw; background: #000; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.5); box-shadow: 0 4px 15px rgba(0,0,0,0.3); overflow: hidden; position: relative; }
-  #reader::after { content: ''; position: absolute; top: 0; left: 5%; right: 5%; height: 2px; background: #ff4747; box-shadow: 0 0 5px #ff4747, 0 0 10px #ff4747; animation: laser-beam 2.5s infinite linear; border-radius: 2px; }
-  @keyframes laser-beam { 0% { transform: translateY(10px); } 50% { transform: translateY(calc(300px - 10px)); } 100% { transform: translateY(10px); } }
-  .qty-controls { display: flex; align-items: center; justify-content: space-evenly; }
-  .qty-controls span { font-weight: bold; margin: 0 8px; min-width: 20px; text-align: center; }
-  .qty-controls button { width: 40px; height: 30px; padding: 0; font-size: 16px; }
-  #sales-header { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 5px; }
-  #sales-header .form-group { margin-bottom: 0; flex-grow: 1; min-width: 200px; position: relative; }
-  #sales-header .search-group { display: flex; align-items: center; }
-  #sales-header .search-group input { border-radius: 0 4px 4px 0; }
-  #sales-header .search-group button { border-radius: 4px 0 0 4px; flex-shrink: 0; width: 50px; }
-  .payment-options { display: flex; gap: 15px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
-  #sales-footer { display: flex; flex-direction: column; gap: 10px; align-items: stretch;}
-  .sales-footer-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-  .sales-footer-row .form-group { margin-bottom: 0; flex: 1 1 150px; }
-  .sales-footer-row .btn-group { display: flex; gap: 10px; flex: 2 1 300px; justify-content: flex-end;}
-  .change-due-container { text-align: left; font-size: 18px; font-weight: bold; padding: 5px 0;}
-  
-  .settlement-section {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 6px;
-    margin: 15px 0;
-    border: 1px solid #dee2e6;
-  }
-  .customer-balance {
-    font-weight: bold;
-    color: #28a745;
-    margin: 10px 0;
-  }
-  .customer-balance.negative {
-    color: #dc3545;
-  }
-  .worker-card {
-    background: white;
-    padding: 15px;
-    margin: 10px 0;
-    border-radius: 6px;
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .worker-details {
-    flex: 1;
-  }
-  .worker-actions {
-    display: flex;
-    gap: 10px;
-  }
-  .advance-form, .vacation-form {
-    margin-top: 15px;
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 6px;
-    border: 1px solid #dee2e6;
-  }
-  .modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.7);
-    z-index: 10000;
-    justify-content: center;
-    align-items: center;
-  }
-  .modal-content {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 500px;
-    max-height: 80vh;
-    overflow-y: auto;
-  }
-  textarea {
-    width: 100%;
-    padding: 10px;
-    margin: 6px 0;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-family: inherit;
-    resize: vertical;
-  }
-  .paid { color: var(--success-color); }
-  .partially-paid { color: var(--warning-color); }
-  .not-paid { color: var(--danger-color); }
+  :root {
+    --primary-color: #007bff; --secondary-color: #343a40; --success-color: #28a745;
+    --danger-color: #dc3545; --warning-color: #ffc107; --text-dark: #222;
+    --bg-light: #f8f9fa; --white: #fff; --border-color: #dee2e6;
+    --shadow-light: 0 0 6px rgba(0, 0, 0, 0.1); --whatsapp-color: #25D366;
+  }
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: var(--bg-light); color: var(--text-dark); direction: rtl; }
+  #app-container { display: none; }
+  header { background: var(--primary-color); color: var(--white); padding: 15px; text-align: center; font-size: 24px; display: flex; justify-content: space-between; align-items: center; }
+  nav { display: flex; background: var(--secondary-color); overflow-x: auto; }
+  nav button { flex: 1; flex-shrink: 0; padding: 12px 10px; border: none; background: var(--secondary-color); color: var(--white); font-size: 16px; cursor: pointer; transition: background 0.3s; }
+  nav button.active, nav button:hover { background: #0056b3; }
+  nav button.hidden { display: none; }
+  main { padding: 15px; max-width: 900px; margin: auto; }
+  section { display: none; }
+  section.active { display: block; }
+  input, select, button, table { font-size: 16px; }
+  input, select { width: 100%; padding: 10px; margin: 6px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+  input:disabled { background-color: #e9ecef; cursor: not-allowed; }
+  input[type="number"] { -moz-appearance: textfield; }
+  input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  button { background: var(--primary-color); color: var(--white); border: none; padding: 10px; border-radius: 4px; cursor: pointer; transition: background 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  button:disabled { background: #6c757d; cursor: not-allowed; }
+  button:hover:not(:disabled) { background: #0056b3; }
+  table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+  th, td { border: 1px solid var(--border-color); padding: 10px; text-align: center; vertical-align: middle; }
+  th { background: #e9ecef; }
+  .btn-small { padding: 5px 10px; font-size: 14px; margin: 0 2px; border-radius: 3px; }
+  .btn-danger { background: var(--danger-color); }
+  .btn-danger:hover:not(:disabled) { background: #a71d2a; }
+  .btn-success { background: var(--success-color); }
+  .btn-success:hover:not(:disabled) { background: #1e7e34; }
+  .btn-whatsapp { background: var(--whatsapp-color); }
+  .btn-whatsapp:hover:not(:disabled) { background: #128C7E; }
+  .btn-warning { background: var(--warning-color); color: var(--text-dark); }
+  .btn-warning:hover:not(:disabled) { background: #d39e00; }
+  .summary-box, .customer-card, .user-card { background: var(--white); padding: 15px; margin: 15px 0; border-radius: 6px; box-shadow: var(--shadow-light); }
+  #searchResults, #customerSuggestions { background: var(--white); max-height: 180px; overflow-y: auto; border: 1px solid #ccc; border-top: none; display: none; position: absolute; z-index: 1000; width: 100%; box-sizing: border-box; }
+  #searchResults div, #customerSuggestions div { padding: 8px; cursor: pointer; border-bottom: 1px solid #ddd; }
+  #searchResults div:hover, #customerSuggestions div:hover { background: var(--primary-color); color: var(--white); }
+  .customer-card, .user-card { margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+  .action-buttons { display: flex; justify-content: center; align-items: center; }
+  .form-group { margin-bottom: 15px; }
+  .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+  .flex-container { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .flex-end { justify-content: flex-end; }
+  #notification-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; max-width: 90%; }
+  .notification { background-color: rgba(0, 0, 0, 0.8); color: white; padding: 15px 25px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); text-align: center; font-size: 16px; opacity: 0; transition: opacity 0.5s ease-in-out; }
+  .notification.show { opacity: 1; }
+  #login-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #e9ecef; }
+  #login-form { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 350px; text-align: center; }
+  #logoutBtn { background: var(--danger-color); }
+  .item-card { border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--white); box-shadow: var(--shadow-light); flex-shrink: 0; width: 120px; }
+  .item-card:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-color: var(--primary-color); }
+  .item-card h5 { margin: 5px 0; font-size: 14px; height: 40px; overflow: hidden; }
+  .item-card p { margin: 5px 0; font-size: 12px; color: var(--success-color); font-weight: bold; }
+  #categoryScrollerContainer { display: none; margin-bottom: 15px; width: 100%; }
+  #salesCategoryFilters { display: grid; grid-auto-flow: column; grid-template-rows: repeat(4, auto); gap: 8px; overflow-x: auto; padding: 10px; background: #e9ecef; border-radius: 6px; }
+  #salesCategoryFilters button { width: auto; padding: 5px 10px; white-space: nowrap; background-color: var(--primary-color); }
+  #salesCategoryFilters button.active { background-color: var(--success-color); color: white; }
+  #itemGrid { display: none; grid-auto-flow: column; grid-template-rows: repeat(3, auto); gap: 10px; overflow-x: auto; padding: 10px; background: #e9ecef; border-radius: 6px; }
+  #scanner-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 10001; display: none; justify-content: center; align-items: flex-start; padding-top: 10vh; }
+  #reader { width: 300px; height: 300px; max-width: 80vw; max-height: 80vw; background: #000; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.5); box-shadow: 0 4px 15px rgba(0,0,0,0.3); overflow: hidden; position: relative; }
+  #reader::after { content: ''; position: absolute; top: 0; left: 5%; right: 5%; height: 2px; background: #ff4747; box-shadow: 0 0 5px #ff4747, 0 0 10px #ff4747; animation: laser-beam 2.5s infinite linear; border-radius: 2px; }
+  @keyframes laser-beam { 0% { transform: translateY(10px); } 50% { transform: translateY(calc(300px - 10px)); } 100% { transform: translateY(10px); } }
+  .qty-controls { display: flex; align-items: center; justify-content: space-evenly; }
+  .qty-controls span { font-weight: bold; margin: 0 8px; min-width: 20px; text-align: center; }
+  .qty-controls button { width: 40px; height: 30px; padding: 0; font-size: 16px; }
+  #sales-header { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 5px; }
+  #sales-header .form-group { margin-bottom: 0; flex-grow: 1; min-width: 200px; position: relative; }
+  #sales-header .search-group { display: flex; align-items: center; }
+  #sales-header .search-group input { border-radius: 0 4px 4px 0; }
+  #sales-header .search-group button { border-radius: 4px 0 0 4px; flex-shrink: 0; width: 50px; }
+  .payment-options { display: flex; gap: 15px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+  #sales-footer { display: flex; flex-direction: column; gap: 10px; align-items: stretch;}
+  .sales-footer-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .sales-footer-row .form-group { margin-bottom: 0; flex: 1 1 150px; }
+  .sales-footer-row .btn-group { display: flex; gap: 10px; flex: 2 1 300px; justify-content: flex-end;}
+  .change-due-container { text-align: left; font-size: 18px; font-weight: bold; padding: 5px 0;}
+  
+  .settlement-section {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    margin: 15px 0;
+    border: 1px solid #dee2e6;
+  }
+  .customer-balance {
+    font-weight: bold;
+    color: #28a745;
+    margin: 10px 0;
+  }
+  .customer-balance.negative {
+    color: #dc3545;
+  }
+  .worker-card {
+    background: white;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 6px;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .worker-details {
+    flex: 1;
+  }
+  .worker-actions {
+    display: flex;
+    gap: 10px;
+  }
+  .advance-form, .vacation-form {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+  }
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.7);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+  }
+  .modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 6px 0;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: inherit;
+    resize: vertical;
+  }
+  .paid { color: var(--success-color); }
+  .partially-paid { color: var(--warning-color); }
+  .not-paid { color: var(--danger-color); }
 
-  @media (max-width: 768px) {
-    #sales-header { flex-direction: column; gap: 5px; align-items: stretch; }
-    #sales-header .form-group { min-width: 100%; margin-bottom: 10px; }
-    .sales-footer-row .btn-group { justify-content: center; }
-    nav button { font-size: 14px; } #login-form { width: 90%; }
-    @keyframes laser-beam { 0% { transform: translateY(10px); } 50% { transform: translateY(calc(80vw - 10px)); } 100% { transform: translateY(10px); } }
-  }
+  @media (max-width: 768px) {
+    #sales-header { flex-direction: column; gap: 5px; align-items: stretch; }
+    #sales-header .form-group { min-width: 100%; margin-bottom: 10px; }
+    .sales-footer-row .btn-group { justify-content: center; }
+    nav button { font-size: 14px; } #login-form { width: 90%; }
+    @keyframes laser-beam { 0% { transform: translateY(10px); } 50% { transform: translateY(calc(80vw - 10px)); } 100% { transform: translateY(10px); } }
+  }
 </style>
 </head>
 <body>
 
 <div id="app-container">
-  <header>
-    <span>Apples-Mart </span>
-    <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> خروج</button>
-  </header>
-  <nav>
-    <button data-tab="items"><i class="fas fa-box"></i> الأصناف</button>
-    <button data-tab="customers"><i class="fas fa-users"></i> العملاء</button>
-    <button class="active" data-tab="sales"><i class="fas fa-cash-register"></i> المبيعات</button>
-    <button data-tab="invoices"><i class="fas fa-file-invoice"></i> الفواتير</button>
-    <button data-tab="summary"><i class="fas fa-chart-bar"></i> التقارير</button>
-    <button data-tab="users" class="hidden"><i class="fas fa-user-shield"></i> إدارة المستخدمين</button>
-  </nav>
+  <header>
+    <span>Apples-Mart </span>
+    <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> خروج</button>
+  </header>
+  <nav>
+    <button data-tab="items"><i class="fas fa-box"></i> الأصناف</button>
+    <button data-tab="customers"><i class="fas fa-users"></i> العملاء</button>
+    <button class="active" data-tab="sales"><i class="fas fa-cash-register"></i> المبيعات</button>
+    <button data-tab="invoices"><i class="fas fa-file-invoice"></i> الفواتير</button>
+    <button data-tab="summary"><i class="fas fa-chart-bar"></i> التقارير</button>
+    <button data-tab="users" class="hidden"><i class="fas fa-user-shield"></i> إدارة المستخدمين</button>
+  </nav>
 
-  <main>
-    <section id="items">
-      <h2><i class="fas fa-box"></i> إدارة الأصناف</h2>
-      <div class="form-group flex-container">
-        <input type="text" id="itemCode" placeholder="الباركود (المعرّف الأساسي)" />
-        <button id="scanBarcodeBtn" class="btn-success"><i class="fas fa-barcode"></i> مسح</button>
-        <input type="text" id="itemBarcode2" placeholder="باركود 2 (اختياري)" />
-        <input type="text" id="itemName" placeholder="اسم الصنف" />
-      </div>
-       <div class="form-group flex-container">
-        <input type="text" id="itemUnit" placeholder="الوحدة (مثال: قطعة، علبة)" />
-        <input type="number" id="itemPrice" placeholder="السعر" min="0" step="0.01" />
-        <input type="number" id="itemStock" placeholder="الكمية / المخزون" min="0" />
-        <div class="flex-container" style="flex-grow: 1;">
-          <select id="itemCategorySelect" style="flex-grow: 1;"><option value="">اختر فئة</option></select>
-          <input type="text" id="newItemCategory" placeholder="أو أضف فئة جديدة" style="flex-grow: 1; min-width: 120px; display: none;" />
-        </div>
-        <button id="saveItemBtn"><i class="fas fa-save"></i> حفظ الصنف</button>
-      </div>
-      <div style="overflow-x:auto;">
-      <table>
-          <thead>
-            <tr id="filterRow">
-              <th><input type="text" id="filterBarcode1" placeholder="فلترة" /></th>
-              <th><input type="text" id="filterBarcode2" placeholder="فلترة" /></th>
-              <th><input type="text" id="filterName" placeholder="فلترة" /></th>
-              <th><input type="text" id="filterUnit" placeholder="فلترة" /></th>
-              <th><input type="text" id="filterSku" placeholder="فلترة" /></th>
-              <th><input type="number" id="filterPrice" placeholder="فلترة" /></th>
-              <th><input type="number" id="filterStock" placeholder="فلترة" /></th>
-              <th><select id="filterCategory"><option value="all">الكل</option></select></th>
-            </tr>
-            <tr>
-              <th>باركود 1</th><th>باركود 2</th><th>اسم</th><th>وحدة</th><th>SKU</th><th>سعر</th><th>كمية</th><th>فئة</th>
-            </tr>
-          </thead>
-          <tbody id="itemsTable"></tbody>
-      </table>
-      </div>
-    </section>
+  <main>
+    <section id="items">
+      <h2><i class="fas fa-box"></i> إدارة الأصناف</h2>
+      <div class="form-group flex-container">
+        <input type="text" id="itemCode" placeholder="الباركود (المعرّف الأساسي)" />
+        <button id="scanBarcodeBtn" class="btn-success"><i class="fas fa-barcode"></i> مسح</button>
+        <input type="text" id="itemBarcode2" placeholder="باركود 2 (اختياري)" />
+        <input type="text" id="itemName" placeholder="اسم الصنف" />
+      </div>
+       <div class="form-group flex-container">
+        <input type="text" id="itemUnit" placeholder="الوحدة (مثال: قطعة، علبة)" />
+        <input type="number" id="itemPrice" placeholder="السعر" min="0" step="0.01" />
+        <input type="number" id="itemStock" placeholder="الكمية / المخزون" min="0" />
+        <div class="flex-container" style="flex-grow: 1;">
+          <select id="itemCategorySelect" style="flex-grow: 1;"><option value="">اختر فئة</option></select>
+          <input type="text" id="newItemCategory" placeholder="أو أضف فئة جديدة" style="flex-grow: 1; min-width: 120px; display: none;" />
+        </div>
+        <button id="saveItemBtn"><i class="fas fa-save"></i> حفظ الصنف</button>
+      </div>
+      <div style="overflow-x:auto;">
+      <table>
+          <thead>
+            <tr>
+              <th><input type="text" id="filterBarcode1" placeholder="فلترة بالباركود" /></th>
+              <th><input type="text" id="filterBarcode2" placeholder="فلترة بـ باركود 2" /></th>
+              <th><input type="text" id="filterName" placeholder="فلترة بالاسم" /></th>
+              <th><input type="text" id="filterUnit" placeholder="فلترة بالوحدة" /></th>
+              <th><input type="text" id="filterSku" placeholder="فلترة بـ SKU" /></th>
+              <th><input type="number" id="filterPrice" placeholder="فلترة بالسعر" /></th>
+              <th><input type="number" id="filterStock" placeholder="فلترة بالكمية" /></th>
+              <th><select id="filterCategory"><option value="all">جميع الفئات</option></select></th>
+            </tr>
+            <tr>
+              <th>باركود 1</th><th>باركود 2</th><th>اسم</th><th>وحدة</th><th>SKU</th><th>سعر</th><th>كمية</th><th>فئة</th>
+            </tr>
+          </thead>
+          <tbody id="itemsTable"></tbody>
+      </table>
+      </div>
+    </section>
 
-    <section id="customers">
-      <h2><i class="fas fa-users"></i> إدارة العملاء</h2>
-      <div class="form-group flex-container"><input type="text" id="newCustomerId" placeholder="رقم هاتف العميل" /><input type="text" id="newCustomerName" placeholder="اسم العميل" /><button id="saveCustomerBtn"><i class="fas fa-save"></i> حفظ العميل</button></div>
-      <div id="customersList"></div>
-    </section>
-    
-    <section id="sales" class="active" style="position: relative;">
-      <h2><i class="fas fa-cash-register"></i> عملية بيع</h2>
-      <div id="sales-header">
-        <div class="form-group">
-          <div class="search-group"><input type="text" id="searchItem" placeholder="بحث بالاسم أو الباركود" autocomplete="off" /><button id="startScannerBtn" title="فتح ماسح الكاميرا (SKU)"><i class="fas fa-barcode"></i></button></div>
-          <div id="searchResults"></div>
-        </div>
-        <div class="form-group">
-          <input type="text" id="customerName" placeholder="اسم العميل (اختياري)" autocomplete="off" />
-          <div id="customerSuggestions"></div>
-        </div>
-        <div class="form-group"><input type="tel" id="customerPhone" placeholder="رقم هاتف العميل" /></div>
-      </div>
-      <button id="toggleItemsGridBtn" class="btn-warning" style="width: 100%; margin-bottom: 15px;"><i class="fas fa-th-large"></i> عرض الأصناف حسب الفئة</button>
-      <div id="categoryScrollerContainer"><div id="salesCategoryFilters"></div></div>
-      <div id="itemGrid"></div>
-      <h3><i class="fas fa-file-invoice"></i> تفاصيل الفاتورة</h3>
-      <table><thead><tr><th>اسم الصنف</th><th>كمية</th><th>سعر الوحدة</th><th>الإجمالي</th><th>حذف</th></tr></thead><tbody id="invoiceTable"></tbody></table>
-      <div class="summary-box" style="padding: 10px;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h3><i class="fas fa-truck"></i> خدمة التوصيل: <span id="deliveryFeeValue">30.00</span> ج.م</h3>
-            <div class="delivery-controls"><button id="increaseDeliveryBtn" class="btn-small btn-success">+5</button><button id="decreaseDeliveryBtn" class="btn-small btn-danger">-5</button></div>
-        </div>
-        <hr style="margin: 10px 0;">
-        <h3 style="text-align: left; margin: 0;">إجمالي الفاتورة: <span id="invoiceTotal">0.00</span> ج.م</span></h3>
-      </div>
-      
-      <div id="sales-footer">
-          <div class="payment-options"><label>طريقة الدفع:</label><label><input type="radio" name="paymentMethod" value="cash" checked> نقداً</label><label><input type="radio" name="paymentMethod" value="visa"> فيزا</label><label><input type="radio" name="paymentMethod" value="wallet"> محفظة</label></div>
-          <div class="sales-footer-row">
-            <div class="form-group">
-              <input type="number" id="amountPaidInput" placeholder="المبلغ المدفوع" min="0" step="0.01" />
-              <div class="change-due-container"><span id="changeText">الباقي للعميل:</span> <span id="changeAmount">0.00</span> ج.م</span></div>
-            </div>
-          </div>
-          <div class="sales-footer-row">
-            <div class="btn-group"><button id="sendWhatsAppBtn" class="btn-whatsapp"><i class="fab fa-whatsapp"></i> واتساب</button><button id="printInvoiceBtn" class="btn-success"><i class="fas fa-print"></i> طباعة</button><button id="saveInvoiceBtn"><i class="fas fa-save"></i> حفظ</button></div>
-          </div>
-      </div>
-    </section>
+    <section id="customers">
+      <h2><i class="fas fa-users"></i> إدارة العملاء</h2>
+      <div class="form-group flex-container"><input type="text" id="newCustomerId" placeholder="رقم هاتف العميل" /><input type="text" id="newCustomerName" placeholder="اسم العميل" /><button id="saveCustomerBtn"><i class="fas fa-save"></i> حفظ العميل</button></div>
+      <div id="customersList"></div>
+    </section>
+    
+    <section id="sales" class="active" style="position: relative;">
+      <h2><i class="fas fa-cash-register"></i> عملية بيع</h2>
+      <div id="sales-header">
+        <div class="form-group">
+          <div class="search-group"><input type="text" id="searchItem" placeholder="بحث بالاسم أو الباركود" autocomplete="off" /><button id="startScannerBtn" title="فتح ماسح الكاميرا (SKU)"><i class="fas fa-barcode"></i></button></div>
+          <div id="searchResults"></div>
+        </div>
+        <div class="form-group">
+          <input type="text" id="customerName" placeholder="اسم العميل (اختياري)" autocomplete="off" />
+          <div id="customerSuggestions"></div>
+        </div>
+        <div class="form-group"><input type="tel" id="customerPhone" placeholder="رقم هاتف العميل" /></div>
+      </div>
+      <button id="toggleItemsGridBtn" class="btn-warning" style="width: 100%; margin-bottom: 15px;"><i class="fas fa-th-large"></i> عرض الأصناف حسب الفئة</button>
+      <div id="categoryScrollerContainer"><div id="salesCategoryFilters"></div></div>
+      <div id="itemGrid"></div>
+      <h3><i class="fas fa-file-invoice"></i> تفاصيل الفاتورة</h3>
+      <table><thead><tr><th>اسم الصنف</th><th>كمية</th><th>سعر الوحدة</th><th>الإجمالي</th><th>حذف</th></tr></thead><tbody id="invoiceTable"></tbody></table>
+      <div class="summary-box" style="padding: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3><i class="fas fa-truck"></i> خدمة التوصيل: <span id="deliveryFeeValue">30.00</span> ج.م</h3>
+            <div class="delivery-controls"><button id="increaseDeliveryBtn" class="btn-small btn-success">+5</button><button id="decreaseDeliveryBtn" class="btn-small btn-danger">-5</button></div>
+        </div>
+        <hr style="margin: 10px 0;">
+        <h3 style="text-align: left; margin: 0;">إجمالي الفاتورة: <span id="invoiceTotal">0.00</span> ج.م</span></h3>
+      </div>
+      
+      <div id="sales-footer">
+          <div class="payment-options"><label>طريقة الدفع:</label><label><input type="radio" name="paymentMethod" value="cash" checked> نقداً</label><label><input type="radio" name="paymentMethod" value="visa"> فيزا</label><label><input type="radio" name="paymentMethod" value="wallet"> محفظة</label></div>
+          <div class="sales-footer-row">
+            <div class="form-group">
+              <input type="number" id="amountPaidInput" placeholder="المبلغ المدفوع" min="0" step="0.01" />
+              <div class="change-due-container"><span id="changeText">الباقي للعميل:</span> <span id="changeAmount">0.00</span> ج.م</span></div>
+            </div>
+          </div>
+          <div class="sales-footer-row">
+              <div class="btn-group"><button id="sendWhatsAppBtn" class="btn-whatsapp"><i class="fab fa-whatsapp"></i> واتساب</button><button id="printInvoiceBtn" class="btn-success"><i class="fas fa-print"></i> طباعة</button><button id="saveInvoiceBtn"><i class="fas fa-save"></i> حفظ</button></div>
+          </div>
+      </div>
+    </section>
 
-    <section id="invoices"><h2><i class="fas fa-file-invoice-dollar"></i> الفواتير المحفوظة</h2><div id="invoicesList"></div></section>
-    
-    <section id="summary">
-      <h2><i class="fas fa-chart-bar"></i> التقارير والنسخ الاحتياطي</h2>
-      <div class="form-group flex-container"><label for="summaryGroupSelect">تجميع حسب:</label><select id="summaryGroupSelect"><option value="day">اليوم</option><option value="week">الأسبوع</option><option value="month">الشهر</option></select></div>
-      <div class="summary-box"><i class="fas fa-coins"></i> <strong>المجموع الكلي للمبيعات:</strong> <span id="totalSalesAmount">0.00</span> ج.م</span></div>
-      <table><thead><tr><th>الفترة</th><th>عدد الفواتير</th><th>المبلغ</th></tr></thead><tbody id="salesSummaryTable"></tbody></table>
-      <div style="margin-top: 30px;"><h3><i class="fas fa-star"></i> الأصناف الأكثر مبيعًا</h3><div id="bestSellingItems" class="summary-box"><p>لا توجد بيانات متاحة.</p></div></div>
-      <div class="flex-container flex-end" style="margin-top: 20px; gap: 15px;">
-        <button id="backupBtn" class="btn-success"><i class="fas fa-download"></i> نسخة احتياطية</button>
-        <button id="restoreBtn" class="btn-warning"><i class="fas fa-upload"></i> استعادة نسخة</button>
-        <button id="resetInvoicesBtn" class="btn-danger"><i class="fas fa-trash-alt"></i> حذف جميع الفواتير</button>
-        <input type="file" id="restoreInput" accept=".json" style="display: none;" />
-      </div>
-    </section>
+    <section id="invoices"><h2><i class="fas fa-file-invoice-dollar"></i> الفواتير المحفوظة</h2><div id="invoicesList"></div></section>
+    
+    <section id="summary">
+      <h2><i class="fas fa-chart-bar"></i> التقارير والنسخ الاحتياطي</h2>
+      <div class="form-group flex-container"><label for="summaryGroupSelect">تجميع حسب:</label><select id="summaryGroupSelect"><option value="day">اليوم</option><option value="week">الأسبوع</option><option value="month">الشهر</option></select></div>
+      <div class="summary-box"><i class="fas fa-coins"></i> <strong>المجموع الكلي للمبيعات:</strong> <span id="totalSalesAmount">0.00</span> ج.م</span></div>
+      <table><thead><tr><th>الفترة</th><th>عدد الفواتير</th><th>المبلغ</th></tr></thead><tbody id="salesSummaryTable"></tbody></table>
+      <div style="margin-top: 30px;"><h3><i class="fas fa-star"></i> الأصناف الأكثر مبيعًا</h3><div id="bestSellingItems" class="summary-box"><p>لا توجد بيانات متاحة.</p></div></div>
+      <div class="flex-container flex-end" style="margin-top: 20px; gap: 15px;">
+        <button id="backupBtn" class="btn-success"><i class="fas fa-download"></i> نسخة احتياطية</button>
+        <button id="restoreBtn" class="btn-warning"><i class="fas fa-upload"></i> استعادة نسخة</button>
+        <button id="resetInvoicesBtn" class="btn-danger"><i class="fas fa-trash-alt"></i> حذف جميع الفواتير</button>
+        <input type="file" id="restoreInput" accept=".json" style="display: none;" />
+      </div>
+    </section>
 
-    <section id="users">
-      <h2><i class="fas fa-user-shield"></i> إدارة المستخدمين</h2>
-      <div class="form-group flex-container"><input type="text" id="newUsernameInput" placeholder="اسم المستخدم" /><input type="password" id="newUserPasswordInput" placeholder="كلمة المرور" /><select id="newUserRoleSelect"><option value="user">مستخدم عادي</option><option value="worker">عامل</option></select><button id="saveUserBtn"><i class="fas fa-plus-circle"></i> إضافة مستخدم</button></div>
-      <div id="usersList"></div>
-      
-      <hr>
-      
-      <h3><i class="fas fa-hard-hat"></i> إدارة العمال</h3>
-      <div class="form-group flex-container">
-        <input type="text" id="workerNameInput" placeholder="اسم العامل" />
-        <input type="tel" id="workerPhoneInput" placeholder="رقم الهاتف" />
-        <input type="text" id="workerAddressInput" placeholder="العنوان" />
-        <input type="number" id="workerSalaryInput" placeholder="الراتب الأساسي" min="0" step="0.01" />
-        <button id="saveWorkerBtn"><i class="fas fa-save"></i> حفظ العامل</button>
-      </div>
-      <div id="workersList"></div>
-      
-      <hr>
-      
-      <div id="changePinSection">
-        <h4><i class="fas fa-key"></i> تغيير كلمة مرور المدير العام</h4>
-        <div class="form-group flex-container">
-          <input type="password" id="oldPinInput" placeholder="الكلمة القديمة" />
-          <input type="password" id="newPinInput" placeholder="الكلمة الجديدة" />
-          <button id="changePinBtn" class="btn-warning"><i class="fas fa-sync-alt"></i> تغيير الكلمة</button>
-        </div>
-      </div>
-      <div class="flex-container flex-end" style="margin-top: 20px;">
-        <button id="fullResetBtn" class="btn-danger"><i class="fas fa-exclamation-triangle"></i> إعادة ضبط كاملة للنظام</button>
-      </div>
-    </section>
-  </main>
+    <section id="users">
+      <h2><i class="fas fa-user-shield"></i> إدارة المستخدمين</h2>
+      <div class="form-group flex-container"><input type="text" id="newUsernameInput" placeholder="اسم المستخدم" /><input type="password" id="newUserPasswordInput" placeholder="كلمة المرور" /><select id="newUserRoleSelect"><option value="user">مستخدم عادي</option><option value="worker">عامل</option></select><button id="saveUserBtn"><i class="fas fa-plus-circle"></i> إضافة مستخدم</button></div>
+      <div id="usersList"></div>
+      
+      <hr>
+      
+            <h3><i class="fas fa-hard-hat"></i> إدارة العمال</h3>
+      <div class="form-group flex-container">
+        <input type="text" id="workerNameInput" placeholder="اسم العامل" />
+        <input type="tel" id="workerPhoneInput" placeholder="رقم الهاتف" />
+        <input type="text" id="workerAddressInput" placeholder="العنوان" />
+        <input type="number" id="workerSalaryInput" placeholder="الراتب الأساسي" min="0" step="0.01" />
+        <button id="saveWorkerBtn"><i class="fas fa-save"></i> حفظ العامل</button>
+      </div>
+      <div id="workersList"></div>
+      
+      <hr>
+      
+      <div id="changePinSection">
+        <h4><i class="fas fa-key"></i> تغيير كلمة مرور المدير العام</h4>
+        <div class="form-group flex-container">
+          <input type="password" id="oldPinInput" placeholder="الكلمة القديمة" />
+          <input type="password" id="newPinInput" placeholder="الكلمة الجديدة" />
+          <button id="changePinBtn" class="btn-warning"><i class="fas fa-sync-alt"></i> تغيير الكلمة</button>
+        </div>
+      </div>
+      <div class="flex-container flex-end" style="margin-top: 20px;">
+        <button id="fullResetBtn" class="btn-danger"><i class="fas fa-exclamation-triangle"></i> إعادة ضبط كاملة للنظام</button>
+      </div>
+    </section>
+  </main>
 </div>
 <div id="login-container">
-    <form id="login-form">
-      <h2><i class="fas fa-lock"></i> تسجيل الدخول</h2>
-      <div class="form-group"><input type="text" id="usernameInput" placeholder="اسم المستخدم" required /></div>
-      <div class="form-group"><input type="password" id="passwordInput" placeholder="كلمة المرور" required /></div>
-      <button type="submit" id="loginBtn"><i class="fas fa-sign-in-alt"></i> دخول</button>
-    </form>
+    <form id="login-form">
+        <h2><i class="fas fa-lock"></i> تسجيل الدخول</h2>
+        <div class="form-group"><input type="text" id="usernameInput" placeholder="اسم المستخدم" required /></div>
+        <div class="form-group"><input type="password" id="passwordInput" placeholder="كلمة المرور" required /></div>
+        <button type="submit" id="loginBtn"><i class="fas fa-sign-in-alt"></i> دخول</button>
+    </form>
 </div>
 <div id="scanner-container"><div id="reader"></div></div>
 <div id="notification-container"></div>
 
 <div id="advanceModal" class="modal">
-  <div class="modal-content">
-    <h3><i class="fas fa-money-bill-wave"></i> إضافة سلفة للعامل</h3>
-    <div class="form-group">
-      <label for="advanceAmount">المبلغ:</label>
-      <input type="number" id="advanceAmount" placeholder="المبلغ" min="0" step="0.01" />
-    </div>
-    <div class="form-group">
-      <label for="advanceNotes">ملاحظات:</label>
-      <textarea id="advanceNotes" placeholder="ملاحظات حول السلفة" rows="3"></textarea>
-    </div>
-    <div class="flex-container flex-end">
-      <button id="saveAdvanceBtn" class="btn-success"><i class="fas fa-save"></i> حفظ</button>
-      <button id="cancelAdvanceBtn" class="btn-danger"><i class="fas fa-times"></i> إلغاء</button>
-    </div>
-  </div>
+  <div class="modal-content">
+    <h3><i class="fas fa-money-bill-wave"></i> إضافة سلفة للعامل</h3>
+    <div class="form-group">
+      <label for="advanceAmount">المبلغ:</label>
+      <input type="number" id="advanceAmount" placeholder="المبلغ" min="0" step="0.01" />
+    </div>
+    <div class="form-group">
+      <label for="advanceNotes">ملاحظات:</label>
+      <textarea id="advanceNotes" placeholder="ملاحظات حول السلفة" rows="3"></textarea>
+    </div>
+    <div class="flex-container flex-end">
+      <button id="saveAdvanceBtn" class="btn-success"><i class="fas fa-save"></i> حفظ</button>
+      <button id="cancelAdvanceBtn" class="btn-danger"><i class="fas fa-times"></i> إلغاء</button>
+    </div>
+  </div>
 </div>
 
 <div id="vacationModal" class="modal">
-  <div class="modal-content">
-    <h3><i class="fas fa-calendar-alt"></i> إضافة إجازة للعامل</h3>
-    <div class="form-group">
-      <label for="vacationStartDate">تاريخ البدء:</label>
-      <input type="date" id="vacationStartDate" />
-    </div>
-    <div class="form-group">
-      <label for="vacationEndDate">تاريخ الانتهاء:</label>
-      <input type="date" id="vacationEndDate" />
-    </div>
-    <div class="form-group">
-      <label for="vacationNotes">ملاحظات:</label>
-      <textarea id="vacationNotes" placeholder="ملاحظات حول الإجازة" rows="3"></textarea>
-    </div>
-    <div class="flex-container flex-end">
-      <button id="saveVacationBtn" class="btn-success"><i class="fas fa-save"></i> حفظ</button>
-      <button id="cancelVacationBtn" class="btn-danger"><i class="fas fa-times"></i> إلغاء</button>
-    </div>
-  </div>
+  <div class="modal-content">
+    <h3><i class="fas fa-calendar-alt"></i> إضافة إجازة للعامل</h3>
+    <div class="form-group">
+      <label for="vacationStartDate">تاريخ البدء:</label>
+      <input type="date" id="vacationStartDate" />
+    </div>
+    <div class="form-group">
+      <label for="vacationEndDate">تاريخ الانتهاء:</label>
+      <input type="date" id="vacationEndDate" />
+    </div>
+    <div class="form-group">
+      <label for="vacationNotes">ملاحظات:</label>
+      <textarea id="vacationNotes" placeholder="ملاحظات حول الإجازة" rows="3"></textarea>
+    </div>
+    <div class="flex-container flex-end">
+      <button id="saveVacationBtn" class="btn-success"><i class="fas fa-save"></i> حفظ</button>
+      <button id="cancelVacationBtn" class="btn-danger"><i class="fas fa-times"></i> إلغاء</button>
+    </div>
+  </div>
 </div>
 
 <div id="settlementModal" class="modal">
-  <div class="modal-content">
-    <h3><i class="fas fa-money-check"></i> تسوية الفاتورة</h3>
-    <div class="form-group">
-      <p>رقم الفاتورة: <span id="settlementInvoiceId"></span></p>
-      <p>العميل: <span id="settlementCustomerName"></span></p>
-      <p>إجمالي الفاتورة: <span id="settlementTotal"></span> ج.م</p>
-      <p>المدفوع سابقاً: <span id="settlementPaid"></span> ج.م</p>
-      <p>المتبقي: <span id="settlementBalance"></span> ج.م</p>
-    </div>
-    <div class="form-group">
-      <label for="settlementAmount">المبلغ المدفوع:</label>
-      <input type="number" id="settlementAmount" placeholder="المبلغ المدفوع" min="0" step="0.01" />
-    </div>
-    <div class="form-group">
-      <label for="settlementNotes">ملاحظات:</label>
-      <textarea id="settlementNotes" placeholder="ملاحظات حول الدفع" rows="3"></textarea>
-    </div>
-    <div class="flex-container flex-end">
-      <button id="saveSettlementBtn" class="btn-success"><i class="fas fa-save"></i> حفظ</button>
-      <button id="cancelSettlementBtn" class="btn-danger"><i class="fas fa-times"></i> إلغاء</button>
-    </div>
-  </div>
+  <div class="modal-content">
+    <h3><i class="fas fa-money-check"></i> تسوية الفاتورة</h3>
+    <div class="form-group">
+      <p>رقم الفاتورة: <span id="settlementInvoiceId"></span></p>
+      <p>العميل: <span id="settlementCustomerName"></span></p>
+      <p>إجمالي الفاتورة: <span id="settlementTotal"></span> ج.م</p>
+      <p>المدفوع سابقاً: <span id="settlementPaid"></span> ج.م</p>
+      <p>المتبقي: <span id="settlementBalance"></span> ج.م</p>
+    </div>
+    <div class="form-group">
+      <label for="settlementAmount">المبلغ المدفوع:</label>
+      <input type="number" id="settlementAmount" placeholder="المبلغ المدفوع" min="0" step="0.01" />
+    </div>
+    <div class="form-group">
+      <label for="settlementNotes">ملاحظات:</label>
+      <textarea id="settlementNotes" placeholder="ملاحظات حول الدفع" rows="3"></textarea>
+    </div>
+    <div class="flex-container flex-end">
+      <button id="saveSettlementBtn" class="btn-success"><i class="fas fa-save"></i> حفظ</button>
+      <button id="cancelSettlementBtn" class="btn-danger"><i class="fas fa-times"></i> إلغاء</button>
+    </div>
+  </div>
 </div>
 
 <script type="module">
@@ -472,7 +472,7 @@ const Auth = {
     login: (username, password) => {
         if (password === appState.adminPIN) { appState.currentUser = { username: "المدير العام", role: "admin" }; localStorage.setItem('currentUser', JSON.stringify(appState.currentUser)); Auth.showApp("admin"); return; }
         const user = appState.users.find(u => u.username === username && u.password === password);
-        if (user) { appState.currentUser = user; localStorage.setItem('currentUser', JSON.stringify(user)); Auth.showApp("user"); } 
+        if (user) { appState.currentUser = user; localStorage.setItem('currentUser', JSON.stringify(user)); Auth.showApp("user"); }
         else { Helpers.showNotification("اسم المستخدم أو كلمة المرور غير صحيحة.", 4000); }
     },
     logout: () => { appState.currentUser = null; localStorage.removeItem('currentUser'); window.location.reload(); },
