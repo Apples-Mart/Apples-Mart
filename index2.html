@@ -485,45 +485,6 @@ const Auth = {
 };
 // #endregion
 
-// #region User Management Controller
-const UsersController = {
-    render: () => { DOM.usersList.innerHTML = appState.users.map(user => `<div class="user-card"><div><b><i class="fas fa-user"></i> ${user.username}</b></div><div class="action-buttons"><button class="btn-small btn-warning edit-user-btn" data-id="${user.id}"><i class="fas fa-edit"></i></button><button class="btn-small btn-danger delete-user-btn" data-id="${user.id}"><i class="fas fa-trash-alt"></i></button></div></div>`).join(""); },
-    clearForm: () => { DOM.newUsernameInput.value = ""; DOM.newUserPasswordInput.value = ""; appState.editingUserId = null; DOM.saveUserBtn.innerHTML = '<i class="fas fa-plus-circle"></i> إضافة مستخدم'; DOM.newUsernameInput.disabled = false; DOM.newUserPasswordInput.placeholder = "كلمة المرور"; },
-    edit: (id) => { const user = appState.users.find(u => u.id === id); if (!user) return; appState.editingUserId = id; DOM.newUsernameInput.value = user.username; DOM.newUsernameInput.disabled = true; DOM.newUserPasswordInput.value = ""; DOM.newUserPasswordInput.placeholder = "اتركها فارغة لعدم التغيير"; DOM.saveUserBtn.innerHTML = '<i class="fas fa-edit"></i> تعديل المستخدم'; },
-    save: async () => {
-        const username = DOM.newUsernameInput.value.trim();
-        let password = DOM.newUserPasswordInput.value.trim();
-        if (!username) { Helpers.showNotification("يجب إدخال اسم المستخدم."); return; }
-        try {
-            if (appState.editingUserId) {
-                const userData = {};
-                if (password) userData.password = password;
-                await window.updateDocument("users", appState.editingUserId, userData);
-                Helpers.showNotification("تم تعديل المستخدم بنجاح.");
-            } else {
-                if (!password) { Helpers.showNotification("يجب إدخال كلمة المرور للمستخدم الجديد."); return; }
-                const docRef = doc(db, "users", username);
-                if ((await getDoc(docRef)).exists()) { Helpers.showNotification("اسم المستخدم هذا موجود بالفعل."); return; }
-                await updateDoc(docRef, { username, password }, { merge: true });
-                Helpers.showNotification("تمت إضافة المستخدم بنجاح.");
-            }
-            UsersController.clearForm();
-        } catch (error) { console.error("Error saving user:", error); Helpers.showNotification("حدث خطأ."); }
-    },
-    delete: async (id) => { if (confirm("هل أنت متأكد من حذف هذا المستخدم؟")) { await window.deleteDocument("users", id); Helpers.showNotification("تم حذف المستخدم."); } },
-    changeAdminPin: async () => {
-        const oldPin = DOM.oldPinInput.value;
-        const newPin = DOM.newPinInput.value;
-        if (!oldPin || !newPin) { Helpers.showNotification("يرجى ملء جميع الحقول."); return; }
-        if (oldPin !== appState.adminPIN) { Helpers.showNotification("كلمة المرور القديمة غير صحيحة."); return; }
-        await window.updateDocument("config", "admin", { pin: newPin });
-        appState.adminPIN = newPin;
-        DOM.oldPinInput.value = ""; DOM.newPinInput.value = "";
-        Helpers.showNotification("تم تغيير كلمة مرور المدير بنجاح.");
-    }
-};
-// #endregion
-
 // #region Items Controller
 const ItemsController = {
     render: () => {
