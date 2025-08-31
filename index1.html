@@ -258,7 +258,7 @@
       </div>
     </section>
 
-    <section id="invoices"><h2><i class="fas fa-file-invoice-dollar"></i> الفواتير المحفوظة </h2><div id="invoicesList"></div></section>
+    <section id="invoices"><h2><i class="fas fa-file-invoice-dollar"></i> الفواتير المحفوظة</h2><div id="invoicesList"></div></section>
     
     <section id="summary">
       <h2><i class="fas fa-chart-bar"></i> التقارير والنسخ الاحتياطي</h2>
@@ -388,14 +388,14 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getFirestore, collection, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc, getDoc, writeBatch, getDocs, where, increment, initializeFirestore, persistentLocalCache, addDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 const firebaseConfig = {
-  apiKey: "AIzaSyCfOzC8gkqkVSNZ3frtnnCMxbeq-v7yaTY",
-  authDomain: "almas-store-a51eb.firebaseapp.com",
-  databaseURL: "https://almas-store-a51eb-default-rtdb.firebaseio.com",
-  projectId: "almas-store-a51eb",
-  storageBucket: "almas-store-a51eb.firebasestorage.app",
-  messagingSenderId: "502522968593",
-  appId: "1:502522968593:web:52dc253f8ea12f4d5bcfb0",
-  measurementId: "G-G0WC9BJ6JW"
+  apiKey: "AIzaSyCfOzC8gkqkVSNZ3frtnnCMxbeq-v7yaTY",
+  authDomain: "almas-store-a51eb.firebaseapp.com",
+  databaseURL: "https://almas-store-a51eb-default-rtdb.firebaseio.com",
+  projectId: "almas-store-a51eb",
+  storageBucket: "almas-store-a51eb.firebasestorage.app",
+  messagingSenderId: "502522968593",
+  appId: "1:502522968593:web:52dc253f8ea12f4d5bcfb0",
+  measurementId: "G-G0WC9BJ6JW"
 };
 const app = initializeApp(firebaseConfig);
 const db = initializeFirestore(app, { cache: persistentLocalCache({}) });
@@ -423,7 +423,6 @@ const DOM = {
     notificationContainer: document.getElementById("notification-container"),
     categoryScrollerContainer: document.getElementById("categoryScrollerContainer"),
     
-    // العناصر الجديدة
     workerNameInput: document.getElementById("workerNameInput"),
     workerPhoneInput: document.getElementById("workerPhoneInput"),
     workerAddressInput: document.getElementById("workerAddressInput"),
@@ -534,15 +533,40 @@ const UsersController = {
 
 // #region Items Controller
 const ItemsController = {
-    render: () => {
-        const filterCategory = DOM.filterCategorySelect.value;
-        appState.items.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
-        const filteredItems = filterCategory === "all" ? appState.items : appState.items.filter(item => item.category === filterCategory);
-        DOM.itemsTable.innerHTML = filteredItems.map(item => `<tr><td>${item.barcode1}</td><td>${item.name || 'اسم غير متوفر'}</td><td>${item.unit}</td><td>${item.sku || ''}</td><td>${(item.price || 0).toFixed(2)}</td><td>${item.qunt}</td><td>${item.category || 'غير محدد'}</td><td><div class="action-buttons"><button class="btn-small btn-warning edit-item-btn" data-id="${item.id}" disabled><i class="fas fa-edit"></i></button><button class="btn-small btn-danger delete-item-btn" data-id="${item.id}" disabled><i class="fas fa-trash-alt"></i></button></div></td></tr>`).join("");
-    },
-    edit: (id) => { Helpers.showNotification("تعديل الأصناف غير متاح في هذا الوضع. يمكنك فقط تعديلها يدوياً في ملف p.json."); },
-    save: async () => { Helpers.showNotification("حفظ الأصناف غير متاح في هذا الوضع. يمكنك فقط تعديلها يدوياً في ملف p.json."); },
-    delete: async (id) => { Helpers.showNotification("حذف الأصناف غير متاح في هذا الوضع. يمكنك فقط حذفها يدوياً من ملف p.json."); }
+    render: () => {
+        const filterCategory = DOM.filterCategorySelect.value;
+        appState.items.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
+        const filteredItems = filterCategory === "all" ? appState.items : appState.items.filter(item => item.category === filterCategory);
+        DOM.itemsTable.innerHTML = filteredItems.map(item => `<tr><td>${item.barcode1}</td><td>${item.barcode2 || ''}</td><td>${item.name || 'اسم غير متوفر'}</td><td>${item.unit}</td><td>${item.sku || ''}</td><td>${(item.price || 0).toFixed(2)}</td><td>${item.qunt}</td><td>${item.category || 'غير محدد'}</td></tr>`).join("");
+    },
+    save: async () => {
+        const itemData = { 
+            barcode1: DOM.itemCode.value.trim(), 
+            barcode2: DOM.itemBarcode2.value.trim() || '',
+            name: DOM.itemName.value.trim(), 
+            unit: DOM.itemUnit.value.trim(), 
+            price: parseFloat(DOM.itemPrice.value), 
+            qunt: parseInt(DOM.itemStock.value),
+            category: DOM.itemCategory.value.trim(),
+            sku: DOM.itemSku.value.trim()
+        };
+        if (!itemData.barcode1 || !itemData.name || !itemData.unit || isNaN(itemData.price) || isNaN(itemData.qunt)) {
+            Helpers.showNotification("يرجى ملء الحقول الأساسية: الباركود، الاسم، الوحدة، السعر، الكمية.");
+            return;
+        }
+        try {
+            const docRef = doc(db, "items", itemData.barcode1);
+            await updateDoc(docRef, itemData, { merge: true });
+            Helpers.showNotification("تم إضافة الصنف بنجاح.");
+            Helpers.clearItemForm();
+        } catch (e) {
+            console.error("Error saving item: ", e);
+            Helpers.showNotification("حدث خطأ أثناء الحفظ.");
+        }
+    },
+    // تعديل وحذف الأصناف معطل
+    edit: () => { Helpers.showNotification("تعديل الأصناف غير متاح في هذا الوضع."); },
+    delete: () => { Helpers.showNotification("حذف الأصناف غير متاح في هذا الوضع."); }
 };
 // #endregion
 
