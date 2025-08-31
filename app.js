@@ -38,7 +38,6 @@ const DOM = {
     deliveryFeeValue: document.getElementById("deliveryFeeValue"), increaseDeliveryBtn: document.getElementById("increaseDeliveryBtn"), decreaseDeliveryBtn: document.getElementById("decreaseDeliveryBtn"),
     notificationContainer: document.getElementById("notification-container"),
     categoryScrollerContainer: document.getElementById("categoryScrollerContainer"),
-    
     // العناصر الجديدة
     workerNameInput: document.getElementById("workerNameInput"),
     workerPhoneInput: document.getElementById("workerPhoneInput"),
@@ -390,7 +389,6 @@ const ReportsController = {
 // #region App Logic & Event Listeners
 const App = {
     init: () => {
-        App.listenToFirebase();
         App.bindEvents();
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -398,19 +396,21 @@ const App = {
                 if (userDoc) {
                     appState.currentUser = { ...userDoc, id: user.uid };
                     Auth.showApp(appState.currentUser.role);
+                    App.listenToFirebase();
                 } else {
                     Auth.logout();
                 }
             } else {
                 DOM.loginContainer.style.display = "flex";
                 DOM.appContainer.style.display = "none";
+                Object.values(appState.unsubscribe).forEach(unsub => unsub());
             }
         });
         const today = new Date().toISOString().split('T')[0];
         DOM.vacationStartDate.value = today;
         DOM.vacationEndDate.value = today;
     },
-    
+    
     listenToFirebase: () => {
         Object.values(appState.unsubscribe).forEach(unsub => unsub());
         
@@ -418,7 +418,6 @@ const App = {
             appState.items = snapshot.docs.map(item => ({
                 id: String(item.id || ''), barcode1: String(item.barcode1 || ''), name: item.name || 'اسم غير متوفر', price: parseFloat(item.price) || 0, category: (item.category || "غير محدد").trim(), unit: typeof item.unit === 'string' && item.unit.trim() ? item.unit.trim() : 'قطعة', qunt: parseInt(item.qunt) || 0, sku: String(item.sku || '')
             }));
-
             const categories = [...new Set(appState.items.map(i => i.category))].filter(Boolean);
             DOM.salesCategoryFilters.innerHTML = categories.map(c => `<button class="btn-small" data-category="${c}">${c}</button>`).join('');
             DOM.filterCategorySelect.innerHTML = '<option value="all">جميع الفئات</option>' + categories.map(c => `<option value="${c}">${c}</option>`).join('');
