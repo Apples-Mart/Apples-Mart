@@ -266,7 +266,7 @@
           <div class="sales-footer-row">
             <div class="form-group">
               <input type="number" id="amountPaidInput" placeholder="المبلغ المدفوع" min="0" step="0.01" />
-              <div class="change-due-container"><span id="changeText">الباقي للعميل:</span> <span id="changeAmount">0.00</span> ج.م</div>
+              <div class="change-due-container"><span id="changeText">الباقي للعميل:</span> <span id="changeAmount">0.00</span> ج.م</span></div>
             </div>
           </div>
           <div class="sales-footer-row">
@@ -445,11 +445,11 @@ const DOM = {
     advanceModal: document.getElementById("advanceModal"), vacationModal: document.getElementById("vacationModal"), settlementModal: document.getElementById("settlementModal"), advanceAmount: document.getElementById("advanceAmount"), advanceNotes: document.getElementById("advanceNotes"), saveAdvanceBtn: document.getElementById("saveAdvanceBtn"), cancelAdvanceBtn: document.getElementById("cancelAdvanceBtn"), vacationStartDate: document.getElementById("vacationStartDate"), vacationEndDate: document.getElementById("vacationEndDate"), vacationNotes: document.getElementById("vacationNotes"), saveVacationBtn: document.getElementById("saveVacationBtn"), cancelVacationBtn: document.getElementById("cancelVacationBtn"), settlementInvoiceId: document.getElementById("settlementInvoiceId"), settlementCustomerName: document.getElementById("settlementCustomerName"), settlementTotal: document.getElementById("settlementTotal"), settlementPaid: document.getElementById("settlementPaid"), settlementBalance: document.getElementById("settlementBalance"), settlementAmount: document.getElementById("settlementAmount"), settlementNotes: document.getElementById("settlementNotes"), saveSettlementBtn: document.getElementById("saveSettlementBtn"), cancelSettlementBtn: document.getElementById("cancelSettlementBtn")
 };
 
-let appState = { 
+let appState = {
   items: [], invoices: [], customers: [], users: [], workers: [], advances: [], vacations: [], settlements: [],
-  adminPIN: "790707071", currentUser: null, currentInvoice: [], deliveryFee: 30, 
+  adminPIN: "790707071", currentUser: null, currentInvoice: [], deliveryFee: 30,
   editingItemId: null, editingCustomerId: null, editingUserId: null, editingWorkerId: null,
-  html5QrCode: null, unsubscribe: {}, selectedWorkerId: null, selectedInvoiceId: null 
+  html5QrCode: null, unsubscribe: {}, selectedWorkerId: null, selectedInvoiceId: null
 };
 // #endregion
 
@@ -472,7 +472,7 @@ const Auth = {
     login: (username, password) => {
         if (password === appState.adminPIN) { appState.currentUser = { username: "المدير العام", role: "admin" }; localStorage.setItem('currentUser', JSON.stringify(appState.currentUser)); Auth.showApp("admin"); return; }
         const user = appState.users.find(u => u.username === username && u.password === password);
-        if (user) { appState.currentUser = user; localStorage.setItem('currentUser', JSON.stringify(user)); Auth.showApp("user"); } 
+        if (user) { appState.currentUser = user; localStorage.setItem('currentUser', JSON.stringify(user)); Auth.showApp("user"); }
         else { Helpers.showNotification("اسم المستخدم أو كلمة المرور غير صحيحة.", 4000); }
     },
     logout: () => { appState.currentUser = null; localStorage.removeItem('currentUser'); window.location.reload(); },
@@ -481,45 +481,6 @@ const Auth = {
         DOM.appContainer.style.display = "block";
         DOM.navButtons.forEach(b => b.dataset.tab === 'users' ? b.classList.toggle("hidden", role !== "admin") : null);
         document.querySelector('[data-tab="sales"]').click();
-    }
-};
-// #endregion
-
-// #region User Management Controller
-const UsersController = {
-    render: () => { DOM.usersList.innerHTML = appState.users.map(user => `<div class="user-card"><div><b><i class="fas fa-user"></i> ${user.username}</b></div><div class="action-buttons"><button class="btn-small btn-warning edit-user-btn" data-id="${user.id}"><i class="fas fa-edit"></i></button><button class="btn-small btn-danger delete-user-btn" data-id="${user.id}"><i class="fas fa-trash-alt"></i></button></div></div>`).join(""); },
-    clearForm: () => { DOM.newUsernameInput.value = ""; DOM.newUserPasswordInput.value = ""; appState.editingUserId = null; DOM.saveUserBtn.innerHTML = '<i class="fas fa-plus-circle"></i> إضافة مستخدم'; DOM.newUsernameInput.disabled = false; DOM.newUserPasswordInput.placeholder = "كلمة المرور"; },
-    edit: (id) => { const user = appState.users.find(u => u.id === id); if (!user) return; appState.editingUserId = id; DOM.newUsernameInput.value = user.username; DOM.newUsernameInput.disabled = true; DOM.newUserPasswordInput.value = ""; DOM.newUserPasswordInput.placeholder = "اتركها فارغة لعدم التغيير"; DOM.saveUserBtn.innerHTML = '<i class="fas fa-edit"></i> تعديل المستخدم'; },
-    save: async () => {
-        const username = DOM.newUsernameInput.value.trim();
-        let password = DOM.newUserPasswordInput.value.trim();
-        if (!username) { Helpers.showNotification("يجب إدخال اسم المستخدم."); return; }
-        try {
-            if (appState.editingUserId) {
-                const userData = {};
-                if (password) userData.password = password;
-                await window.updateDocument("users", appState.editingUserId, userData);
-                Helpers.showNotification("تم تعديل المستخدم بنجاح.");
-            } else {
-                if (!password) { Helpers.showNotification("يجب إدخال كلمة المرور للمستخدم الجديد."); return; }
-                const docRef = doc(db, "users", username);
-                if ((await getDoc(docRef)).exists()) { Helpers.showNotification("اسم المستخدم هذا موجود بالفعل."); return; }
-                await updateDoc(docRef, { username, password }, { merge: true });
-                Helpers.showNotification("تمت إضافة المستخدم بنجاح.");
-            }
-            UsersController.clearForm();
-        } catch (error) { console.error("Error saving user:", error); Helpers.showNotification("حدث خطأ."); }
-    },
-    delete: async (id) => { if (confirm("هل أنت متأكد من حذف هذا المستخدم؟")) { await window.deleteDocument("users", id); Helpers.showNotification("تم حذف المستخدم."); } },
-    changeAdminPin: async () => {
-        const oldPin = DOM.oldPinInput.value;
-        const newPin = DOM.newPinInput.value;
-        if (!oldPin || !newPin) { Helpers.showNotification("يرجى ملء جميع الحقول."); return; }
-        if (oldPin !== appState.adminPIN) { Helpers.showNotification("كلمة المرور القديمة غير صحيحة."); return; }
-        await window.updateDocument("config", "admin", { pin: newPin });
-        appState.adminPIN = newPin;
-        DOM.oldPinInput.value = ""; DOM.newPinInput.value = "";
-        Helpers.showNotification("تم تغيير كلمة مرور المدير بنجاح.");
     }
 };
 // #endregion
@@ -547,7 +508,7 @@ const ItemsController = {
             const matchesCategory = filterCategory === 'all' || item.category === filterCategory;
             return matchesBarcode1 && matchesBarcode2 && matchesName && matchesUnit && matchesSku && matchesPrice && matchesStock && matchesCategory;
         });
-        
+
         DOM.itemsTable.innerHTML = filteredItems.map(item => `
           <tr>
             <td>${item.barcode1}</td>
@@ -614,7 +575,6 @@ const CustomersController = {
                     <div>
                         <b>${cust.name}</b><br/>
                         <small>هاتف: ${cust.id}</small>
-                        <div class="${balanceClass}">${balanceText}</div>
                     </div>
                     <div class="action-buttons">
                         <button class="btn-small btn-warning edit-customer-btn" data-id="${cust.id}"><i class="fas fa-edit"></i></button>
@@ -1273,7 +1233,7 @@ const App = {
             const q = DOM.searchItem.value.trim();
             DOM.searchResults.style.display = "none";
             if (q.length < 1) return;
-            const matched = appState.items.filter(i => (i.name || '').toLowerCase().includes(q.toLowerCase()) || (i.barcode1 || '').includes(q)).slice(0, 5);
+            const matched = appState.items.filter(i => (i.name || '').toLowerCase().includes(q.toLowerCase()) || (i.barcode1 || '').includes(q) || (i.barcode2 || '').includes(q)).slice(0, 5);
             if (matched.length > 0) {
                 DOM.searchResults.innerHTML = matched.map(i => `<div data-id="${i.id}">${i.barcode1} - ${i.name}</div>`).join('');
                 DOM.searchResults.style.display = "block";
