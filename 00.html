@@ -445,7 +445,6 @@ const DOM = {
     appContainer: document.getElementById("app-container"), loginContainer: document.getElementById("login-container"), loginForm: document.getElementById("login-form"), usernameInput: document.getElementById("usernameInput"), passwordInput: document.getElementById("passwordInput"),
     navButtons: document.querySelectorAll("nav button"), sections: document.querySelectorAll("main section"), logoutBtn: document.getElementById("logoutBtn"),
     itemsTable: document.getElementById("itemsTable"),
-    scanBarcodeBtn: document.getElementById("scanBarcodeBtn"),
     filterBarcode1: document.getElementById("filterBarcode1"), filterBarcode2: document.getElementById("filterBarcode2"), filterName: document.getElementById("filterName"), filterUnit: document.getElementById("filterUnit"), filterSku: document.getElementById("filterSku"), filterPrice: document.getElementById("filterPrice"), filterStock: document.getElementById("filterStock"), filterCategory: document.getElementById("filterCategory"),
     newCustomerId: document.getElementById("newCustomerId"), newCustomerName: document.getElementById("newCustomerName"), newCustomerAddress: document.getElementById("newCustomerAddress"), saveCustomerBtn: document.getElementById("saveCustomerBtn"), customersTableBody: document.getElementById("customersTableBody"),
     customerName: document.getElementById("customerName"), customerPhone: document.getElementById("customerPhone"), customerSuggestions: document.getElementById("customerSuggestions"), searchItem: document.getElementById("searchItem"), searchResults: document.getElementById("searchResults"), invoiceTable: document.getElementById("invoiceTable"), invoiceTotal: document.getElementById("invoiceTotal"), saveInvoiceBtn: document.getElementById("saveInvoiceBtn"), printInvoiceBtn: document.getElementById("printInvoiceBtn"), sendWhatsAppBtn: document.getElementById("sendWhatsAppBtn"), amountPaidInput: document.getElementById("amountPaidInput"), changeText: document.getElementById("changeText"), changeAmount: document.getElementById("changeAmount"),
@@ -467,7 +466,7 @@ let appState = {
   adminPIN: "790707071", currentUser: null, currentInvoice: [], deliveryFee: 30,
   editingItemId: null, editingCustomerId: null, editingUserId: null, editingWorkerId: null,
   html5QrCode: null, unsubscribe: {}, selectedWorkerId: null, selectedInvoiceId: null,
-  scannerMode: 'sales' // Can be 'sales' or 'items'
+  scannerMode: 'sales'
 };
 // #endregion
 
@@ -1305,7 +1304,6 @@ const App = {
         DOM.restoreBtn.addEventListener("click", () => DOM.restoreInput.click());
         DOM.restoreInput.addEventListener("change", (e) => ReportsController.restore(e.target.files[0]));
         
-        // Removed scan button from Items tab logic
         DOM.startScannerBtn.addEventListener("click", () => {
             appState.scannerMode = 'sales'; 
             ScannerController.start();
@@ -1346,14 +1344,10 @@ const App = {
 };
 
 const UsersController = {
-  // Functions for managing non-worker users (if any) would go here
-  // For now, it's mostly a placeholder as management is focused on workers
   save: () => { Helpers.showNotification("جاري العمل على هذه الميزة."); },
   edit: () => {},
   delete: () => {},
-  render: () => {
-    // Render non-worker users if any
-  },
+  render: () => {},
   changeAdminPin: async () => {
       const oldPin = DOM.oldPinInput.value;
       const newPin = DOM.newPinInput.value;
