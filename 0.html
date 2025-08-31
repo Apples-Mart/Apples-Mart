@@ -318,6 +318,7 @@
 </div>
 <div id="scanner-container"><div id="reader"></div></div>
 <div id="notification-container"></div>
+
 <div id="advanceModal" class="modal">
   <div class="modal-content">
     <h3><i class="fas fa-money-bill-wave"></i> إضافة سلفة للعامل</h3>
@@ -461,6 +462,7 @@ let appState = { 
   html5QrCode: null, unsubscribe: {}, selectedWorkerId: null, selectedInvoiceId: null 
 };
 // #endregion
+
 // #region Helper & Utility Functions
 const Helpers = {
     showNotification: (message, duration = 3000) => { const n = document.createElement("div"); n.className = "notification"; n.textContent = message; DOM.notificationContainer.appendChild(n); setTimeout(() => n.classList.add("show"), 10); setTimeout(() => { n.classList.remove("show"); setTimeout(() => n.remove(), 500); }, duration); },
