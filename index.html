@@ -87,7 +87,6 @@
   .sales-footer-row .btn-group { display: flex; gap: 10px; flex: 2 1 300px; justify-content: flex-end;}
   .change-due-container { text-align: left; font-size: 18px; font-weight: bold; padding: 5px 0;}
   
-  /* أنماط جديدة للعناصر المضافة */
   .settlement-section {
     background: #f8f9fa;
     padding: 15px;
@@ -200,7 +199,7 @@
         <input type="text" id="itemSku" placeholder="كود SKU (اختياري للكاميرا)" />
         <input type="number" id="itemPrice" placeholder="السعر" min="0" step="0.01" />
         <input type="number" id="itemStock" placeholder="الكمية / المخزون" min="0" />
-        <button id="saveItemBtn"><i class="fas fa-save"></i> حفظ الصنف</button>
+        <button id="saveItemBtn" disabled><i class="fas fa-save"></i> حفظ الصنف</button>
       </div>
       <div class="form-group flex-container" style="margin-top: 20px;">
         <label for="filterCategorySelect" style="flex-grow: 0; margin-right: 10px;">تصفية حسب الفئة:</label>
@@ -254,7 +253,7 @@
             </div>
           </div>
           <div class="sales-footer-row">
-              <div class="btn-group"><button id="sendWhatsAppBtn" class="btn-whatsapp"><i class="fab fa-whatsapp"></i> واتساب</button><button id="printInvoiceBtn" class="btn-success"><i class="fas fa-print"></i> طباعة</button><button id="saveInvoiceBtn"><i class="fas fa-save"></i> حفظ</button></div>
+            <div class="btn-group"><button id="sendWhatsAppBtn" class="btn-whatsapp"><i class="fab fa-whatsapp"></i> واتساب</button><button id="printInvoiceBtn" class="btn-success"><i class="fas fa-print"></i> طباعة</button><button id="saveInvoiceBtn"><i class="fas fa-save"></i> حفظ</button></div>
           </div>
       </div>
     </section>
@@ -282,7 +281,6 @@
       
       <hr>
       
-      <!-- قسم إدارة العمال -->
       <h3><i class="fas fa-hard-hat"></i> إدارة العمال</h3>
       <div class="form-group flex-container">
         <input type="text" id="workerNameInput" placeholder="اسم العامل" />
@@ -311,16 +309,15 @@
 </div>
 <div id="login-container">
     <form id="login-form">
-        <h2><i class="fas fa-lock"></i> تسجيل الدخول</h2>
-        <div class="form-group"><input type="text" id="usernameInput" placeholder="اسم المستخدم" required /></div>
-        <div class="form-group"><input type="password" id="passwordInput" placeholder="كلمة المرور" required /></div>
-        <button type="submit" id="loginBtn"><i class="fas fa-sign-in-alt"></i> دخول</button>
+      <h2><i class="fas fa-lock"></i> تسجيل الدخول</h2>
+      <div class="form-group"><input type="text" id="usernameInput" placeholder="اسم المستخدم" required /></div>
+      <div class="form-group"><input type="password" id="passwordInput" placeholder="كلمة المرور" required /></div>
+      <button type="submit" id="loginBtn"><i class="fas fa-sign-in-alt"></i> دخول</button>
     </form>
 </div>
 <div id="scanner-container"><div id="reader"></div></div>
 <div id="notification-container"></div>
 
-<!-- نماذج جديدة للعمال والتسويات -->
 <div id="advanceModal" class="modal">
   <div class="modal-content">
     <h3><i class="fas fa-money-bill-wave"></i> إضافة سلفة للعامل</h3>
@@ -384,7 +381,6 @@
       <button id="cancelSettlementBtn" class="btn-danger"><i class="fas fa-times"></i> إلغاء</button>
     </div>
   </div>
-  
 </div>
 
 <script type="module">
@@ -542,40 +538,11 @@ const ItemsController = {
         const filterCategory = DOM.filterCategorySelect.value;
         appState.items.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ar'));
         const filteredItems = filterCategory === "all" ? appState.items : appState.items.filter(item => item.category === filterCategory);
-        DOM.itemsTable.innerHTML = filteredItems.map(item => `<tr><td>${item.barcode1}</td><td>${item.name || 'اسم غير متوفر'}</td><td>${item.unit}</td><td>${item.sku || ''}</td><td>${(item.price || 0).toFixed(2)}</td><td>${item.qunt}</td><td>${item.category || 'غير محدد'}</td><td><div class="action-buttons"><button class="btn-small btn-warning edit-item-btn" data-id="${item.id}"><i class="fas fa-edit"></i></button><button class="btn-small btn-danger delete-item-btn" data-id="${item.id}"><i class="fas fa-trash-alt"></i></button></div></td></tr>`).join("");
+        DOM.itemsTable.innerHTML = filteredItems.map(item => `<tr><td>${item.barcode1}</td><td>${item.name || 'اسم غير متوفر'}</td><td>${item.unit}</td><td>${item.sku || ''}</td><td>${(item.price || 0).toFixed(2)}</td><td>${item.qunt}</td><td>${item.category || 'غير محدد'}</td><td><div class="action-buttons"><button class="btn-small btn-warning edit-item-btn" data-id="${item.id}" disabled><i class="fas fa-edit"></i></button><button class="btn-small btn-danger delete-item-btn" data-id="${item.id}" disabled><i class="fas fa-trash-alt"></i></button></div></td></tr>`).join("");
     },
-    edit: (id) => { 
-        const item = appState.items.find(i => i.id === id); if (!item) return; 
-        appState.editingItemId = id; 
-        DOM.itemCode.value = item.barcode1; 
-        DOM.itemCode.disabled = true; 
-        DOM.itemSku.value = item.sku || '';
-        DOM.itemName.value = item.name; 
-        DOM.itemUnit.value = item.unit;
-        DOM.itemPrice.value = item.price; 
-        DOM.itemStock.value = item.qunt; 
-        DOM.saveItemBtn.innerHTML = '<i class="fas fa-edit"></i> تعديل الصنف'; 
-    },
-    save: async () => {
-        const itemData = { 
-            barcode1: DOM.itemCode.value.trim(), 
-            sku: DOM.itemSku.value.trim(),
-            name: DOM.itemName.value.trim(), 
-            unit: DOM.itemUnit.value.trim(), 
-            price: parseFloat(DOM.itemPrice.value), 
-            qunt: parseInt(DOM.itemStock.value), 
-            category: "غير محدد"
-        };
-        if (!itemData.barcode1 || !itemData.name || !itemData.unit || isNaN(itemData.price) || isNaN(itemData.qunt)) { Helpers.showNotification("يرجى ملء الحقول الأساسية: الباركود، الاسم، الوحدة، السعر، الكمية."); return; }
-        
-        try {
-            const docRef = doc(db, "items", itemData.barcode1);
-            await updateDoc(docRef, itemData, { merge: true });
-            Helpers.showNotification(appState.editingItemId ? "تم تحديث الصنف بنجاح." : "تم إضافة الصنف بنجاح.");
-            Helpers.clearItemForm();
-        } catch (e) { console.error("Error saving item: ", e); Helpers.showNotification("حدث خطأ أثناء الحفظ."); }
-    },
-    delete: async (id) => { if (confirm("هل أنت متأكد من حذف هذا الصنف؟")) { await window.deleteDocument("items", id); Helpers.showNotification("تم حذف الصنف."); } }
+    edit: (id) => { Helpers.showNotification("تعديل الأصناف غير متاح في هذا الوضع. يمكنك فقط تعديلها يدوياً في ملف p.json."); },
+    save: async () => { Helpers.showNotification("حفظ الأصناف غير متاح في هذا الوضع. يمكنك فقط تعديلها يدوياً في ملف p.json."); },
+    delete: async (id) => { Helpers.showNotification("حذف الأصناف غير متاح في هذا الوضع. يمكنك فقط حذفها يدوياً من ملف p.json."); }
 };
 // #endregion
 
@@ -583,7 +550,6 @@ const ItemsController = {
 const CustomersController = {
     render: () => {
         DOM.customersList.innerHTML = appState.customers.map(cust => {
-            // حساب رصيد العميل من الفواتير
             const customerInvoices = appState.invoices.filter(inv => inv.customerPhone === cust.id);
             let totalBalance = 0;
             
@@ -643,26 +609,25 @@ const SalesController = {
             items: appState.currentInvoice, 
             deliveryFee: appState.deliveryFee, 
             total, 
-            status: 'pending', // pending, partially_paid, paid
+            status: 'pending', 
             paidAmount: 0,
             balance: total,
             createdAt: serverTimestamp() 
         };
         
         try {
-            // حفظ الفاتورة
             const docRef = await addDoc(collection(db, "invoices"), data);
             
-            // تحديث المخزون
             const batch = writeBatch(db);
             appState.currentInvoice.forEach(ci => {
-                batch.update(doc(db, "items", ci.id), { qunt: increment(-ci.qty) });
+                const stockItem = appState.items.find(i => i.id === ci.id);
+                if (stockItem) {
+                    stockItem.qunt -= ci.qty;
+                }
             });
-            await batch.commit();
             
             Helpers.showNotification("تم حفظ الفاتورة بنجاح!");
             
-            // إضافة تسوية أولية إذا كان هناك دفع
             const paid = parseFloat(DOM.amountPaidInput.value) || 0;
             if (paid > 0) {
                 const settlementData = {
@@ -674,7 +639,6 @@ const SalesController = {
                 await addDoc(collection(db, "settlements"), settlementData);
             }
             
-            // إعادة تعيين الفاتورة الحالية
             appState.currentInvoice = [];
             DOM.customerName.value = "";
             DOM.customerPhone.value = "";
@@ -740,11 +704,9 @@ const ScannerController = {
 const WorkersController = {
     render: () => {
         DOM.workersList.innerHTML = appState.workers.map(worker => {
-            // حساب إجمالي السلف
             const workerAdvances = appState.advances.filter(a => a.workerId === worker.id);
             const totalAdvances = workerAdvances.reduce((sum, advance) => sum + parseFloat(advance.amount || 0), 0);
             
-            // حساب إجمالي الإجازات
             const workerVacations = appState.vacations.filter(v => v.workerId === worker.id);
             
             return `
@@ -902,7 +864,6 @@ const InvoicesController = {
             const dateObj = inv.createdAt?.toDate ? inv.createdAt.toDate() : new Date();
             const date = dateObj.toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' });
             
-            // حساب إجمالي المدفوعات لهذه الفاتورة
             const invoiceSettlements = appState.settlements.filter(s => s.invoiceId === inv.id);
             const totalPaid = invoiceSettlements.reduce((sum, s) => sum + parseFloat(s.amount || 0), 0);
             const balance = parseFloat(inv.total || 0) - totalPaid;
@@ -1001,7 +962,7 @@ const InvoicesController = {
             await addDoc(collection(db, "settlements"), settlementData);
             Helpers.showNotification("تم تسوية المبلغ بنجاح.");
             Helpers.closeModal(DOM.settlementModal);
-            InvoicesController.render(); // إعادة تحميل الفواتير
+            InvoicesController.render(); 
         } catch (error) {
             console.error("Error saving settlement:", error);
             Helpers.showNotification("حدث خطأ أثناء التسوية.");
@@ -1013,7 +974,6 @@ const InvoicesController = {
 // #region Reports Controller
 const ReportsController = {
     render: () => {
-        // سيتم تنفيذ هذا لاحقاً
     },
     resetInvoices: async () => {
         if (confirm("هل أنت متأكد من حذف جميع الفواتير؟ هذا الإجراء لا يمكن التراجع عنه.")) {
@@ -1057,7 +1017,11 @@ const ReportsController = {
             const data = {};
             const collections = ["items", "customers", "invoices", "users", "workers", "advances", "vacations", "settlements"];
             
-            for (const collectionName of collections) {
+            const itemsResponse = await fetch('p.json');
+            data.items = await itemsResponse.json();
+            
+            const firebaseCollections = ["customers", "invoices", "users", "workers", "advances", "vacations", "settlements"];
+            for (const collectionName of firebaseCollections) {
                 const snapshot = await getDocs(collection(db, collectionName));
                 data[collectionName] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             }
@@ -1087,7 +1051,6 @@ const ReportsController = {
                 const data = JSON.parse(e.target.result);
                 
                 if (confirm("هل أنت متأكد من استعادة النسخة الاحتياطية؟ هذا الإجراء سيمسح جميع البيانات الحالية.")) {
-                    // مسح البيانات الحالية أولاً
                     const collections = ["items", "customers", "invoices", "users", "workers", "advances", "vacations", "settlements"];
                     const batch = writeBatch(db);
                     
@@ -1099,7 +1062,6 @@ const ReportsController = {
                     }
                     await batch.commit();
                     
-                    // استعادة البيانات من النسخة الاحتياطية
                     const restoreBatch = writeBatch(db);
                     
                     for (const collectionName of collections) {
@@ -1137,7 +1099,6 @@ const App = {
         }
         App.bindEvents();
         
-        // تعيين تاريخ اليوم في نماذج الإجازات
         const today = new Date().toISOString().split('T')[0];
         DOM.vacationStartDate.value = today;
         DOM.vacationEndDate.value = today;
@@ -1146,26 +1107,35 @@ const App = {
     listenToFirebase: () => {
         Object.values(appState.unsubscribe).forEach(unsub => unsub());
         
-        // الاشتراك في المجموعات الحالية
-        appState.unsubscribe.items = window.readCollection("items", (fbItems) => { 
-            appState.items = fbItems.map(item => ({
-                id: String(item.id || ''),
-                barcode1: String(item.barcode1 || ''),
-                name: item.name || 'اسم غير متوفر',
-                price: parseFloat(item.price) || 0,
-                category: (item.category || "غير محدد").trim(),
-                unit: typeof item.unit === 'string' && item.unit.trim() ? item.unit.trim() : 'قطعة',
-                qunt: parseInt(item.qunt) || 0,
-                sku: String(item.sku || '')
-            }));
-
-            const categories = [...new Set(appState.items.map(i => i.category))].filter(Boolean);
-            DOM.salesCategoryFilters.innerHTML = categories.map(c => `<button class="btn-small" data-category="${c}">${c}</button>`).join('');
-            DOM.filterCategorySelect.innerHTML = '<option value="all">جميع الفئات</option>' + categories.map(c => `<option value="${c}">${c}</option>`).join('');
-            
-            if (document.getElementById('items').classList.contains('active')) ItemsController.render();
-        });
-
+        fetch('p.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('فشل في جلب ملف p.json');
+                }
+                return response.json();
+            })
+            .then(data => {
+                appState.items = data.map(item => ({
+                    id: String(item.id || ''),
+                    barcode1: String(item.barcode1 || ''),
+                    name: item.name || 'اسم غير متوفر',
+                    price: parseFloat(item.price) || 0,
+                    category: (item.category || "غير محدد").trim(),
+                    unit: typeof item.unit === 'string' && item.unit.trim() ? item.unit.trim() : 'قطعة',
+                    qunt: parseInt(item.qunt) || 0,
+                    sku: String(item.sku || '')
+                }));
+                const categories = [...new Set(appState.items.map(i => i.category))].filter(Boolean);
+                DOM.salesCategoryFilters.innerHTML = categories.map(c => `<button class="btn-small" data-category="${c}">${c}</button>`).join('');
+                DOM.filterCategorySelect.innerHTML = '<option value="all">جميع الفئات</option>' + categories.map(c => `<option value="${c}">${c}</option>`).join('');
+                ItemsController.render();
+                Helpers.showNotification("تم تحميل الأصناف من ملف p.json.");
+            })
+            .catch(error => {
+                console.error("Error fetching local items:", error);
+                Helpers.showNotification("فشل تحميل الأصناف. يرجى التأكد من وجود ملف p.json.", 5000);
+            });
+        
         appState.unsubscribe.customers = window.readCollection("customers", (data) => { 
             appState.customers = data; 
             if (document.getElementById('customers').classList.contains('active')) CustomersController.render(); 
@@ -1181,7 +1151,6 @@ const App = {
             if (document.getElementById('users').classList.contains('active')) UsersController.render(); 
         }, "username", "asc");
         
-        // الاشتراك في المجموعات الجديدة
         appState.unsubscribe.workers = window.readCollection("workers", (data) => { 
             appState.workers = data; 
             if (document.getElementById('users').classList.contains('active')) WorkersController.render(); 
@@ -1226,12 +1195,23 @@ const App = {
     },
     
     bindEvents: () => {
-        // --- Login/Logout ---
         DOM.loginForm.addEventListener("submit", (e) => { e.preventDefault(); Auth.login(DOM.usernameInput.value, DOM.passwordInput.value); });
         DOM.logoutBtn.addEventListener("click", Auth.logout);
-        DOM.navButtons.forEach(btn => btn.addEventListener("click", () => { Helpers.updateNavButtons(btn); Helpers.switchTab(btn.dataset.tab); }));
 
-        // --- Sales Tab (Search and Grids) ---
+        DOM.navButtons.forEach(btn => {
+            btn.addEventListener("click", () => {
+                DOM.navButtons.forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                DOM.sections.forEach(s => s.classList.remove("active"));
+                const tabId = btn.dataset.tab;
+                const activeSection = document.getElementById(tabId);
+                if (activeSection) {
+                    activeSection.classList.add("active");
+                    App.onTabSwitch(tabId);
+                }
+            });
+        });
+
         DOM.searchItem.addEventListener("input", () => {
             const q = DOM.searchItem.value.trim();
             DOM.searchResults.style.display = "none";
@@ -1269,7 +1249,6 @@ const App = {
             }
         });
 
-        // --- Invoice Table Buttons (Quantity +/-/delete) ---
         DOM.invoiceTable.addEventListener("click", (e) => { 
             const btn = e.target.closest("button"); 
             if (!btn) return; 
@@ -1282,7 +1261,6 @@ const App = {
             }
         });
 
-        // --- Sales Footer Buttons (Save, Print, etc.) ---
         DOM.saveInvoiceBtn.addEventListener("click", SalesController.save);
         DOM.printInvoiceBtn.addEventListener("click", SalesController.print);
         DOM.sendWhatsAppBtn.addEventListener("click", SalesController.sendWhatsApp);
@@ -1290,7 +1268,6 @@ const App = {
         DOM.increaseDeliveryBtn.addEventListener("click", () => { appState.deliveryFee += 5; SalesController.updateTotals(); });
         DOM.decreaseDeliveryBtn.addEventListener("click", () => { appState.deliveryFee = Math.max(0, appState.deliveryFee - 5); SalesController.updateTotals(); });
 
-        // --- Other Tabs Bindings ---
         DOM.saveItemBtn.addEventListener("click", ItemsController.save);
         DOM.itemsTable.addEventListener("click", e => { const btn = e.target.closest("button"); if(btn) { if (btn.classList.contains("edit-item-btn")) ItemsController.edit(btn.dataset.id); if (btn.classList.contains("delete-item-btn")) ItemsController.delete(btn.dataset.id); }});
         
@@ -1310,7 +1287,6 @@ const App = {
         DOM.startScannerBtn.addEventListener("click", ScannerController.start);
         DOM.scannerContainer.addEventListener("click", (e) => { if(e.target === DOM.scannerContainer) ScannerController.stop(); });
         
-        // أحداث جديدة للعمال
         DOM.saveWorkerBtn.addEventListener('click', WorkersController.save);
         DOM.workersList.addEventListener('click', (e) => {
             const btn = e.target.closest('button');
@@ -1327,14 +1303,12 @@ const App = {
             }
         });
         
-        // أحداث نماذج السلف والإجازات
         DOM.saveAdvanceBtn.addEventListener('click', WorkersController.saveAdvance);
         DOM.cancelAdvanceBtn.addEventListener('click', () => Helpers.closeModal(DOM.advanceModal));
         
         DOM.saveVacationBtn.addEventListener('click', WorkersController.saveVacation);
         DOM.cancelVacationBtn.addEventListener('click', () => Helpers.closeModal(DOM.vacationModal));
         
-        // أحداث تسوية الفواتير
         DOM.invoicesList.addEventListener('click', (e) => {
             const btn = e.target.closest('.settle-invoice-btn');
             if (btn) {
@@ -1345,7 +1319,6 @@ const App = {
         DOM.saveSettlementBtn.addEventListener('click', InvoicesController.saveSettlement);
         DOM.cancelSettlementBtn.addEventListener('click', () => Helpers.closeModal(DOM.settlementModal));
         
-        // إغلاق النماذج عند النقر خارجها
         [DOM.advanceModal, DOM.vacationModal, DOM.settlementModal].forEach(modal => {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
@@ -1357,7 +1330,6 @@ const App = {
 };
 
 App.init();
-// #endregion
 </script>
 </body>
 </html>
