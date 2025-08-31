@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Apples-Mart - Firebase</title>
+<title>Apples-Mart</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <style>
@@ -54,7 +54,7 @@
   .flex-container { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
   .flex-end { justify-content: flex-end; }
   #notification-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; max-width: 90%; }
-  .notification { background-color: rgba(0, 0, 0, 0.8); color: white; padding: 15px 25px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); text-align: center; font-size: 16px; opacity: 0; transition: opacity 0.5s ease-in-out; }
+  .notification { background-color: rgba(0, 0, 0, 0.8); color: white; padding: 15px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); text-align: center; font-size: 16px; opacity: 0; transition: opacity 0.5s ease-in-out; }
   .notification.show { opacity: 1; }
   #login-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #e9ecef; }
   #login-form { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 350px; text-align: center; }
@@ -64,10 +64,10 @@
   .item-card h5 { margin: 5px 0; font-size: 14px; height: 40px; overflow: hidden; }
   .item-card p { margin: 5px 0; font-size: 12px; color: var(--success-color); font-weight: bold; }
   #categoryScrollerContainer { display: none; margin-bottom: 15px; width: 100%; }
-  #salesCategoryFilters { display: grid; grid-auto-flow: column; grid-template-rows: repeat(4, auto); gap: 8px; overflow-x: auto; padding: 10px; background: #e9ecef; border-radius: 6px; }
-  #salesCategoryFilters button { width: auto; padding: 5px 10px; white-space: nowrap; background-color: var(--primary-color); }
+  #salesCategoryFilters { display: flex; gap: 8px; overflow-x: auto; padding: 10px; background: #e9ecef; border-radius: 6px; }
+  #salesCategoryFilters button { white-space: nowrap; }
   #salesCategoryFilters button.active { background-color: var(--success-color); color: white; }
-  #itemGrid { display: none; grid-auto-flow: column; grid-template-rows: repeat(3, auto); gap: 10px; overflow-x: auto; padding: 10px; background: #e9ecef; border-radius: 6px; }
+  #itemGrid { display: none; gap: 10px; padding: 10px; background: #e9ecef; border-radius: 6px; }
   #scanner-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 10001; display: none; justify-content: center; align-items: flex-start; padding-top: 10vh; }
   #reader { width: 300px; height: 300px; max-width: 80vw; max-height: 80vw; background: #000; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.5); box-shadow: 0 4px 15px rgba(0,0,0,0.3); overflow: hidden; position: relative; }
   #reader::after { content: ''; position: absolute; top: 0; left: 5%; right: 5%; height: 2px; background: #ff4747; box-shadow: 0 0 5px #ff4747, 0 0 10px #ff4747; animation: laser-beam 2.5s infinite linear; border-radius: 2px; }
@@ -86,81 +86,6 @@
   .sales-footer-row .form-group { margin-bottom: 0; flex: 1 1 150px; }
   .sales-footer-row .btn-group { display: flex; gap: 10px; flex: 2 1 300px; justify-content: flex-end;}
   .change-due-container { text-align: left; font-size: 18px; font-weight: bold; padding: 5px 0;}
-  
-  .settlement-section {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 6px;
-    margin: 15px 0;
-    border: 1px solid #dee2e6;
-  }
-  .customer-balance {
-    font-weight: bold;
-    color: #28a745;
-    margin: 10px 0;
-  }
-  .customer-balance.negative {
-    color: #dc3545;
-  }
-  .worker-card {
-    background: white;
-    padding: 15px;
-    margin: 10px 0;
-    border-radius: 6px;
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-  .worker-details {
-    flex: 1;
-  }
-  .worker-actions {
-    display: flex;
-    gap: 10px;
-  }
-  .advance-form, .vacation-form {
-    margin-top: 15px;
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 6px;
-    border: 1px solid #dee2e6;
-  }
-  .modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.7);
-    z-index: 10000;
-    justify-content: center;
-    align-items: center;
-  }
-  .modal-content {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 500px;
-    max-height: 80vh;
-    overflow-y: auto;
-  }
-  textarea {
-    width: 100%;
-    padding: 10px;
-    margin: 6px 0;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-family: inherit;
-    resize: vertical;
-  }
-  .paid { color: var(--success-color); }
-  .partially-paid { color: var(--warning-color); }
-  .not-paid { color: var(--danger-color); }
   .customer-notes {
     font-size: 14px;
     color: #666;
@@ -231,13 +156,12 @@
               <th><input type="text" id="filterBarcode2" placeholder="فلترة بـ باركود 2" /></th>
               <th><input type="text" id="filterName" placeholder="فلترة بالاسم" /></th>
               <th><input type="text" id="filterUnit" placeholder="فلترة بالوحدة" /></th>
-              <th><input type="text" id="filterSku" placeholder="فلترة بـ SKU" /></th>
               <th><input type="number" id="filterPrice" placeholder="فلترة بالسعر" /></th>
               <th><input type="number" id="filterStock" placeholder="فلترة بالكمية" /></th>
               <th><select id="filterCategory"><option value="all">جميع الفئات</option></select></th>
             </tr>
             <tr>
-              <th>باركود 1</th><th>باركود 2</th><th>اسم</th><th>وحدة</th><th>SKU</th><th>سعر</th><th>كمية</th><th>فئة</th>
+              <th>باركود 1</th><th>باركود 2</th><th>اسم</th><th>وحدة</th><th>سعر</th><th>كمية</th><th>فئة</th>
             </tr>
           </thead>
           <tbody id="itemsTable"></tbody>
@@ -369,72 +293,6 @@
 <div id="scanner-container"><div id="reader"></div></div>
 <div id="notification-container"></div>
 
-<!-- النوافذ المنبثقة (Modals) -->
-<div id="advanceModal" class="modal">
-  <div class="modal-content">
-    <h3><i class="fas fa-money-bill-wave"></i> إضافة سلفة للعامل</h3>
-    <div class="form-group">
-      <label for="advanceAmount">المبلغ:</label>
-      <input type="number" id="advanceAmount" placeholder="المبلغ" min="0" step="0.01" />
-    </div>
-    <div class="form-group">
-      <label for="advanceNotes">ملاحظات:</label>
-      <textarea id="advanceNotes" placeholder="ملاحظات حول السلفة" rows="3"></textarea>
-    </div>
-    <div class="flex-container flex-end">
-      <button id="saveAdvanceBtn" class="btn-success"><i class="fas fa-save"></i> حفظ</button>
-      <button id="cancelAdvanceBtn" class="btn-danger"><i class="fas fa-times"></i> إلغاء</button>
-    </div>
-  </div>
-</div>
-
-<div id="vacationModal" class="modal">
-  <div class="modal-content">
-    <h3><i class="fas fa-calendar-alt"></i> إضافة إجازة للعامل</h3>
-    <div class="form-group">
-      <label for="vacationStartDate">تاريخ البدء:</label>
-      <input type="date" id="vacationStartDate" />
-    </div>
-    <div class="form-group">
-      <label for="vacationEndDate">تاريخ الانتهاء:</label>
-      <input type="date" id="vacationEndDate" />
-    </div>
-    <div class="form-group">
-      <label for="vacationNotes">ملاحظات:</label>
-      <textarea id="vacationNotes" placeholder="ملاحظات حول الإجازة" rows="3"></textarea>
-    </div>
-    <div class="flex-container flex-end">
-      <button id="saveVacationBtn" class="btn-success"><i class="fas fa-save"></i> حفظ</button>
-      <button id="cancelVacationBtn" class="btn-danger"><i class="fas fa-times"></i> إلغاء</button>
-    </div>
-  </div>
-</div>
-
-<div id="settlementModal" class="modal">
-  <div class="modal-content">
-    <h3><i class="fas fa-money-check"></i> تسوية الفاتورة</h3>
-    <div class="form-group">
-      <p>رقم الفاتورة: <span id="settlementInvoiceId"></span></p>
-      <p>العميل: <span id="settlementCustomerName"></span></p>
-      <p>إجمالي الفاتورة: <span id="settlementTotal"></span> ج.م</p>
-      <p>المدفوع سابقاً: <span id="settlementPaid"></span> ج.م</p>
-      <p>المتبقي: <span id="settlementBalance"></span> ج.م</p>
-    </div>
-    <div class="form-group">
-      <label for="settlementAmount">المبلغ المدفوع:</label>
-      <input type="number" id="settlementAmount" placeholder="المبلغ المدفوع" min="0" step="0.01" />
-    </div>
-    <div class="form-group">
-      <label for="settlementNotes">ملاحظات:</label>
-      <textarea id="settlementNotes" placeholder="ملاحظات حول الدفع" rows="3"></textarea>
-    </div>
-    <div class="flex-container flex-end">
-      <button id="saveSettlementBtn" class="btn-success"><i class="fas fa-save"></i> حفظ</button>
-      <button id="cancelSettlementBtn" class="btn-danger"><i class="fas fa-times"></i> إلغاء</button>
-    </div>
-  </div>
-</div>
-
 <script>
 // ====== نظام المصادقة الأساسي ======
 function showNotification(message, duration = 3000) {
@@ -473,6 +331,7 @@ async function handleLogin(event) {
       document.getElementById('app-container').style.display = 'block';
       // تحميل البيانات الأولية
       loadInitialData();
+      initApp();
     }, 1000);
     
     return;
@@ -485,13 +344,18 @@ async function handleLogin(event) {
 function loadInitialData() {
   // تحميل الأصناف من ملف JSON
   fetch('p.json')
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('لم يتم العثور على ملف الأصناف');
+      }
+      return response.json();
+    })
     .then(items => {
       console.log('تم تحميل الأصناف بنجاح', items);
-      // هنا يمكنك معالجة البيانات وتحويلها للتنسيق المناسب
+      // تخزين البيانات في appState
       if (window.appState) {
         window.appState.items = items.map(item => ({
-          id: String(item.id || item.barcode1 || ''),
+          id: String(item.id || item.barcode1 || Math.random().toString(36).substr(2, 9)),
           barcode1: String(item.barcode1 || ''),
           barcode2: String(item.barcode2 || ''),
           name: item.name || 'اسم غير متوفر',
@@ -506,12 +370,61 @@ function loadInitialData() {
         if (document.getElementById('items').classList.contains('active') && window.ItemsController) {
           window.ItemsController.render();
         }
+        
+        // تحديث فئات الأصناف
+        updateCategories();
       }
     })
     .catch(error => {
       console.error('Error loading items:', error);
       showNotification('حدث خطأ في تحميل بيانات الأصناف', 4000);
+      // إنشاء بيانات تجريبية في حالة فشل التحميل
+      createSampleData();
     });
+}
+
+// إنشاء بيانات تجريبية في حالة عدم وجود ملف p.json
+function createSampleData() {
+  if (window.appState) {
+    window.appState.items = [
+      { id: '1', barcode1: '1001', name: 'تفاح أحمر', price: 15.0, category: 'فواكه', unit: 'كيلو', qunt: 50 },
+      { id: '2', barcode1: '1002', name: 'موز', price: 12.0, category: 'فواكه', unit: 'كيلو', qunt: 30 },
+      { id: '3', barcode1: '2001', name: 'أرز', price: 25.0, category: 'أطعمة', unit: 'كيلو', qunt: 40 },
+      { id: '4', barcode1: '2002', name: 'سكر', price: 10.0, category: 'أطعمة', unit: 'كيلو', qunt: 60 },
+      { id: '5', barcode1: '3001', name: 'شاي', price: 8.0, category: 'مشروبات', unit: 'علبة', qunt: 20 }
+    ];
+    
+    // تحديث واجهة المستخدم إذا كانت شاشة الأصناف مفتوحة
+    if (document.getElementById('items').classList.contains('active') && window.ItemsController) {
+      window.ItemsController.render();
+    }
+    
+    // تحديث فئات الأصناف
+    updateCategories();
+    
+    showNotification("تم تحميل بيانات تجريبية لأن ملف الأصناف غير موجود", 4000);
+  }
+}
+
+// تحديث فئات الأصناف
+function updateCategories() {
+  if (!window.appState || !window.appState.items) return;
+  
+  const categories = [...new Set(window.appState.items.map(i => i.category))].filter(Boolean);
+  const categoryOptions = `<option value="all">جميع الفئات</option>` + categories.map(c => `<option value="${c}">${c}</option>`).join('');
+  
+  // تحديث عناصر واجهة المستخدم
+  const filterCategory = document.getElementById('filterCategory');
+  const itemCategorySelect = document.getElementById('itemCategorySelect');
+  const salesCategoryFilters = document.getElementById('salesCategoryFilters');
+  
+  if (filterCategory) filterCategory.innerHTML = categoryOptions;
+  if (itemCategorySelect) {
+    itemCategorySelect.innerHTML = `<option value="">اختر فئة</option><option value="new">إضافة فئة جديدة</option>` + categories.map(c => `<option value="${c}">${c}</option>`).join('');
+  }
+  if (salesCategoryFilters) {
+    salesCategoryFilters.innerHTML = categories.map(c => `<button class="btn-small" data-category="${c}">${c}</button>`).join('');
+  }
 }
 
 // إعداد event listener للنموذج
@@ -526,6 +439,7 @@ window.addEventListener('DOMContentLoaded', function() {
       document.getElementById('login-container').style.display = 'none';
       document.getElementById('app-container').style.display = 'block';
       loadInitialData();
+      initApp();
     } catch (e) {
       localStorage.removeItem('currentUser');
     }
@@ -539,174 +453,360 @@ document.getElementById('logoutBtn').addEventListener('click', function() {
   document.getElementById('login-container').style.display = 'flex';
   showNotification("تم تسجيل الخروج بنجاح");
 });
-</script>
 
-<script type="module">
-// ====== نظام Firebase والتطبيق الرئيسي ======
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getFirestore, collection, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc, getDoc, writeBatch, getDocs, where, increment, initializeFirestore, persistentLocalCache, addDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-
-// تكوين Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyCfOzC8gkqkVSNZ3frtnnCMxbeq-v7yaTY",
-  authDomain: "almas-store-a51eb.firebaseapp.com",
-  databaseURL: "https://almas-store-a51eb-default-rtdb.firebaseio.com",
-  projectId: "almas-store-a51eb",
-  storageBucket: "almas-store-a51eb.firebasestorage.app",
-  messagingSenderId: "502522968593",
-  appId: "1:502522968593:web:52dc253f8ea12f4d5bcfb0",
-  measurementId: "G-G0WC9BJ6JW"
-};
-
-// تهيئة Firebase
-const app = initializeApp(firebaseConfig);
-const db = initializeFirestore(app, { cache: persistentLocalCache({}) });
-
-// تصدير الدوال للاستخدام العالمي
-window.db = db; 
-window.doc = doc; 
-window.collection = collection; 
-window.writeBatch = writeBatch; 
-window.serverTimestamp = serverTimestamp; 
-window.getDocs = getDocs; 
-window.query = query; 
-window.where = where; 
-window.increment = increment; 
-window.addDoc = addDoc;
-window.updateDocument = (collectionName, docId, data) => updateDoc(doc(db, collectionName, docId), data);
-window.deleteDocument = (collectionName, docId) => deleteDoc(doc(db, collectionName, docId));
-window.getDocument = async (collectionName, docId) => { 
-  const d = await getDoc(doc(db, collectionName, docId)); 
-  return d.exists() ? { id: d.id, ...d.data() } : null; 
-};
-
-// دالة لقراءة collection من Firebase
-window.readCollection = (collectionName, callback, orderByField = "name", orderDirection = "asc") => {
-  return onSnapshot(
-    query(collection(db, collectionName), orderBy(orderByField, orderDirection)), 
-    (snapshot) => callback(snapshot.docs.map(d => ({ id: d.id, ...d.data() })))
-  );
-};
-
-// حالة التطبيق العالمية
-window.appState = {
-  items: [], invoices: [], customers: [], users: [], workers: [], advances: [], vacations: [], settlements: [],
-  adminPIN: "790707071", currentUser: null, currentInvoice: [], deliveryFee: 30,
-  editingItemId: null, editingCustomerId: null, editingUserId: null, editingWorkerId: null,
-  html5QrCode: null, unsubscribe: {}, selectedWorkerId: null, selectedInvoiceId: null
-};
-
-// تهيئة التطبيق بعد تحميل الصفحة
-document.addEventListener('DOMContentLoaded', function() {
-  // تحميل المستخدم الحالي من localStorage
-  const savedUser = localStorage.getItem('currentUser');
-  if (savedUser) {
-    try {
-      window.appState.currentUser = JSON.parse(savedUser);
-    } catch (e) {
-      localStorage.removeItem('currentUser');
-    }
-  }
+// ====== تهيئة التطبيق الرئيسي ======
+function initApp() {
+  // تهيئة حالة التطبيق
+  window.appState = window.appState || {
+    items: [], currentInvoice: [], deliveryFee: 30,
+    editingItemId: null, html5QrCode: null
+  };
   
-  // بدء استماع Firebase للتحديثات
-  if (window.appState.currentUser) {
-    initFirebaseListeners();
-  }
-});
-
-// تهيئة مستمعي Firebase
-function initFirebaseListeners() {
-  // استماع للتحديثات من Firebase للبيانات المختلفة
-  window.appState.unsubscribe.customers = window.readCollection("customers", (data) => { 
-    window.appState.customers = data; 
-    if (document.getElementById('customers').classList.contains('active') && window.CustomersController) { 
-      window.CustomersController.render(); 
-    } 
-  });
+  // تهيئة الـ controllers
+  initControllers();
   
-  window.appState.unsubscribe.invoices = window.readCollection("invoices", (data) => { 
-    window.appState.invoices = data; 
-    if (document.querySelector('nav button.active')?.dataset.tab === 'invoices' && window.InvoicesController) { 
-      window.InvoicesController.render(); 
-    } 
-  }, "createdAt", "desc");
-  
-  window.appState.unsubscribe.users = window.readCollection("users", (data) => { 
-    window.appState.users = data; 
-    if (document.getElementById('users').classList.contains('active') && window.UsersController) { 
-      window.UsersController.render(); 
-    } 
-  }, "username", "asc");
-  
-  window.appState.unsubscribe.workers = window.readCollection("workers", (data) => { 
-    window.appState.workers = data; 
-    if (document.getElementById('users').classList.contains('active') && window.WorkersController) { 
-      window.WorkersController.render(); 
-    } 
-  }, "name", "asc");
-  
-  window.appState.unsubscribe.advances = window.readCollection("advances", (data) => { 
-    window.appState.advances = data; 
-    if (document.getElementById('users').classList.contains('active') && window.WorkersController) { 
-      window.WorkersController.render(); 
-    } 
-  }, "date", "desc");
-  
-  window.appState.unsubscribe.vacations = window.readCollection("vacations", (data) => { 
-    window.appState.vacations = data; 
-    if (document.getElementById('users').classList.contains('active') && window.WorkersController) { 
-      window.WorkersController.render(); 
-    } 
-  }, "startDate", "desc");
-  
-  window.appState.unsubscribe.settlements = window.readCollection("settlements", (data) => { 
-    window.appState.settlements = data; 
-    if (document.querySelector('nav button.active')?.dataset.tab === 'invoices' && window.InvoicesController) { 
-      window.InvoicesController.render(); 
-    } 
-    if (document.getElementById('customers').classList.contains('active') && window.CustomersController) { 
-      window.CustomersController.render(); 
-    } 
-  }, "date", "desc");
+  // إعداد event listeners
+  setupEventListeners();
 }
 
-// ====== تهيئة控制器的 الكود ======
-// سيتم وضع كود الـ Controllers هنا (ItemsController, CustomersController, etc.)
-// بما في ذلك جميع الدوال والأحداث الخاصة بالتطبيق
+// تهيئة الـ controllers
+function initControllers() {
+  // Items Controller
+  window.ItemsController = {
+    render: () => {
+      const filterBarcode1 = document.getElementById('filterBarcode1').value.toLowerCase();
+      const filterBarcode2 = document.getElementById('filterBarcode2').value.toLowerCase();
+      const filterName = document.getElementById('filterName').value.toLowerCase();
+      const filterUnit = document.getElementById('filterUnit').value.toLowerCase();
+      const filterPrice = parseFloat(document.getElementById('filterPrice').value);
+      const filterStock = parseFloat(document.getElementById('filterStock').value);
+      const filterCategory = document.getElementById('filterCategory').value;
 
-// بدء تحميل الأصناف من ملف JSON
-if (window.appState.currentUser) {
-  fetch('p.json')
-    .then(response => response.json())
-    .then(items => {
-      window.appState.items = items.map(item => ({
-        id: String(item.id || item.barcode1 || ''),
-        barcode1: String(item.barcode1 || ''),
-        barcode2: String(item.barcode2 || ''),
-        name: item.name || 'اسم غير متوفر',
-        price: parseFloat(item.price) || 0,
-        category: (item.category || "غير محدد").trim(),
-        unit: typeof item.unit === 'string' && item.unit.trim() ? item.unit.trim() : 'قطعة',
-        qunt: parseInt(item.qunt) || 0,
-        sku: String(item.sku || '')
-      }));
+      const filteredItems = window.appState.items.filter(item => {
+        const matchesBarcode1 = !filterBarcode1 || (item.barcode1 && item.barcode1.toLowerCase().includes(filterBarcode1));
+        const matchesBarcode2 = !filterBarcode2 || (item.barcode2 && item.barcode2.toLowerCase().includes(filterBarcode2));
+        const matchesName = !filterName || (item.name && item.name.toLowerCase().includes(filterName));
+        const matchesUnit = !filterUnit || (item.unit && item.unit.toLowerCase().includes(filterUnit));
+        const matchesPrice = isNaN(filterPrice) || (item.price == filterPrice);
+        const matchesStock = isNaN(filterStock) || (item.qunt == filterStock);
+        const matchesCategory = filterCategory === 'all' || item.category === filterCategory;
+        return matchesBarcode1 && matchesBarcode2 && matchesName && matchesUnit && matchesPrice && matchesStock && matchesCategory;
+      });
       
-      // تحديث واجهة المستخدم إذا كانت شاشة الأصناف مفتوحة
-      if (document.getElementById('items').classList.contains('active') && window.ItemsController) {
-        window.ItemsController.render();
+      const itemsTable = document.getElementById('itemsTable');
+      if (itemsTable) {
+        itemsTable.innerHTML = filteredItems.map(item => `
+          <tr>
+            <td>${item.barcode1}</td>
+            <td>${item.barcode2 || ''}</td>
+            <td>${item.name || 'اسم غير متوفر'}</td>
+            <td>${item.unit || ''}</td>
+            <td>${(item.price || 0).toFixed(2)}</td>
+            <td>${item.qunt || 0}</td>
+            <td>${item.category || 'غير محدد'}</td>
+          </tr>
+        `).join("");
       }
-    })
-    .catch(error => {
-      console.error('Error loading items:', error);
-      showNotification('حدث خطأ في تحميل بيانات الأصناف', 4000);
-    });
+    },
+    
+    save: () => {
+      const newCategory = document.getElementById('newItemCategory').value.trim();
+      const selectedCategory = document.getElementById('itemCategorySelect').value;
+      const finalCategory = newCategory || selectedCategory;
+      
+      if (!finalCategory) {
+        showNotification("يرجى اختيار أو إضافة فئة.");
+        return;
+      }
+      
+      const itemData = {
+        barcode1: document.getElementById('itemCode').value.trim(),
+        barcode2: document.getElementById('itemBarcode2').value.trim() || '',
+        name: document.getElementById('itemName').value.trim(),
+        unit: document.getElementById('itemUnit').value.trim(),
+        price: parseFloat(document.getElementById('itemPrice').value) || 0,
+        qunt: parseFloat(document.getElementById('itemStock').value) || 0,
+        category: finalCategory
+      };
+      
+      if (!itemData.barcode1 || !itemData.name || !itemData.unit) { 
+        showNotification("يرجى ملء الحقول الأساسية."); 
+        return; 
+      }
+      
+      // إنشاء معرف فريد إذا لم يكن موجوداً
+      if (!window.appState.editingItemId) {
+        itemData.id = itemData.barcode1 || Math.random().toString(36).substr(2, 9);
+        window.appState.items.push(itemData);
+      } else {
+        // البحث عن العنصر وتحديثه
+        const index = window.appState.items.findIndex(item => item.id === window.appState.editingItemId);
+        if (index !== -1) {
+          window.appState.items[index] = {...window.appState.items[index], ...itemData};
+        }
+        window.appState.editingItemId = null;
+      }
+      
+      showNotification("تم حفظ الصنف بنجاح.");
+      
+      // إعادة تعيين النموذج
+      document.getElementById('itemCode').value = '';
+      document.getElementById('itemBarcode2').value = '';
+      document.getElementById('itemName').value = '';
+      document.getElementById('itemUnit').value = '';
+      document.getElementById('itemPrice').value = '';
+      document.getElementById('itemStock').value = '';
+      document.getElementById('itemCategorySelect').value = '';
+      document.getElementById('newItemCategory').value = '';
+      document.getElementById('newItemCategory').style.display = 'none';
+      document.getElementById('saveItemBtn').innerHTML = '<i class="fas fa-save"></i> حفظ الصنف';
+      
+      // إعادة Render الجدول
+      window.ItemsController.render();
+      updateCategories();
+    }
+  };
+  
+  // Sales Controller
+  window.SalesController = {
+    updateTotals: () => {
+      const itemsTotal = window.appState.currentInvoice.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      const grandTotal = itemsTotal + window.appState.deliveryFee;
+      document.getElementById('invoiceTotal').textContent = grandTotal.toFixed(2);
+      document.getElementById('deliveryFeeValue').textContent = window.appState.deliveryFee.toFixed(2);
+      calculateChange();
+    },
+    
+    renderInvoice: () => {
+      const invoiceTable = document.getElementById('invoiceTable');
+      if (invoiceTable) {
+        invoiceTable.innerHTML = window.appState.currentInvoice.map((item, index) => `
+          <tr>
+            <td>${item.name}</td>
+            <td>
+              <div class="qty-controls">
+                <button class="btn-small btn-success qty-increase" data-index="${index}">+</button>
+                <span>${item.qty}</span>
+                <button class="btn-small btn-danger qty-decrease" data-index="${index}">-</button>
+              </div>
+            </td>
+            <td>${(item.price || 0).toFixed(2)}</td>
+            <td>${((item.price || 0) * item.qty).toFixed(2)}</td>
+            <td><button class="btn-small btn-danger remove-from-invoice-btn" data-index="${index}"><i class="fas fa-trash-alt"></i></button></td>
+          </tr>
+        `).join("");
+      }
+      window.SalesController.updateTotals();
+    },
+    
+    addToInvoice: (item) => {
+      const existing = window.appState.currentInvoice.find(i => i.id === item.id);
+      const stockItem = window.appState.items.find(i => i.id === item.id);
+      
+      if (!stockItem || stockItem.qunt <= 0) {
+        showNotification("المخزون غير متوفر.");
+        return;
+      }
+      
+      if (existing) {
+        if (stockItem.qunt > existing.qty) {
+          existing.qty++;
+        } else {
+          showNotification(`أقصى كمية: ${stockItem.qunt}`);
+          return;
+        }
+      } else {
+        window.appState.currentInvoice.push({ ...item, qty: 1 });
+      }
+      
+      window.SalesController.renderInvoice();
+    },
+    
+    updateItemQty: (index, change) => {
+      const item = window.appState.currentInvoice[index];
+      if (!item) return;
+      
+      const stockItem = window.appState.items.find(i => i.id === item.id);
+      if (change > 0 && item.qty + change > stockItem.qunt) {
+        showNotification(`أقصى كمية: ${stockItem.qunt}`);
+        return;
+      }
+      
+      item.qty += change;
+      if (item.qty <= 0) {
+        window.appState.currentInvoice.splice(index, 1);
+      }
+      
+      window.SalesController.renderInvoice();
+    },
+    
+    save: () => {
+      if (window.appState.currentInvoice.length === 0) {
+        showNotification("الفاتورة فارغة.");
+        return;
+      }
+      
+      const saveInvoiceBtn = document.getElementById('saveInvoiceBtn');
+      saveInvoiceBtn.disabled = true;
+      
+      const total = parseFloat(document.getElementById('invoiceTotal').textContent);
+      const data = {
+        customerName: document.getElementById('customerName').value.trim() || 'عميل نقدي',
+        customerPhone: document.getElementById('customerPhone').value.trim(),
+        paymentMethod: document.querySelector('input[name="paymentMethod"]:checked').value,
+        items: window.appState.currentInvoice,
+        deliveryFee: window.appState.deliveryFee,
+        total: total,
+        status: 'pending',
+        paidAmount: 0,
+        balance: total,
+        createdAt: new Date().toISOString()
+      };
+      
+      // محاكاة حفظ الفاتورة
+      setTimeout(() => {
+        // في تطبيق حقيقي، هنا سيتم حفظ البيانات في Firebase أو قاعدة البيانات
+        showNotification("تم حفظ الفاتورة بنجاح!");
+        
+        // خصم الكميات من المخزون
+        window.appState.currentInvoice.forEach(ci => {
+          const stockItem = window.appState.items.find(i => i.id === ci.id);
+          if (stockItem) {
+            stockItem.qunt -= ci.qty;
+          }
+        });
+        
+        // إعادة تعيين الفاتورة
+        window.appState.currentInvoice = [];
+        document.getElementById('customerName').value = "";
+        document.getElementById('customerPhone').value = "";
+        document.getElementById('amountPaidInput').value = "";
+        
+        window.SalesController.renderInvoice();
+        window.ItemsController.render();
+        
+        saveInvoiceBtn.disabled = false;
+      }, 1000);
+    },
+    
+    print: () => {
+      if (window.appState.currentInvoice.length === 0) {
+        showNotification("الفاتورة فارغة للطباعة.");
+        return;
+      }
+      
+      const total = parseFloat(document.getElementById('invoiceTotal').textContent).toFixed(2);
+      const paid = parseFloat(document.getElementById('amountPaidInput').value || total).toFixed(2);
+      const change = (paid - total).toFixed(2);
+      
+      let itemsHtml = window.appState.currentInvoice.map(item => `
+        <tr>
+          <td>${item.name}</td>
+          <td>${item.qty}</td>
+          <td>${(item.price || 0).toFixed(2)}</td>
+          <td>${((item.price || 0) * item.qty).toFixed(2)}</td>
+        </tr>
+      `).join('');
+      
+      const printContent = `
+        <style>
+          body { font-family: monospace; direction: rtl; margin: 0; padding: 5px; }
+          h2, h4 { text-align: center; margin: 5px 0; }
+          table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+          th, td { border: 1px solid #ccc; padding: 4px; text-align: center; }
+          .summary { text-align: left; margin-top: 10px; font-size: 13px; font-weight: bold; }
+        </style>
+        <h2>فاتورة بيع</h2>
+        <h4>${new Date().toLocaleString('ar-EG')}</h4>
+        <p>العميل: ${document.getElementById('customerName').value || 'عميل نقدي'}</p>
+        <table>
+          <thead>
+            <tr><th>الصنف</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr>
+          </thead>
+          <tbody>${itemsHtml}</tbody>
+        </table>
+        <div class="summary">خدمة التوصيل: ${window.appState.deliveryFee.toFixed(2)}</div>
+        <div class="summary">الإجمالي: ${total}</div>
+        <div class="summary">المدفوع: ${paid}</div>
+        <div class="summary">الباقي: ${change}</div>
+      `;
+      
+      const printWindow = window.open('', '', 'height=600,width=800');
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+    },
+    
+    sendWhatsApp: () => {
+      if (window.appState.currentInvoice.length === 0) {
+        showNotification("الفاتورة فارغة.");
+        return;
+      }
+      
+      let phone = document.getElementById('customerPhone').value.replace(/\s+/g, '');
+      if (!phone) {
+        showNotification("يرجى إدخال رقم هاتف العميل.");
+        return;
+      }
+      
+      if (phone.startsWith('0')) phone = phone.substring(1);
+      if (!phone.startsWith('20')) phone = '20' + phone;
+      
+      let message = `*فاتورة جديدة*\\n-------------------\\n${window.appState.currentInvoice.map(item => `${item.name} (الكمية: ${item.qty}) - ${(item.price || 0).toFixed(2)} ج.م`).join('\\n')}\\n-------------------\\nخدمة التوصيل: ${window.appState.deliveryFee.toFixed(2)} ج.م\\n*الإجمالي: ${document.getElementById('invoiceTotal').textContent} ج.م*`;
+      
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+    }
+  };
+  
+  // Scanner Controller
+  window.ScannerController = {
+    onScanSuccess: (decodedText, decodedResult) => {
+      // البحث عن المنتج باستخدام باركود 1 فقط
+      const product = window.appState.items.find(p => p.barcode1 === decodedText);
+      
+      if (document.getElementById('scanner-container').style.display === 'flex') {
+        document.getElementById('itemCode').value = decodedText;
+        window.ScannerController.stop();
+        showNotification("تم مسح الباركود بنجاح.");
+      } else {
+        if (product) {
+          window.SalesController.addToInvoice(product);
+        } else {
+          showNotification("الصنف غير موجود بهذا الباركود.");
+        }
+      }
+    },
+    
+    start: () => {
+      if (!window.html5QrCode) {
+        window.html5QrCode = new Html5Qrcode("reader");
+      }
+      
+      document.getElementById('scanner-container').style.display = 'flex';
+      
+      window.html5QrCode.start(
+        { facingMode: "environment" }, 
+        { fps: 10, qrbox: { width: 250, height: 250 } }, 
+        window.ScannerController.onScanSuccess, 
+        () => {} // ignore errors
+      ).catch((err) => {
+        showNotification("فشل تشغيل الكاميرا.");
+        console.error("Scanner error:", err);
+      });
+    },
+    
+    stop: () => {
+      if (window.html5QrCode && window.html5QrCode.isScanning) {
+        window.html5QrCode.stop().catch(err => console.error("Scanner stop failed", err));
+      }
+      document.getElementById('scanner-container').style.display = 'none';
+    }
+  };
 }
-</script>
 
-<!-- نضمن تحميل جميع控制器的 والأحداث -->
-<script>
-// ====== نظام الأحداث والوظائف الأساسية ======
-document.addEventListener('DOMContentLoaded', function() {
+// إعداد event listeners
+function setupEventListeners() {
   // تبديل علامات التبويب
   document.querySelectorAll('nav button').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -718,63 +818,224 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
   
-  // إعداد ماسح الباركود
-  document.getElementById('scanBarcodeBtn').addEventListener('click', function() {
+  // حفظ الصنف
+  document.getElementById('saveItemBtn').addEventListener('click', () => {
+    if (window.ItemsController && window.ItemsController.save) {
+      window.ItemsController.save();
+    }
+  });
+  
+  // تصفية الأصناف
+  const filterInputs = [
+    'filterBarcode1', 'filterBarcode2', 'filterName', 
+    'filterUnit', 'filterPrice', 'filterStock', 'filterCategory'
+  ];
+  
+  filterInputs.forEach(inputId => {
+    const input = document.getElementById(inputId);
+    if (input) {
+      input.addEventListener('input', () => {
+        if (window.ItemsController && window.ItemsController.render) {
+          window.ItemsController.render();
+        }
+      });
+    }
+  });
+  
+  // البحث عن الأصناف في المبيعات
+  const searchItem = document.getElementById('searchItem');
+  if (searchItem) {
+    searchItem.addEventListener('input', () => {
+      const q = searchItem.value.trim();
+      const searchResults = document.getElementById('searchResults');
+      searchResults.style.display = "none";
+      
+      if (q.length < 1) return;
+      
+      const matched = window.appState.items.filter(i => 
+        (i.name || '').toLowerCase().includes(q.toLowerCase()) || 
+        (i.barcode1 || '').includes(q) || 
+        (i.barcode2 || '').includes(q)
+      ).slice(0, 5);
+      
+      if (matched.length > 0) {
+        searchResults.innerHTML = matched.map(i => 
+          `<div data-id="${i.id}">${i.barcode1} - ${i.name}</div>`
+        ).join('');
+        searchResults.style.display = "block";
+      }
+    });
+  }
+  
+  // النتائج البحث
+  const searchResults = document.getElementById('searchResults');
+  if (searchResults) {
+    searchResults.addEventListener('click', (e) => {
+      const div = e.target.closest("div[data-id]");
+      if (div) {
+        const item = window.appState.items.find(i => i.id === div.dataset.id);
+        if (item && window.SalesController) {
+          window.SalesController.addToInvoice(item);
+          document.getElementById('searchItem').value = "";
+          searchResults.style.display = "none";
+        }
+      }
+    });
+  }
+  
+  // فتح وإغلاق الماسح
+  document.getElementById('scanBarcodeBtn').addEventListener('click', () => {
     if (window.ScannerController) {
       window.ScannerController.start();
     }
   });
   
-  document.getElementById('startScannerBtn').addEventListener('click', function() {
+  document.getElementById('startScannerBtn').addEventListener('click', () => {
     if (window.ScannerController) {
       window.ScannerController.start();
     }
   });
   
-  // إغلاق الماسح عند النقر خارجيه
-  document.getElementById('scanner-container').addEventListener('click', function(e) {
-    if (e.target === this && window.ScannerController) {
+  document.getElementById('scanner-container').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget && window.ScannerController) {
       window.ScannerController.stop();
     }
   });
   
-  // تحميل الأصناف من ملف JSON عند النقر على تبويب الأصناف
-  document.querySelector('[data-tab="items"]').addEventListener('click', function() {
-    if (window.appState.items.length === 0) {
-      fetch('p.json')
-        .then(response => response.json())
-        .then(items => {
-          window.appState.items = items.map(item => ({
-            id: String(item.id || item.barcode1 || ''),
-            barcode1: String(item.barcode1 || ''),
-            barcode2: String(item.barcode2 || ''),
-            name: item.name || 'اسم غير متوفر',
-            price: parseFloat(item.price) || 0,
-            category: (item.category || "غير محدد").trim(),
-            unit: typeof item.unit === 'string' && item.unit.trim() ? item.unit.trim() : 'قطعة',
-            qunt: parseInt(item.qunt) || 0,
-            sku: String(item.sku || '')
-          }));
-          
-          if (window.ItemsController) {
-            window.ItemsController.render();
-          }
-        })
-        .catch(error => {
-          console.error('Error loading items:', error);
-          showNotification('حدث خطأ في تحميل بيانات الأصناف', 4000);
-        });
+  // التحكم في كمية العناصر في الفاتورة
+  document.getElementById('invoiceTable').addEventListener('click', (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    
+    const index = parseInt(btn.dataset.index);
+    
+    if (btn.classList.contains("qty-increase")) {
+      window.SalesController.updateItemQty(index, 1);
+    } else if (btn.classList.contains("qty-decrease")) {
+      window.SalesController.updateItemQty(index, -1);
+    } else if (btn.classList.contains("remove-from-invoice-btn")) {
+      window.appState.currentInvoice.splice(index, 1);
+      window.SalesController.renderInvoice();
     }
   });
-});
+  
+  // حفظ الفاتورة
+  document.getElementById('saveInvoiceBtn').addEventListener('click', () => {
+    if (window.SalesController && window.SalesController.save) {
+      window.SalesController.save();
+    }
+  });
+  
+  // طباعة الفاتورة
+  document.getElementById('printInvoiceBtn').addEventListener('click', () => {
+    if (window.SalesController && window.SalesController.print) {
+      window.SalesController.print();
+    }
+  });
+  
+  // إرسال الواتساب
+  document.getElementById('sendWhatsAppBtn').addEventListener('click', () => {
+    if (window.SalesController && window.SalesController.sendWhatsApp) {
+      window.SalesController.sendWhatsApp();
+    }
+  });
+  
+  // التحكم في رسوم التوصيل
+  document.getElementById('increaseDeliveryBtn').addEventListener('click', () => {
+    window.appState.deliveryFee += 5;
+    window.SalesController.updateTotals();
+  });
+  
+  document.getElementById('decreaseDeliveryBtn').addEventListener('click', () => {
+    window.appState.deliveryFee = Math.max(0, window.appState.deliveryFee - 5);
+    window.SalesController.updateTotals();
+  });
+  
+  // حساب الباقي
+  document.getElementById('amountPaidInput').addEventListener('input', calculateChange);
+  
+  // عرض الأصناف حسب الفئة
+  document.getElementById('toggleItemsGridBtn').addEventListener('click', () => {
+    const isHidden = document.getElementById('categoryScrollerContainer').style.display === 'none';
+    document.getElementById('categoryScrollerContainer').style.display = isHidden ? 'block' : 'none';
+    document.getElementById('itemGrid').style.display = isHidden ? 'grid' : 'none';
+    document.getElementById('toggleItemsGridBtn').innerHTML = isHidden ? 
+      '<i class="fas fa-eye-slash"></i> إخفاء الأصناف' : 
+      '<i class="fas fa-th-large"></i> عرض الأصناف';
+    
+    if (isHidden) {
+      const firstButton = document.querySelector('#salesCategoryFilters button');
+      if (firstButton) firstButton.click();
+    }
+  });
+  
+  // الفئات في المبيعات
+  const salesCategoryFilters = document.getElementById('salesCategoryFilters');
+  if (salesCategoryFilters) {
+    salesCategoryFilters.addEventListener('click', (e) => {
+      const btn = e.target.closest("button[data-category]");
+      if (btn) {
+        document.querySelectorAll("#salesCategoryFilters button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        renderItemsGrid(btn.dataset.category);
+      }
+    });
+  }
+  
+  // إضافة عنصر من الشبكة
+  const itemGrid = document.getElementById('itemGrid');
+  if (itemGrid) {
+    itemGrid.addEventListener('click', (e) => {
+      const card = e.target.closest(".item-card[data-id]");
+      if (card) {
+        const item = window.appState.items.find(i => i.id === card.dataset.id);
+        if (item && window.SalesController) {
+          window.SalesController.addToInvoice(item);
+        }
+      }
+    });
+  }
+}
 
-// دالة مساعدة للتبديل بين علامات التبويب
-window.switchTab = (tabId) => {
-  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('main section').forEach(s => s.classList.remove('active'));
-  document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
-  document.getElementById(tabId).classList.add('active');
-};
+// عرض الأصناف في الشبكة حسب الفئة
+function renderItemsGrid(category) {
+  const itemGrid = document.getElementById('itemGrid');
+  if (!itemGrid || !window.appState || !window.appState.items) return;
+  
+  const itemsToShow = category ? 
+    window.appState.items.filter(item => item.category === category && item.qunt > 0) : 
+    [];
+  
+  itemGrid.innerHTML = itemsToShow.map(item => `
+    <div class="item-card" data-id="${item.id}">
+      <h5>${item.name || 'غير متوفر'}</h5>
+      <p>${(item.price || 0).toFixed(2)} ج.م</p>
+    </div>
+  `).join("");
+}
+
+// حساب الباقي
+function calculateChange() {
+  const total = parseFloat(document.getElementById('invoiceTotal').textContent) || 0;
+  const paid = parseFloat(document.getElementById('amountPaidInput').value) || 0;
+  const change = paid - total;
+  
+  const changeText = document.getElementById('changeText');
+  const changeAmount = document.getElementById('changeAmount');
+  
+  if (change >= 0) {
+    changeText.textContent = "الباقي للعميل:";
+    changeAmount.textContent = change.toFixed(2);
+  } else {
+    changeText.textContent = "المطلوب منه:";
+    changeAmount.textContent = Math.abs(change).toFixed(2);
+  }
+}
+
+// تهيئة التطبيق عند تحميل الصفحة
+if (document.getElementById('app-container').style.display === 'block') {
+  initApp();
+}
 </script>
 
 </body>
