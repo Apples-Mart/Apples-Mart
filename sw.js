@@ -9,8 +9,8 @@ const urlsToCache = [
   'https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js',
   'https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js',
   'https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js',
-  'icon/icon-192x192.png', // أيقونة أساسية للعرض
-  'icon/icon-512x512.png'
+  'icons/icon-192x192.png', // أيقونة أساسية للعرض
+  'icons/icon-512x512.png'
 ];
 
 // 1. تثبيت الـ Service Worker وتخزين الملفات الأساسية
