@@ -4,6 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Apples-Mart - Firebase</title>
+<meta name="theme-color" content="#007bff"/>
+<link rel="apple-touch-icon" href="https://placehold.co/192x192/007bff/ffffff?text=A-M">
+<link rel="manifest" href='data:application/manifest+json,{"name":"Apples-Mart","short_name":"Apples-Mart","start_url":".","display":"standalone","background_color":"#ffffff","theme_color":"#007bff","description":"نظام نقاط بيع لإدارة المبيعات والمخزون.","icons":[{"src":"https://placehold.co/192x192/007bff/ffffff?text=A-M","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"https://placehold.co/512x512/007bff/ffffff?text=Apples-Mart","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}'>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <style>
@@ -1611,5 +1614,96 @@ const UsersController = {
 
 App.init();
 </script>
+<script>
+  // Service Worker Registration for PWA
+  if ('serviceWorker' in navigator) {
+    const swCode = `
+      const CACHE_NAME = 'apples-mart-cache-v2';
+      // Add the current file and essential assets to the cache list
+      const urlsToCache = [
+        './apples-mart.html',
+        'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
+        'https://unpkg.com/html5-qrcode',
+        'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js',
+        'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js',
+        'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js'
+      ];
+
+      self.addEventListener('install', event => {
+        event.waitUntil(
+          caches.open(CACHE_NAME)
+            .then(cache => {
+              console.log('Opened cache');
+              return cache.addAll(urlsToCache);
+            })
+        );
+      });
+
+      self.addEventListener('fetch', event => {
+        event.respondWith(
+          caches.match(event.request)
+            .then(response => {
+              // Cache hit - return response
+              if (response) {
+                return response;
+              }
+              // Clone the request because it's a stream and can be consumed once.
+              let fetchRequest = event.request.clone();
+
+              return fetch(fetchRequest).then(
+                response => {
+                  // Check if we received a valid response
+                  if (!response || response.status !== 200) {
+                    return response;
+                  }
+
+                  // Clone the response because it's also a stream.
+                  let responseToCache = response.clone();
+
+                  caches.open(CACHE_NAME)
+                    .then(cache => {
+                      // We don't cache firebase auth requests
+                      if(!event.request.url.includes('googleapis.com/identitytoolkit')) {
+                          cache.put(event.request, responseToCache);
+                      }
+                    });
+
+                  return response;
+                }
+              );
+            })
+        );
+      });
+
+      self.addEventListener('activate', event => {
+        const cacheWhitelist = [CACHE_NAME];
+        event.waitUntil(
+          caches.keys().then(cacheNames => {
+            return Promise.all(
+              cacheNames.map(cacheName => {
+                if (cacheWhitelist.indexOf(cacheName) === -1) {
+                  return caches.delete(cacheName);
+                }
+              })
+            );
+          })
+        );
+      });
+    `;
+    const blob = new Blob([swCode], { type: 'application/javascript' });
+    const swUrl = URL.createObjectURL(blob);
+
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register(swUrl)
+        .then(registration => {
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        })
+        .catch(err => {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+    });
+  }
+</script>
 </body>
 </html>
+
