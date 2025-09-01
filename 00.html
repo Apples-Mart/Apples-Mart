@@ -419,7 +419,9 @@
 <script type="module">
 // #region Firebase Initialization and Offline Persistence
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { getFirestore, collection, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc, getDoc, writeBatch, getDocs, where, increment, initializeFirestore, persistentLocalCache, addDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyCfOzC8gkqkVSNZ3frtnnCMxbeq-v7yaTY",
   authDomain: "almas-store-a51eb.firebaseapp.com",
@@ -432,6 +434,7 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = initializeFirestore(app, { cache: persistentLocalCache({}) });
+const auth = getAuth(app);
 
 window.db = db; window.doc = doc; window.collection = collection; window.writeBatch = writeBatch; window.serverTimestamp = serverTimestamp; window.getDocs = getDocs; window.query = query; window.where = where; window.increment = increment; window.addDoc = addDoc;
 window.readCollection = (collectionName, callback, orderByField = "name", orderDirection = "asc") => onSnapshot(query(collection(db, collectionName), orderBy(orderByField, orderDirection)), s => callback(s.docs.map(d => ({ id: d.id, ...d.data() }))));
@@ -1113,7 +1116,8 @@ const ReportsController = {
 
 // #region App Logic & Event Listeners
 const App = {
-    init: () => {
+    init: async () => {
+        await App.firebaseSignIn(); // Sign in to Firebase first
         App.listenToFirebase();
         const savedUser = localStorage.getItem('currentUser'); 
         if (savedUser) { 
@@ -1125,6 +1129,16 @@ const App = {
         const today = new Date().toISOString().split('T')[0];
         DOM.vacationStartDate.value = today;
         DOM.vacationEndDate.value = today;
+    },
+    
+    firebaseSignIn: async () => {
+        try {
+            await signInAnonymously(auth);
+            console.log("Signed in to Firebase Anonymously");
+        } catch (error) {
+            console.error("Anonymous sign-in failed:", error);
+            Helpers.showNotification("فشل الاتصال بقاعدة البيانات. قد لا تعمل الميزات بشكل صحيح.");
+        }
     },
     
     loadItemsFromJSON: async () => {
