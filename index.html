@@ -286,6 +286,19 @@
       <div class="summary-box"><i class="fas fa-coins"></i> <strong>المجموع الكلي للمبيعات:</strong> <span id="totalSalesAmount">0.00</span> ج.م</span></div>
       <table><thead><tr><th>الفترة</th><th>عدد الفواتير</th><th>المبلغ</th></tr></thead><tbody id="salesSummaryTable"></tbody></table>
       <div style="margin-top: 30px;"><h3><i class="fas fa-star"></i> الأصناف الأكثر مبيعًا</h3><div id="bestSellingItems" class="summary-box"><p>لا توجد بيانات متاحة.</p></div></div>
+      
+      <div id="admin-reports-section" class="hidden">
+        <hr>
+        <div style="margin-top: 30px;">
+          <h3><i class="fas fa-hard-hat"></i> تقرير مجمع للعمال</h3>
+          <div id="workersSummaryContainer" class="summary-box"></div>
+        </div>
+        <div style="margin-top: 30px;">
+          <h3><i class="fas fa-user-friends"></i> تقرير مجمع للموظفين</h3>
+          <div id="employeesSummaryContainer" class="summary-box"></div>
+        </div>
+      </div>
+
       <div class="flex-container flex-end" style="margin-top: 20px; gap: 15px;">
         <button id="backupBtn" class="btn-success"><i class="fas fa-download"></i> نسخة احتياطية</button>
         <button id="restoreBtn" class="btn-warning"><i class="fas fa-upload"></i> استعادة نسخة</button>
@@ -452,6 +465,8 @@ const DOM = {
     newCustomerId: document.getElementById("newCustomerId"), newCustomerName: document.getElementById("newCustomerName"), newCustomerAddress: document.getElementById("newCustomerAddress"), saveCustomerBtn: document.getElementById("saveCustomerBtn"), customersTableBody: document.getElementById("customersTableBody"),
     customerName: document.getElementById("customerName"), customerPhone: document.getElementById("customerPhone"), customerSuggestions: document.getElementById("customerSuggestions"), searchItem: document.getElementById("searchItem"), searchResults: document.getElementById("searchResults"), invoiceTable: document.getElementById("invoiceTable"), invoiceTotal: document.getElementById("invoiceTotal"), saveInvoiceBtn: document.getElementById("saveInvoiceBtn"), printInvoiceBtn: document.getElementById("printInvoiceBtn"), sendWhatsAppBtn: document.getElementById("sendWhatsAppBtn"), amountPaidInput: document.getElementById("amountPaidInput"), changeText: document.getElementById("changeText"), changeAmount: document.getElementById("changeAmount"),
     invoicesList: document.getElementById("invoicesList"),
+    summaryGroupSelect: document.getElementById("summaryGroupSelect"), totalSalesAmount: document.getElementById("totalSalesAmount"), salesSummaryTable: document.getElementById("salesSummaryTable"), bestSellingItems: document.getElementById("bestSellingItems"),
+    adminReportsSection: document.getElementById("admin-reports-section"), workersSummaryContainer: document.getElementById("workersSummaryContainer"), employeesSummaryContainer: document.getElementById("employeesSummaryContainer"),
     resetInvoicesBtn: document.getElementById("resetInvoicesBtn"), backupBtn: document.getElementById("backupBtn"), restoreBtn: document.getElementById("restoreBtn"), restoreInput: document.getElementById("restoreInput"),
     newUsernameInput: document.getElementById("newUsernameInput"), newUserPasswordInput: document.getElementById("newUserPasswordInput"), newUserRoleSelect: document.getElementById("newUserRoleSelect"), saveUserBtn: document.getElementById("saveUserBtn"), usersList: document.getElementById("usersList"),
     changePinBtn: document.getElementById("changePinBtn"), oldPinInput: document.getElementById("oldPinInput"), newPinInput: document.getElementById("newPinInput"), fullResetBtn: document.getElementById("fullResetBtn"),
@@ -1053,13 +1068,59 @@ const InvoicesController = {
 // #region Reports Controller
 const ReportsController = {
     render: () => {
-        const invoices = appState.invoices;
-        const totalSales = invoices.reduce((sum, inv) => sum + inv.total, 0);
-        DOM.totalSalesAmount.textContent = totalSales.toFixed(2);
+        ReportsController.renderSalesSummary();
+        ReportsController.renderBestSelling();
+        if (appState.currentUser?.role === 'admin') {
+            DOM.adminReportsSection.classList.remove('hidden');
+            ReportsController.renderWorkersSummary();
+            ReportsController.renderEmployeesSummary();
+        } else {
+            DOM.adminReportsSection.classList.add('hidden');
+        }
+    },
 
+    renderSalesSummary: () => {
+        const group = DOM.summaryGroupSelect.value;
+        const now = new Date();
+        const groupedInvoices = {};
+
+        appState.invoices.forEach(inv => {
+            if (!inv.createdAt || !inv.createdAt.toDate) return;
+            const date = inv.createdAt.toDate();
+            let key;
+
+            if (group === 'day') {
+                key = date.toLocaleDateString('ar-EG');
+            } else if (group === 'week') {
+                const firstDay = new Date(date.setDate(date.getDate() - date.getDay()));
+                key = `أسبوع ${firstDay.toLocaleDateString('ar-EG')}`;
+            } else if (group === 'month') {
+                key = `${date.toLocaleString('ar-EG', { month: 'long' })} ${date.getFullYear()}`;
+            }
+            
+            if (!groupedInvoices[key]) {
+                groupedInvoices[key] = { count: 0, total: 0 };
+            }
+            groupedInvoices[key].count++;
+            groupedInvoices[key].total += inv.total;
+        });
+        
+        DOM.salesSummaryTable.innerHTML = Object.entries(groupedInvoices).map(([key, value]) => `
+            <tr>
+                <td>${key}</td>
+                <td>${value.count}</td>
+                <td>${value.total.toFixed(2)} ج.م</td>
+            </tr>
+        `).join('');
+        
+        const totalSales = appState.invoices.reduce((sum, inv) => sum + inv.total, 0);
+        DOM.totalSalesAmount.textContent = totalSales.toFixed(2);
+    },
+
+    renderBestSelling: () => {
         const itemCounts = {};
-        invoices.forEach(inv => {
-            inv.items.forEach(item => {
+        appState.invoices.forEach(inv => {
+            (inv.items || []).forEach(item => {
                 itemCounts[item.name] = (itemCounts[item.name] || 0) + item.qty;
             });
         });
@@ -1078,6 +1139,55 @@ const ReportsController = {
             DOM.bestSellingItems.innerHTML = '<p>لا توجد بيانات مبيعات كافية.</p>';
         }
     },
+
+    renderWorkersSummary: () => {
+        const totalWorkers = appState.workers.length;
+        const totalSalaries = appState.workers.reduce((sum, w) => sum + (w.salary || 0), 0);
+        const totalAbsences = appState.workers.reduce((sum, w) => sum + (w.absences || 0), 0);
+        const totalAdvances = appState.advances.reduce((sum, a) => sum + (a.amount || 0), 0);
+        const totalVacationDays = appState.vacations.reduce((sum, v) => sum + (v.days || 0), 0);
+
+        DOM.workersSummaryContainer.innerHTML = `
+            <table style="font-size: 14px;">
+                <thead>
+                    <tr><th>البند</th><th>الإجمالي</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>عدد العمال</td><td>${totalWorkers}</td></tr>
+                    <tr><td>إجمالي الرواتب الأساسية</td><td>${totalSalaries.toFixed(2)} ج.م</td></tr>
+                    <tr><td>إجمالي السلف</td><td>${totalAdvances.toFixed(2)} ج.م</td></tr>
+                    <tr><td>إجمالي أيام الغياب</td><td>${totalAbsences} يوم</td></tr>
+                    <tr><td>إجمالي أيام الإجازات</td><td>${totalVacationDays} يوم</td></tr>
+                </tbody>
+            </table>
+        `;
+    },
+
+    renderEmployeesSummary: () => {
+        const employees = appState.users.filter(u => u.role === 'user');
+        if (employees.length === 0) {
+            DOM.employeesSummaryContainer.innerHTML = "<p>لا يوجد موظفين مسجلين.</p>";
+            return;
+        }
+
+        DOM.employeesSummaryContainer.innerHTML = `
+             <table style="font-size: 14px;">
+                <thead>
+                    <tr><th>اسم الموظف</th><th>المسمى الوظيفي</th><th>المستحقات</th></tr>
+                </thead>
+                <tbody>
+                    ${employees.map(emp => `
+                        <tr>
+                            <td>${emp.username}</td>
+                            <td>موظف عادي</td>
+                            <td>لم تحدد بعد</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    },
+
     resetInvoices: async () => {
         if (confirm("هل أنت متأكد من حذف جميع الفواتير؟ هذا الإجراء لا يمكن التراجع عنه.")) {
             try {
@@ -1266,6 +1376,42 @@ const App = {
         });
         DOM.searchResults.addEventListener("click", (e) => { const div = e.target.closest("div[data-id]"); if (div) { SalesController.addToInvoice(appState.items.find(i => i.id === div.dataset.id)); DOM.searchItem.value = ""; DOM.searchResults.style.display = "none"; }});
         
+        DOM.customerName.addEventListener("input", () => {
+            const query = DOM.customerName.value.trim().toLowerCase();
+            DOM.customerSuggestions.innerHTML = '';
+            if (query.length === 0) {
+                DOM.customerSuggestions.style.display = 'none';
+                return;
+            }
+            const suggestions = appState.customers.filter(c => c.name.toLowerCase().includes(query));
+            if (suggestions.length > 0) {
+                DOM.customerSuggestions.innerHTML = suggestions.map(c => `<div data-id="${c.id}">${c.name}</div>`).join('');
+                DOM.customerSuggestions.style.display = 'block';
+            } else {
+                DOM.customerSuggestions.style.display = 'none';
+            }
+        });
+
+        DOM.customerSuggestions.addEventListener("click", e => {
+            const div = e.target.closest("div[data-id]");
+            if (div) {
+                const customer = appState.customers.find(c => c.id === div.dataset.id);
+                if (customer) {
+                    DOM.customerName.value = customer.name;
+                    DOM.customerPhone.value = customer.id;
+                }
+                DOM.customerSuggestions.style.display = 'none';
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!DOM.sales-header.contains(e.target)) {
+                 DOM.customerSuggestions.style.display = 'none';
+                 DOM.searchResults.style.display = 'none';
+            }
+        });
+
+
         DOM.toggleItemsGridBtn.addEventListener("click", () => {
             const isHidden = DOM.categoryScrollerContainer.style.display === 'none';
             DOM.categoryScrollerContainer.style.display = isHidden ? 'block' : 'none';
@@ -1320,6 +1466,7 @@ const App = {
         DOM.usersList.addEventListener("click", e => { const btn = e.target.closest("button"); if(btn) { if (btn.classList.contains("edit-user-btn")) UsersController.edit(btn.dataset.id); if (btn.classList.contains("delete-user-btn")) UsersController.delete(btn.dataset.id); }});
         DOM.changePinBtn.addEventListener("click", UsersController.changeAdminPin);
         
+        DOM.summaryGroupSelect.addEventListener("change", ReportsController.renderSalesSummary);
         DOM.fullResetBtn.addEventListener("click", ReportsController.fullReset);
         DOM.resetInvoicesBtn.addEventListener("click", ReportsController.resetInvoices);
         DOM.backupBtn.addEventListener("click", ReportsController.backup);
