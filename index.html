@@ -420,7 +420,7 @@
 // #region Firebase Initialization and Offline Persistence
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { getFirestore, collection, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc, getDoc, writeBatch, getDocs, where, increment, initializeFirestore, persistentLocalCache, addDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { getFirestore, collection, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc, getDoc, writeBatch, getDocs, where, increment, initializeFirestore, persistentLocalCache, addDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCfOzC8gkqkVSNZ3frtnnCMxbeq-v7yaTY",
@@ -436,7 +436,7 @@ const app = initializeApp(firebaseConfig);
 const db = initializeFirestore(app, { cache: persistentLocalCache({}) });
 const auth = getAuth(app);
 
-window.db = db; window.doc = doc; window.collection = collection; window.writeBatch = writeBatch; window.serverTimestamp = serverTimestamp; window.getDocs = getDocs; window.query = query; window.where = where; window.increment = increment; window.addDoc = addDoc;
+window.db = db; window.doc = doc; window.collection = collection; window.writeBatch = writeBatch; window.serverTimestamp = serverTimestamp; window.getDocs = getDocs; window.query = query; window.where = where; window.increment = increment; window.addDoc = addDoc; window.setDoc = setDoc;
 window.readCollection = (collectionName, callback, orderByField = "name", orderDirection = "asc") => onSnapshot(query(collection(db, collectionName), orderBy(orderByField, orderDirection)), s => callback(s.docs.map(d => ({ id: d.id, ...d.data() }))));
 window.updateDocument = (collectionName, docId, data) => updateDoc(doc(db, collectionName, docId), data);
 window.deleteDocument = (collectionName, docId) => deleteDoc(doc(db, collectionName, docId));
@@ -453,7 +453,7 @@ const DOM = {
     customerName: document.getElementById("customerName"), customerPhone: document.getElementById("customerPhone"), customerSuggestions: document.getElementById("customerSuggestions"), searchItem: document.getElementById("searchItem"), searchResults: document.getElementById("searchResults"), invoiceTable: document.getElementById("invoiceTable"), invoiceTotal: document.getElementById("invoiceTotal"), saveInvoiceBtn: document.getElementById("saveInvoiceBtn"), printInvoiceBtn: document.getElementById("printInvoiceBtn"), sendWhatsAppBtn: document.getElementById("sendWhatsAppBtn"), amountPaidInput: document.getElementById("amountPaidInput"), changeText: document.getElementById("changeText"), changeAmount: document.getElementById("changeAmount"),
     invoicesList: document.getElementById("invoicesList"),
     resetInvoicesBtn: document.getElementById("resetInvoicesBtn"), backupBtn: document.getElementById("backupBtn"), restoreBtn: document.getElementById("restoreBtn"), restoreInput: document.getElementById("restoreInput"),
-    newUsernameInput: document.getElementById("newUsernameInput"), newUserPasswordInput: document.getElementById("newUserPasswordInput"), saveUserBtn: document.getElementById("saveUserBtn"), usersList: document.getElementById("usersList"),
+    newUsernameInput: document.getElementById("newUsernameInput"), newUserPasswordInput: document.getElementById("newUserPasswordInput"), newUserRoleSelect: document.getElementById("newUserRoleSelect"), saveUserBtn: document.getElementById("saveUserBtn"), usersList: document.getElementById("usersList"),
     changePinBtn: document.getElementById("changePinBtn"), oldPinInput: document.getElementById("oldPinInput"), newPinInput: document.getElementById("newPinInput"), fullResetBtn: document.getElementById("fullResetBtn"),
     toggleItemsGridBtn: document.getElementById("toggleItemsGridBtn"), salesCategoryFilters: document.getElementById("salesCategoryFilters"), itemGrid: document.getElementById("itemGrid"), startScannerBtn: document.getElementById("startScannerBtn"), scannerContainer: document.getElementById("scanner-container"), readerDiv: document.getElementById("reader"),
     deliveryFeeValue: document.getElementById("deliveryFeeValue"), increaseDeliveryBtn: document.getElementById("increaseDeliveryBtn"), decreaseDeliveryBtn: document.getElementById("decreaseDeliveryBtn"),
@@ -586,12 +586,18 @@ const CustomersController = {
         if (!id || !name) { Helpers.showNotification("يرجى إدخال اسم ورقم هاتف العميل."); return; } 
         const ref = doc(db, "customers", id); 
         if (!appState.editingCustomerId && (await getDoc(ref)).exists()) { Helpers.showNotification("هذا الرقم مسجل لعميل آخر."); return; } 
-        await updateDoc(ref, { name, address }, { merge: true }); 
-        Helpers.showNotification(appState.editingCustomerId ? "تم تعديل العميل بنجاح." : "تم حفظ العميل بنجاح."); 
-        DOM.newCustomerId.value = "";
-        DOM.newCustomerName.value = "";
-        DOM.newCustomerAddress.value = "";
-        appState.editingCustomerId = null; 
+        
+        try {
+            await setDoc(ref, { name, address }, { merge: true }); 
+            Helpers.showNotification(appState.editingCustomerId ? "تم تعديل العميل بنجاح." : "تم حفظ العميل بنجاح."); 
+            DOM.newCustomerId.value = "";
+            DOM.newCustomerName.value = "";
+            DOM.newCustomerAddress.value = "";
+            appState.editingCustomerId = null; 
+        } catch (error) {
+            console.error("Error saving customer: ", error);
+            Helpers.showNotification("فشل حفظ العميل. تحقق من اتصالك بالإنترنت.");
+        }
     },
     edit: (id) => {
         const c = appState.customers.find(c => c.id === id);
@@ -772,8 +778,8 @@ const WorkersController = {
         }
         
         try {
-            const docId = appState.editingWorkerId || workerData.phone;
-            await window.updateDocument("workers", docId, workerData);
+            const docRef = doc(db, "workers", appState.editingWorkerId || workerData.phone);
+            await setDoc(docRef, workerData, { merge: true });
             Helpers.showNotification(appState.editingWorkerId ? "تم تعديل بيانات العامل بنجاح." : "تم إضافة العامل بنجاح.");
             WorkersController.clearForm();
         } catch (error) {
@@ -1360,10 +1366,34 @@ const App = {
 };
 
 const UsersController = {
-  save: () => { Helpers.showNotification("جاري العمل على هذه الميزة."); },
+  save: async () => {
+      const username = DOM.newUsernameInput.value.trim();
+      const password = DOM.newUserPasswordInput.value.trim();
+      const role = DOM.newUserRoleSelect.value;
+      if (!username || !password) {
+          Helpers.showNotification("يرجى إدخال اسم المستخدم وكلمة المرور.");
+          return;
+      }
+      try {
+          const docRef = doc(db, "users", username);
+          await setDoc(docRef, { username, password, role });
+          Helpers.showNotification("تم إضافة المستخدم بنجاح.");
+          DOM.newUsernameInput.value = "";
+          DOM.newUserPasswordInput.value = "";
+      } catch (error) {
+          console.error("Error saving user:", error);
+          Helpers.showNotification("فشل حفظ المستخدم.");
+      }
+  },
   edit: () => {},
   delete: () => {},
-  render: () => {},
+  render: () => {
+    DOM.usersList.innerHTML = appState.users.map(user => `
+        <div class="user-card">
+            <span>${user.username} (${user.role})</span>
+        </div>
+    `).join("");
+  },
   changeAdminPin: async () => {
       const oldPin = DOM.oldPinInput.value;
       const newPin = DOM.newPinInput.value;
@@ -1376,7 +1406,7 @@ const UsersController = {
           return;
       }
       try {
-          await window.updateDocument("config", "admin", { pin: newPin });
+          await setDoc(doc(db, "config", "admin"), { pin: newPin });
           appState.adminPIN = newPin;
           Helpers.showNotification("تم تغيير كلمة مرور المدير بنجاح.");
           DOM.oldPinInput.value = "";
