@@ -15,149 +15,165 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.9);
+    background-color: rgba(0,0,0,0.95);
     z-index: 10001;
     display: none;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     padding: 20px;
+    box-sizing: border-box;
   }
   
   #scanner-header {
     color: white;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     width: 100%;
     max-width: 500px;
   }
   
   #scanner-controls {
     display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
+    gap: 10px;
+    margin-bottom: 15px;
     flex-wrap: wrap;
     justify-content: center;
   }
   
   .scanner-btn {
-    background: rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.1);
     color: white;
     border: none;
-    padding: 10px 15px;
-    border-radius: 20px;
+    padding: 8px 12px;
+    border-radius: 18px;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 14px;
+    gap: 5px;
+    font-size: 13px;
   }
   
   .scanner-btn:hover {
-    background: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.2);
   }
   
   #reader {
     width: 90%;
     max-width: 500px;
-    height: 300px;
+    height: 220px; /* ارتفاع أقل ليكون مستطيلاً أكثر */
     background: #000;
-    border-radius: 12px;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     overflow: hidden;
     position: relative;
+    border: 2px solid #4db8ff;
+    box-shadow: 0 0 20px rgba(77, 184, 255, 0.5);
   }
   
   #reader::after {
     content: '';
     position: absolute;
     top: 0;
-    left: 5%;
-    right: 5%;
-    height: 2px;
+    left: 10%;
+    right: 10%;
+    height: 3px;
     background: #ff4747;
-    box-shadow: 0 0 5px #ff4747, 0 0 10px #ff4747;
-    animation: laser-beam 2.5s infinite linear;
-    border-radius: 2px;
+    box-shadow: 0 0 10px #ff4747;
+    animation: laser-beam 2s infinite linear;
+    border-radius: 3px;
   }
   
   #scanner-guide {
     color: white;
     text-align: center;
-    margin-top: 20px;
-    font-size: 16px;
+    margin-top: 15px;
+    font-size: 14px;
     max-width: 500px;
-    line-height: 1.6;
-    background: rgba(0,0,0,0.5);
-    padding: 15px;
-    border-radius: 10px;
+    line-height: 1.5;
+    background: rgba(0,0,0,0.6);
+    padding: 12px;
+    border-radius: 8px;
   }
   
   #scanner-guide h3 {
     margin-top: 0;
     color: #4db8ff;
+    font-size: 16px;
+    margin-bottom: 8px;
   }
   
   #scanner-guide ul {
     text-align: right;
-    padding-right: 20px;
+    padding-right: 15px;
+    margin: 0;
   }
   
   #scanner-guide li {
-    margin-bottom: 8px;
+    margin-bottom: 5px;
   }
   
   .zoom-controls {
     display: flex;
     align-items: center;
-    gap: 10px;
-    background: rgba(0,0,0,0.5);
-    padding: 8px 15px;
-    border-radius: 20px;
-    margin-top: 10px;
+    gap: 8px;
+    background: rgba(0,0,0,0.6);
+    padding: 6px 12px;
+    border-radius: 18px;
+    margin-top: 8px;
   }
   
   .zoom-btn {
     background: none;
     border: 1px solid white;
     color: white;
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 16px;
     cursor: pointer;
   }
   
   .zoom-value {
     color: white;
-    font-size: 16px;
-    min-width: 50px;
+    font-size: 14px;
+    min-width: 40px;
     text-align: center;
   }
   
   @keyframes laser-beam {
-    0% { transform: translateY(10px); }
-    50% { transform: translateY(calc(100% - 10px)); }
-    100% { transform: translateY(10px); }
+    0% { transform: translateY(5px); }
+    50% { transform: translateY(calc(100% - 5px)); }
+    100% { transform: translateY(5px); }
   }
   
   @media (max-width: 768px) {
     #reader {
-      height: 250px;
+      height: 200px;
     }
     
     #scanner-controls {
-      flex-direction: column;
-      align-items: center;
+      flex-direction: row;
     }
     
     .scanner-btn {
-      width: 200px;
-      justify-content: center;
+      width: auto;
+    }
+    
+    #scanner-guide {
+      font-size: 13px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    #reader {
+      height: 180px;
+    }
+    
+    .scanner-btn {
+      padding: 6px 10px;
+      font-size: 12px;
     }
   }
 </style>
@@ -191,10 +207,6 @@
   </div>
   
   <div id="scanner-controls">
-    <button id="switchCameraBtn" class="scanner-btn">
-      <i class="fas fa-camera-rotate"></i> تبديل الكاميرا
-    </button>
-    
     <button id="toggleTorchBtn" class="scanner-btn">
       <i class="fas fa-lightbulb"></i> ضوء
     </button>
@@ -224,11 +236,11 @@
 </div>
 
 <script>
-// متغيرات التحكم بالماسح الضوئي
-let scannerZoom = 1.0;
-let isTorchOn = false;
-let currentCameraId = null;
-let cameras = [];
+// حالة التطبيق
+const appState = {
+  items: [],
+  currentInvoice: []
+};
 
 // تهيئة الماسح الضوئي مع تحسينات للكود الصغير
 function initScanner() {
@@ -236,88 +248,46 @@ function initScanner() {
     window.scanner = new Html5Qrcode("reader");
   }
   
-  // الحصول على قائمة الكاميرات المتاحة
-  Html5Qrcode.getCameras().then(devices => {
-    cameras = devices;
-    if (cameras.length > 0) {
-      // نبدأ بالكاميرا الخلفية إن وجدت
-      const backCamera = cameras.find(cam => cam.label.toLowerCase().includes('back'));
-      currentCameraId = backCamera ? backCamera.id : cameras[0].id;
-      startScanner(currentCameraId);
-    }
-  }).catch(err => {
-    console.error("خطأ في الحصول على الكاميرات:", err);
-    startScanner(); // استخدام الإعدادات الافتراضية
-  });
-}
-
-// بدء تشغيل الماسح مع إعدادات محسنة للأكواد الصغيرة
-function startScanner(cameraId = null) {
-  const config = {
-    fps: 15, // زيادة معدل الأطراف للكشف الأسرع
-    qrbox: {
-      width: 200,  // منطقة مسح أصغر للتركيز على التفاصيل الدقيقة
-      height: 100
-    },
-    aspectRatio: 1.5, // نسبة أبعاد للمساحة المستطيلة
-    focusMode: "continuous" // وضع التركيز المستمر
+  // استخدام الكاميرا الخلفية دائمًا
+  const constraints = {
+    facingMode: "environment" // الكاميرا الخلفية فقط
   };
   
-  let scannerConfig = config;
-  
-  // إذا كان المتصفح يدوى Zoom API
-  if (window.scanner && 'applyVideoConstraints' in window.scanner) {
-    scannerConfig = {
-      ...config,
-      videoConstraints: {
-        ...(cameraId && { deviceId: { exact: cameraId } }),
-        width: { min: 1280, ideal: 1920 }, // دقة عالية للكشف عن التفاصيل الدقيقة
-        height: { min: 720, ideal: 1080 },
-        zoom: scannerZoom
-      }
-    };
-  }
+  const config = {
+    fps: 15,
+    qrbox: {
+      width: 250,  // منطقة مسح أوسع للكود الطويل
+      height: 80   // ارتفاع أقل للتركيز على الكود المستطيل
+    },
+    aspectRatio: 1.5,
+    focusMode: "continuous"
+  };
   
   window.scanner.start(
-    cameraId || { facingMode: "environment" },
-    scannerConfig,
+    constraints,
+    config,
     onScanSuccess,
     onScanFailure
   ).then(() => {
     // محاولة تفعيل الضوء إذا كان متاحًا
-    if (window.scanner && window.scanner.getRunningTrackCapabilities) {
-      try {
+    try {
+      if (window.scanner && window.scanner.getRunningTrackCapabilities) {
         const capabilities = window.scanner.getRunningTrackCapabilities();
         if (capabilities && capabilities.torch) {
           document.getElementById('toggleTorchBtn').style.display = 'flex';
+        } else {
+          document.getElementById('toggleTorchBtn').style.display = 'none';
         }
-      } catch (e) {
-        console.log("الضوء غير متاح في هذه الكاميرا");
       }
+    } catch (e) {
+      console.log("الضوء غير متاح في هذه الكاميرا");
+      document.getElementById('toggleTorchBtn').style.display = 'none';
     }
   }).catch(err => {
     console.error("فشل تشغيل الماسح:", err);
     alert("تعذر الوصول إلى الكاميرا. تأكد من منح التطبيق صلاحية استخدام الكاميرا.");
   });
 }
-
-// تبديل الكاميرا الأمامية/الخلفية
-document.getElementById('switchCameraBtn').addEventListener('click', function() {
-  if (cameras.length < 2) {
-    alert("لم يتم العثور على كاميرا أخرى");
-    return;
-  }
-  
-  const currentIndex = cameras.findIndex(cam => cam.id === currentCameraId);
-  const nextIndex = (currentIndex + 1) % cameras.length;
-  currentCameraId = cameras[nextIndex].id;
-  
-  window.scanner.stop().then(() => {
-    startScanner(currentCameraId);
-  }).catch(err => {
-    console.error("خطأ في تبديل الكاميرا:", err);
-  });
-});
 
 // التحكم في ضوء الكاميرا (الفلاتش)
 document.getElementById('toggleTorchBtn').addEventListener('click', function() {
@@ -337,6 +307,7 @@ document.getElementById('toggleTorchBtn').addEventListener('click', function() {
 });
 
 // التحكم في التكبير/التصغير
+let scannerZoom = 1.0;
 document.getElementById('zoomInBtn').addEventListener('click', function() {
   if (scannerZoom < 3.0) {
     scannerZoom += 0.1;
@@ -374,7 +345,6 @@ function stopScanner() {
   if (window.scanner && window.scanner.isScanning) {
     window.scanner.stop().then(() => {
       document.getElementById('scanner-container').style.display = 'none';
-      isTorchOn = false;
     }).catch(err => {
       console.error("خطأ في إيقاف الماسح:", err);
     });
@@ -405,41 +375,85 @@ function onScanSuccess(decodedText, decodedResult) {
   
   if (product) {
     // إضافة المنتج إلى الفاتورة
-    SalesController.addToInvoice(product);
-    Helpers.showNotification(`تمت إضافة: ${product.name}`);
+    addToInvoice(product);
+    showNotification(`تمت إضافة: ${product.name}`);
     
     // إيقاف الماسح بعد المسح الناجح
     setTimeout(stopScanner, 1000);
   } else {
-    Helpers.showNotification("الصنف غير موجود بهذا الباركود.");
+    showNotification("الصنف غير موجود بهذا الباركود.");
   }
 }
 
 // دالة عند فشل المسح
 function onScanFailure(error) {
   // يمكن استخدام هذا للتصحيح، ولكن لا داعي لعرض كل الأخطاء
-  // console.warn(`خطأ في المسح: ${error}`);
 }
 
-// إظهار وإخفاء دليل المسح حسب الحاجة
-setTimeout(() => {
-  const guide = document.getElementById('scanner-guide');
-  if (guide) {
-    guide.style.display = 'block';
-    
-    // إخفاء الدليل بعد 10 ثواني
-    setTimeout(() => {
-      guide.style.opacity = '1';
-      setTimeout(() => {
-        guide.style.transition = 'opacity 1s';
-        guide.style.opacity = '0';
-        setTimeout(() => {
-          guide.style.display = 'none';
-        }, 1000);
-      }, 10000);
-    }, 100);
+// وظيفة إضافة عنصر إلى الفاتورة
+function addToInvoice(item) {
+  const existing = appState.currentInvoice.find(i => i.id === item.id);
+  const stockItem = appState.items.find(i => i.id === item.id);
+  
+  if (!stockItem || stockItem.qunt <= 0) {
+    showNotification("المخزون غير متوفر.");
+    return;
   }
-}, 500);
+  
+  if (existing) {
+    if (stockItem.qunt > existing.qty) {
+      existing.qty++;
+    } else {
+      showNotification(`أقصى كمية: ${stockItem.qunt}`);
+      return;
+    }
+  } else {
+    appState.currentInvoice.push({ ...item, qty: 1 });
+  }
+  
+  renderInvoice();
+}
+
+// وظيفة عرض الإشعارات
+function showNotification(message, duration = 3000) {
+  // تنفيذ عرض الإشعار هنا
+  console.log(message);
+  alert(message); // يمكن استبدال هذا بتنفيذ أفضل لعرض الإشعارات
+}
+
+// وظيفة عرض الفاتورة
+function renderInvoice() {
+  // تنفيذ عرض الفاتورة هنا
+  console.log("يتم تحديث الفاتورة:", appState.currentInvoice);
+}
+
+// تحميل العناصر من ملف JSON
+async function loadItemsFromJSON() {
+  try {
+    const response = await fetch('p.json');
+    if (!response.ok) {
+      throw new Error('فشل في تحميل ملف الأصناف');
+    }
+    const itemsData = await response.json();
+    appState.items = itemsData.map(item => ({
+      ...item,
+      id: String(item.barcode1 || item.id || ''),
+      price: parseFloat(item.price) || 0,
+      qunt: parseInt(item.qunt) || 0
+    }));
+    
+    showNotification("تم تحميل الأصناف بنجاح");
+    console.log("تم تحميل العناصر:", appState.items);
+  } catch (error) {
+    console.error("Error loading items from JSON:", error);
+    showNotification("خطأ في تحميل ملف الأصناف");
+  }
+}
+
+// تحميل العناصر عند بدء التطبيق
+document.addEventListener('DOMContentLoaded', function() {
+  loadItemsFromJSON();
+});
 </script>
 
 </body>
