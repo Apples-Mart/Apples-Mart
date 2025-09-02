@@ -10,7 +10,7 @@
             font-family: Arial, sans-serif;
             background-color: #f0f2f5;
             margin: 0;
-            padding: 20px;
+            padding: 0; /* تم التعديل: إلغاء المسافات البادئة حول الصفحة */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -19,30 +19,24 @@
             box-sizing: border-box;
         }
 
-        /* --- التعديل الرئيسي هنا --- */
-        /* الآن، هذه الحاوية هي نفسها منطقة المسح المرئية */
         #scanner-container {
-            position: relative; /* ضروري لعمل overflow: hidden مع الفيديو */
-            width: 90%; /* عرض منطقة المسح */
-            max-width: 500px;
-            height: 150px; /* ارتفاع منطقة المسح، يمكنك تعديله */
-            margin: 5vh auto 0 auto;
-            border: 3px solid #4CAF50; /* الإطار الأخضر مباشرة على الحاوية */
-            border-radius: 12px; /* زوايا دائرية أكثر */
-            overflow: hidden; /* أهم خاصية: تخفي أي شيء خارج هذا الإطار */
-            background-color: #333; /* لون يظهر أثناء تحميل الكاميرا */
+            position: relative;
+            width: 100%; /* تم التعديل: ليمتد بعرض الشاشة بالكامل */
+            height: 150px;
+            margin: 0; /* تم التعديل: لإزالة أي هوامش */
+            border: none; /* تم إزالة الإطار ليصبح جزءًا من السقف */
+            border-bottom: 3px solid #4CAF50; /* جعل الإطار خطًا سفليًا فقط */
+            border-radius: 0; /* تم التعديل: لإزالة أي زوايا دائرية */
+            overflow: hidden;
+            background-color: #333;
         }
 
-        /* نجعل الفيديو يملأ الحاوية بالكامل ويتجاوزها ليتم قصه */
         #qr-reader video {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* يضمن ملء الفيديو للمساحة دون تشويه */
+            object-fit: cover;
         }
         
-        /* --- تم حذف .scanner-overlay و .scan-region بالكامل --- */
-        /* لم نعد بحاجة إليهما */
-
         #scan-result-display {
             width: 90%;
             max-width: 500px;
@@ -128,11 +122,7 @@
                 }
             };
             
-            // بما أن منطقة العرض كلها أصبحت للمسح، يمكننا تبسيط الإعدادات
-            const config = { 
-                fps: 10,
-                // لم نعد بحاجة لـ qrbox لأن المكتبة ستستخدم كل المنطقة المرئية
-            };
+            const config = { fps: 10 };
 
             html5QrCode.start(
                 { facingMode: "environment" },
