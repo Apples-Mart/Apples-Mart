@@ -1,799 +1,290 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Apples-Mart - Firebase</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Apples-Mart - Final</title>
+
+    <meta name="theme-color" content="#007bff"/>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
 <style>
-  :root {
-    --primary-color: #0d6efd;
-    --secondary-color: #6c757d;
-    --success-color: #198754;
-    --danger-color: #dc3545;
-    --warning-color: #ffc107;
-    --info-color: #0dcaf0;
-    --light-color: #f8f9fa;
-    --dark-color: #212529;
-    --text-dark: #343a40;
-    --text-light: #6c757d;
-    --bg-light: #f1f3f5;
-    --white: #fff;
-    --border-color: #dee2e6;
-    --shadow-sm: 0 .125rem .25rem rgba(0,0,0,.075);
-    --shadow-md: 0 .5rem 1rem rgba(0,0,0,.15);
-    --border-radius-sm: 0.25rem;
-    --border-radius-md: 0.5rem;
-    --font-family-sans-serif: 'Segoe UI', 'Cairo', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-  }
-  
-  *, *::before, *::after {
-    box-sizing: border-box;
-  }
+    :root {
+        --primary-color: #007bff; --secondary-color: #343a40; --success-color: #28a745;
+        --danger-color: #dc3545; --warning-color: #ffc107; --text-dark: #222;
+        --bg-light: #f8f9fa; --white: #fff; --border-color: #dee2e6;
+        --shadow-light: 0 0 6px rgba(0, 0, 0, 0.1); --whatsapp-color: #25D366;
+    }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background: var(--bg-light); color: var(--text-dark); direction: rtl; }
+    #app-container { display: none; }
+    header { background: var(--primary-color); color: var(--white); padding: 15px; text-align: center; font-size: 24px; display: flex; justify-content: space-between; align-items: center; }
+    nav { display: flex; background: var(--secondary-color); overflow-x: auto; }
+    nav button { flex: 1; flex-shrink: 0; padding: 12px 10px; border: none; background: var(--secondary-color); color: var(--white); font-size: 16px; cursor: pointer; transition: background 0.3s; }
+    nav button.active, nav button:hover { background: #0056b3; }
+    nav button.hidden { display: none; }
+    main { padding: 15px; max-width: 900px; margin: auto; }
+    section { display: none; }
+    section.active { display: block; }
+    input, select, button, table { font-size: 16px; }
+    input, select { width: 100%; padding: 10px; margin: 6px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+    button { background: var(--primary-color); color: var(--white); border: none; padding: 10px; border-radius: 4px; cursor: pointer; transition: background 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    button:disabled { background: #6c757d; cursor: not-allowed; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { border: 1px solid var(--border-color); padding: 10px; text-align: center; vertical-align: middle; }
+    th { background: #e9ecef; }
+    .btn-small { padding: 5px 10px; font-size: 14px; margin: 0 2px; }
+    .btn-danger { background: var(--danger-color); }
+    .btn-success { background: var(--success-color); }
+    .btn-warning { background: var(--warning-color); color: var(--text-dark); }
+    .summary-box { background: var(--white); padding: 15px; margin: 15px 0; border-radius: 6px; box-shadow: var(--shadow-light); }
+    #searchResults, #customerSuggestions { background: var(--white); max-height: 180px; overflow-y: auto; border: 1px solid #ccc; border-top: none; display: none; position: absolute; z-index: 1000; width: 100%; box-sizing: border-box; }
+    #searchResults div, #customerSuggestions div { padding: 8px; cursor: pointer; border-bottom: 1px solid #ddd; }
+    #searchResults div:hover, #customerSuggestions div:hover { background: var(--primary-color); color: var(--white); }
+    .form-group { margin-bottom: 15px; }
+    #notification-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; max-width: 90%; }
+    .notification { background-color: rgba(0, 0, 0, 0.8); color: white; padding: 15px 25px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); text-align: center; font-size: 16px; opacity: 0; transition: opacity 0.5s ease-in-out; }
+    .notification.show { opacity: 1; }
+    #login-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #e9ecef; }
+    #login-form { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 350px; text-align: center; }
+    #logoutBtn { background: var(--danger-color); }
+    .qty-controls { display: flex; align-items: center; justify-content: space-evenly; }
+    .qty-controls button { width: 40px; height: 30px; padding: 0; font-size: 16px; }
+    #sales-header { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 5px; }
+    #sales-header .form-group { margin-bottom: 0; flex-grow: 1; min-width: 200px; position: relative; }
+    #sales-header .search-group { display: flex; align-items: center; }
+    #sales-header .search-group input { border-radius: 0 4px 4px 0; }
+    #sales-header .search-group button { border-radius: 4px 0 0 4px; flex-shrink: 0; width: 50px; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 10000; justify-content: center; align-items: center; }
+    .modal-content { background-color: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
 
-  body { 
-    font-family: var(--font-family-sans-serif); 
-    margin: 0; 
-    background: var(--bg-light); 
-    color: var(--text-dark); 
-    direction: rtl; 
-    font-size: 16px;
-    line-height: 1.5;
-  }
-
-  #app-container { 
-    display: none; 
-    height: 100vh;
-    display: flex;
-  }
-
-  .sidebar {
-    width: 260px;
-    background-color: var(--dark-color);
-    color: var(--white);
-    display: flex;
-    flex-direction: column;
-    padding: 1.5rem 1rem;
-    flex-shrink: 0;
-    transition: width 0.3s ease;
-  }
-
-  .sidebar-header {
-    text-align: center;
-    margin-bottom: 2rem;
-    font-size: 1.75rem;
-    font-weight: 700;
-  }
-  .sidebar-header i {
-    color: var(--primary-color);
-  }
-
-  .sidebar-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    flex-grow: 1;
-  }
-  .sidebar-nav a, #logoutBtn {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.8rem 1rem;
-    border-radius: var(--border-radius-md);
-    color: #adb5bd;
-    text-decoration: none;
-    font-size: 1rem;
-    transition: background-color 0.2s, color 0.2s;
-    cursor: pointer;
-    border: none;
-    background: none;
-    width: 100%;
-    text-align: right;
-  }
-  .sidebar-nav a:hover, #logoutBtn:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: var(--white);
-  }
-  .sidebar-nav a.active {
-    background-color: var(--primary-color);
-    color: var(--white);
-    font-weight: 600;
-  }
-  .sidebar-nav a.hidden {
-    display: none;
-  }
-  .sidebar-nav a i {
-    width: 20px;
-    text-align: center;
-  }
-
-  #logoutBtn {
-    background: var(--danger-color);
-    color: var(--white);
-    justify-content: center;
-  }
-
-  .main-content {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding: 2rem;
-  }
-
-  section { display: none; }
-  section.active { display: block; animation: fadeIn 0.5s ease; }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .card {
-    background: var(--white);
-    border: none;
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-sm);
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  input, select { 
-    width: 100%; 
-    padding: 0.75rem; 
-    margin: 6px 0; 
-    box-sizing: border-box; 
-    border: 1px solid #ced4da; 
-    border-radius: var(--border-radius-sm);
-    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
-  }
-  input:focus, select:focus {
-    border-color: var(--primary-color);
-    outline: 0;
-    box-shadow: 0 0 0 .25rem rgba(13,110,253,.25);
-  }
-  input:disabled { background-color: #e9ecef; cursor: not-allowed; }
-  input[type="number"] { -moz-appearance: textfield; }
-  input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  
-  button { 
-    padding: 0.75rem 1rem; 
-    border-radius: var(--border-radius-sm); 
-    cursor: pointer; 
-    transition: background-color 0.2s, transform 0.1s; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    gap: 8px;
-    font-weight: 600;
-  }
-  button:hover:not(:disabled) {
-      transform: translateY(-2px);
-  }
-  
-  table { 
-    width: 100%; 
-    border-collapse: collapse; 
-    margin-top: 1.5rem; 
-  }
-  th, td { 
-    border: 1px solid var(--border-color); 
-    padding: 0.75rem; 
-    text-align: center; 
-    vertical-align: middle; 
-  }
-  th { background: var(--light-color); font-weight: 600; }
-  
-  .btn-primary { background-color: var(--primary-color); border-color: var(--primary-color); color: var(--white); }
-  .btn-primary:hover { background-color: #0b5ed7; border-color: #0a58ca; }
-  .btn-danger { background-color: var(--danger-color); border-color: var(--danger-color); color: var(--white); }
-  .btn-danger:hover { background-color: #bb2d3b; border-color: #b02a37; }
-  .btn-success { background-color: var(--success-color); border-color: var(--success-color); color: var(--white); }
-  .btn-success:hover { background-color: #157347; border-color: #146c43; }
-  .btn-warning { background-color: var(--warning-color); border-color: var(--warning-color); color: var(--dark-color); }
-  .btn-warning:hover { background-color: #ffca2c; border-color: #ffc720; }
-  .btn-whatsapp { background: #25D366; color: var(--white); border: none; }
-  .btn-whatsapp:hover { background: #128C7E; }
-
-  #login-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #e9ecef; }
-  #login-form { background: white; padding: 30px; border-radius: var(--border-radius-md); box-shadow: var(--shadow-md); width: 350px; text-align: center; }
-
-  #scanner-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 10001; display: none; justify-content: center; align-items: center; }
-  #reader { width: 300px; height: 300px; max-width: 80vw; max-height: 80vw; background: #000; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.5); box-shadow: 0 4px 15px rgba(0,0,0,0.3); overflow: hidden; position: relative; }
-  
-  /* Hiding the old header and nav */
-  #old-header, #old-nav { display: none; }
-
-  @media (max-width: 768px) {
-    .sidebar {
+    /* --- أنماط الماسح الضوئي النهائية --- */
+    #scanner-container {
+        display: none; /* يبدأ مخفيًا */
+        position: sticky; /* يلتصق بأعلى الصفحة عند التمرير */
+        top: 0;
+        z-index: 9998;
         width: 100%;
-        height: auto;
-        flex-direction: row;
-        padding: 0.5rem;
-        overflow-x: auto;
+        height: 75px; /* تم تقليل الارتفاع للنصف */
+        margin: 0;
+        border: none;
+        border-bottom: 3px solid var(--secondary-color);
+        overflow: hidden;
+        background-color: #222;
     }
-    .sidebar-header, .sidebar-footer {
-        display: none;
+    #qr-reader { position: relative; height: 100%; width: 100%; }
+    #qr-reader video { width: 100%; height: 100%; object-fit: cover; }
+    .scanner-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+    .scan-region {
+        width: 60%;
+        height: 65%;
+        border: 2px solid #4CAF50; /* اللون الأخضر الافتراضي */
+        border-radius: 10px;
+        transition: all 0.2s ease-in-out;
     }
-    .sidebar-nav {
-        flex-direction: row;
-        gap: 0.25rem;
+    .scan-region.success-flash {
+        border-color: #28a745;
+        box-shadow: 0 0 20px #28a745;
     }
-    .sidebar-nav a {
-        padding: 0.5rem;
-        gap: 0.5rem;
+    .scan-region.error-flash {
+        border-color: #dc3545;
+        box-shadow: 0 0 20px #dc3545;
     }
-    .sidebar-nav a span {
-        display: none;
+    #closeScannerBtn {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        z-index: 10;
+        background: rgba(220, 53, 69, 0.8);
+        border: 1px solid white;
+        width: 35px;
+        height: 35px;
+        padding: 0;
+        border-radius: 50%;
+        font-size: 18px;
     }
-    #app-container {
-        flex-direction: column;
-    }
-    .main-content {
-        padding: 1rem;
-    }
-  }
-
 </style>
 </head>
 <body>
 
-<div id="login-container">
-    <form id="login-form" class="card">
-      <h2><i class="fas fa-lock"></i> تسجيل الدخول</h2>
-      <div class="form-group"><input type="text" id="usernameInput" placeholder="اسم المستخدم" required /></div>
-      <div class="form-group"><input type="password" id="passwordInput" placeholder="كلمة المرور" required /></div>
-      <button type="submit" id="loginBtn" class="btn-primary" style="width: 100%;"><i class="fas fa-sign-in-alt"></i> دخول</button>
-    </form>
+<div id="scanner-container">
+    <div id="qr-reader"></div>
+    <div class="scanner-overlay"><div class="scan-region"></div></div>
+    <button id="closeScannerBtn" title="إغلاق الماسح"><i class="fas fa-times"></i></button>
 </div>
 
 <div id="app-container">
-  <aside class="sidebar">
-      <div>
-          <div class="sidebar-header">
-              <i class="fas fa-apple-alt"></i> Apples-Mart
-          </div>
-          <nav class="sidebar-nav">
-              <a href="#" data-tab="sales" class="active"><i class="fas fa-cash-register fa-fw"></i><span>المبيعات</span></a>
-              <a href="#" data-tab="items"><i class="fas fa-box fa-fw"></i><span>الأصناف</span></a>
-              <a href="#" data-tab="customers"><i class="fas fa-users fa-fw"></i><span>العملاء</span></a>
-              <a href="#" data-tab="invoices"><i class="fas fa-file-invoice fa-fw"></i><span>الفواتير</span></a>
-              <a href="#" data-tab="summary"><i class="fas fa-chart-bar fa-fw"></i><span>التقارير</span></a>
-              <a href="#" data-tab="users" class="hidden"><i class="fas fa-user-shield fa-fw"></i><span>إدارة المستخدمين</span></a>
-          </nav>
-      </div>
-      <div class="sidebar-footer">
-          <button id="logoutBtn"><i class="fas fa-sign-out-alt fa-fw"></i><span>خروج</span></button>
-      </div>
-  </aside>
+    <header>
+        <span>Apples-Mart</span>
+        <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> خروج</button>
+    </header>
+    <nav>
+        <button data-tab="items"><i class="fas fa-box"></i> الأصناف</button>
+        <button data-tab="customers"><i class="fas fa-users"></i> العملاء</button>
+        <button class="active" data-tab="sales"><i class="fas fa-cash-register"></i> المبيعات</button>
+        <button data-tab="invoices"><i class="fas fa-file-invoice"></i> الفواتير</button>
+        <button data-tab="summary"><i class="fas fa-chart-bar"></i> التقارير</button>
+        <button data-tab="users" class="hidden"><i class="fas fa-user-shield"></i> إدارة المستخدمين</button>
+    </nav>
 
-  <main class="main-content">
-    <section id="items" class="card">
-      <h2><i class="fas fa-box"></i> عرض الأصناف</h2>
-      <div style="overflow-x:auto;">
-      <table>
-          <thead>
-            <tr id="filterRow">
-              <th><input type="text" id="filterBarcode1" placeholder="فلترة بالباركود" /></th>
-              <th><input type="text" id="filterBarcode2" placeholder="فلترة بـ باركود 2" /></th>
-              <th><input type="text" id="filterName" placeholder="فلترة بالاسم" /></th>
-              <th><input type="text" id="filterUnit" placeholder="فلترة بالوحدة" /></th>
-              <th><input type="text" id="filterSku" placeholder="فلترة بـ SKU" /></th>
-              <th><input type="number" id="filterPrice" placeholder="فلترة بالسعر" /></th>
-              <th><input type="number" id="filterStock" placeholder="فلترة بالكمية" /></th>
-              <th><select id="filterCategory"><option value="all">جميع الفئات</option></select></th>
-            </tr>
-            <tr>
-              <th>باركود 1</th><th>باركود 2</th><th>اسم</th><th>وحدة</th><th>SKU</th><th>سعر</th><th>كمية</th><th>فئة</th>
-            </tr>
-          </thead>
-          <tbody id="itemsTable"></tbody>
-      </table>
-      </div>
-    </section>
-
-    <section id="customers" class="card">
-      <h2><i class="fas fa-users"></i> إدارة العملاء</h2>
-      <div class="form-group flex-container">
-        <input type="text" id="newCustomerId" placeholder="رقم هاتف العميل" />
-        <input type="text" id="newCustomerName" placeholder="اسم العميل" />
-        <input type="text" id="newCustomerAddress" placeholder="عنوان العميل" style="flex-grow: 1;" />
-        <button id="saveCustomerBtn" class="btn-primary"><i class="fas fa-save"></i> حفظ العميل</button>
-      </div>
-      <div id="customersListContainer">
-        <table id="customersTable">
-          <thead>
-            <tr>
-              <th>الاسم</th>
-              <th>الهاتف</th>
-              <th>العنوان</th>
-              <th>الرصيد</th>
-              <th>إجراءات</th>
-            </tr>
-          </thead>
-          <tbody id="customersTableBody"></tbody>
-        </table>
-      </div>
-    </section>
-    
-    <section id="sales" class="active card">
-      <h2><i class="fas fa-cash-register"></i> عملية بيع</h2>
-      <div id="sales-header">
-        <div class="form-group">
-          <div class="search-group"><input type="text" id="searchItem" placeholder="بحث بالاسم أو الباركود" autocomplete="off" /><button id="startScannerBtn" title="فتح ماسح الكاميرا (SKU)" class="btn-success"><i class="fas fa-barcode"></i></button></div>
-          <div id="searchResults"></div>
-        </div>
-        <div class="form-group">
-          <input type="text" id="customerName" placeholder="اسم العميل (اختياري)" autocomplete="off" />
-          <div id="customerSuggestions"></div>
-        </div>
-        <div class="form-group"><input type="tel" id="customerPhone" placeholder="رقم هاتف العميل" /></div>
-      </div>
-      <button id="toggleItemsGridBtn" class="btn-warning" style="width: 100%; margin-bottom: 15px;"><i class="fas fa-th-large"></i> عرض الأصناف حسب الفئة</button>
-      <div id="categoryScrollerContainer"><div id="salesCategoryFilters"></div></div>
-      <div id="itemGrid"></div>
-      <h3><i class="fas fa-file-invoice"></i> تفاصيل الفاتورة</h3>
-      <table><thead><tr><th>اسم الصنف</th><th>كمية</th><th>سعر الوحدة</th><th>الإجمالي</th><th>حذف</th></tr></thead><tbody id="invoiceTable"></tbody></table>
-      <div class="summary-box" style="padding: 10px; margin-top: 1rem; border: 1px solid var(--border-color); ">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h3><i class="fas fa-truck"></i> خدمة التوصيل: <span id="deliveryFeeValue">30.00</span> ج.م</h3>
-            <div class="delivery-controls"><button id="increaseDeliveryBtn" class="btn-small btn-success">+5</button><button id="decreaseDeliveryBtn" class="btn-small btn-danger">-5</button></div>
-        </div>
-        <hr style="margin: 10px 0;">
-        <h3 style="text-align: left; margin: 0; font-size: 1.5rem;">إجمالي الفاتورة: <span id="invoiceTotal">0.00</span> ج.م</span></h3>
-      </div>
-      
-      <div id="sales-footer" style="margin-top: 1.5rem;">
-          <div class="payment-options"><label>طريقة الدفع:</label><label><input type="radio" name="paymentMethod" value="cash" checked> نقداً</label><label><input type="radio" name="paymentMethod" value="visa"> فيزا</label><label><input type="radio" name="paymentMethod" value="wallet"> محفظة</label></div>
-          <div class="sales-footer-row">
-            <div class="form-group">
-              <input type="number" id="amountPaidInput" placeholder="المبلغ المدفوع" min="0" step="0.01" />
-              <div class="change-due-container"><span id="changeText">الباقي للعميل:</span> <span id="changeAmount">0.00</span> ج.م</span></div>
+    <main>
+        <section id="items">
+            <h2><i class="fas fa-box"></i> عرض الأصناف</h2>
+            <p>هذه هي الأصناف المحملة من ملف p.json</p>
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead><tr><th>باركود 1</th><th>اسم الصنف</th><th>السعر</th><th>الكمية</th><th>الفئة</th></tr></thead>
+                    <tbody id="itemsTable"></tbody>
+                </table>
             </div>
-          </div>
-          <div class="sales-footer-row">
-            <div class="btn-group"><button id="sendWhatsAppBtn" class="btn-whatsapp"><i class="fab fa-whatsapp"></i> واتساب</button><button id="printInvoiceBtn" class="btn-success"><i class="fas fa-print"></i> طباعة</button><button id="saveInvoiceBtn" class="btn-primary"><i class="fas fa-save"></i> حفظ</button></div>
-          </div>
-      </div>
-    </section>
+        </section>
 
-    <section id="invoices" class="card"><h2><i class="fas fa-file-invoice-dollar"></i> الفواتير المحفوظة</h2><div id="invoicesList"></div></section>
-    
-    <section id="summary" class="card">
-      <h2><i class="fas fa-chart-bar"></i> التقارير والنسخ الاحتياطي</h2>
-      <div class="form-group flex-container"><label for="summaryGroupSelect">تجميع حسب:</label><select id="summaryGroupSelect"><option value="day">اليوم</option><option value="week">الأسبوع</option><option value="month">الشهر</option></select></div>
-      <div class="summary-box"><i class="fas fa-coins"></i> <strong>المجموع الكلي للمبيعات:</strong> <span id="totalSalesAmount">0.00</span> ج.م</span></div>
-      <table><thead><tr><th>الفترة</th><th>عدد الفواتير</th><th>المبلغ</th></tr></thead><tbody id="salesSummaryTable"></tbody></table>
-      <div style="margin-top: 30px;"><h3><i class="fas fa-star"></i> الأصناف الأكثر مبيعًا</h3><div id="bestSellingItems" class="summary-box"><p>لا توجد بيانات متاحة.</p></div></div>
-      
-      <div id="admin-reports-section" class="hidden">
-        <hr>
-        <div style="margin-top: 30px;">
-          <h3><i class="fas fa-hard-hat"></i> تقرير مجمع للعمال</h3>
-          <div id="workersSummaryContainer" class="summary-box"></div>
-        </div>
-        <div style="margin-top: 30px;">
-          <h3><i class="fas fa-user-friends"></i> تقرير مجمع للموظفين</h3>
-          <div id="employeesSummaryContainer" class="summary-box"></div>
-        </div>
-      </div>
+        <section id="customers"><h2><i class="fas fa-users"></i> إدارة العملاء</h2></section>
+        
+        <section id="sales" class="active" style="position: relative;">
+            <h2><i class="fas fa-cash-register"></i> عملية بيع</h2>
+            <div id="sales-header">
+                <div class="form-group">
+                    <div class="search-group">
+                        <input type="text" id="searchItem" placeholder="بحث بالاسم أو الباركود" autocomplete="off" />
+                        <button id="startScannerBtn" title="فتح ماسح الكاميرا"><i class="fas fa-barcode"></i></button>
+                    </div>
+                    <div id="searchResults"></div>
+                </div>
+                <div class="form-group"><input type="text" id="customerName" placeholder="اسم العميل (اختياري)" autocomplete="off" /><div id="customerSuggestions"></div></div>
+                <div class="form-group"><input type="tel" id="customerPhone" placeholder="رقم هاتف العميل" /></div>
+            </div>
+            <h3><i class="fas fa-file-invoice"></i> تفاصيل الفاتورة</h3>
+            <table><thead><tr><th>اسم الصنف</th><th>كمية</th><th>سعر الوحدة</th><th>الإجمالي</th><th>حذف</th></tr></thead><tbody id="invoiceTable"></tbody></table>
+            <div class="summary-box">
+                <h3 style="text-align: left; margin: 0;">إجمالي الفاتورة: <span id="invoiceTotal">0.00</span> ج.م</span></h3>
+            </div>
+            <div id="sales-footer">
+                <div class="form-group"><input type="number" id="amountPaidInput" placeholder="المبلغ المدفوع" min="0" /></div>
+                <div class="btn-group"><button id="printInvoiceBtn" class="btn-success"><i class="fas fa-print"></i> طباعة</button><button id="saveInvoiceBtn"><i class="fas fa-save"></i> حفظ</button></div>
+            </div>
+        </section>
 
-      <div class="flex-container flex-end" style="margin-top: 20px; gap: 15px;">
-        <button id="backupBtn" class="btn-success"><i class="fas fa-download"></i> نسخة احتياطية</button>
-        <button id="restoreBtn" class="btn-warning"><i class="fas fa-upload"></i> استعادة نسخة</button>
-        <button id="resetInvoicesBtn" class="btn-danger"><i class="fas fa-trash-alt"></i> حذف جميع الفواتير</button>
-        <input type="file" id="restoreInput" accept=".json" style="display: none;" />
-      </div>
-    </section>
-
-    <section id="users" class="card">
-      <h2><i class="fas fa-user-shield"></i> إدارة المستخدمين</h2>
-      <div class="form-group flex-container"><input type="text" id="newUsernameInput" placeholder="اسم المستخدم" /><input type="password" id="newUserPasswordInput" placeholder="كلمة المرور" /><select id="newUserRoleSelect"><option value="user">مستخدم عادي</option><option value="worker">عامل</option></select><button id="saveUserBtn" class="btn-primary"><i class="fas fa-plus-circle"></i> إضافة مستخدم</button></div>
-      <div id="usersList"></div>
-      
-      <div id="admin-workers-section" class="hidden">
-        <hr>
-        <h3><i class="fas fa-hard-hat"></i> إدارة العمال</h3>
-        <div class="form-group flex-container">
-          <input type="text" id="workerNameInput" placeholder="اسم العامل" />
-          <input type="tel" id="workerPhoneInput" placeholder="رقم الهاتف" />
-          <input type="text" id="workerAddressInput" placeholder="العنوان" />
-          <input type="number" id="workerSalaryInput" placeholder="الراتب الأساسي" />
-          <input type="number" id="workerAbsencesInput" placeholder="أيام غياب" />
-          <input type="number" id="workerOvertimeInput" placeholder="ساعات إضافي" />
-          <button id="saveWorkerBtn" class="btn-primary"><i class="fas fa-save"></i> حفظ العامل</button>
-        </div>
-        <div id="workersList"></div>
-      </div>
-      
-      <hr>
-      
-      <div id="changePinSection">
-        <h4><i class="fas fa-key"></i> تغيير كلمة مرور المدير العام</h4>
-        <div class="form-group flex-container">
-          <input type="password" id="oldPinInput" placeholder="الكلمة القديمة" />
-          <input type="password" id="newPinInput" placeholder="الكلمة الجديدة" />
-          <button id="changePinBtn" class="btn-warning"><i class="fas fa-sync-alt"></i> تغيير الكلمة</button>
-        </div>
-      </div>
-      <div class="flex-container flex-end" style="margin-top: 20px;">
-        <button id="fullResetBtn" class="btn-danger"><i class="fas fa-exclamation-triangle"></i> إعادة ضبط كاملة للنظام</button>
-      </div>
-    </section>
-  </main>
+        <section id="invoices"><h2><i class="fas fa-file-invoice-dollar"></i> الفواتير</h2></section>
+        <section id="summary"><h2><i class="fas fa-chart-bar"></i> التقارير</h2></section>
+        <section id="users"><h2><i class="fas fa-user-shield"></i> إدارة المستخدمين</h2></section>
+    </main>
 </div>
-
-<div id="scanner-container"><div id="reader"></div></div>
+<div id="login-container">
+    <form id="login-form">
+        <h2><i class="fas fa-lock"></i> تسجيل الدخول</h2>
+        <div class="form-group"><input type="text" id="usernameInput" placeholder="اسم المستخدم" required /></div>
+        <div class="form-group"><input type="password" id="passwordInput" placeholder="كلمة المرور" required /></div>
+        <button type="submit" id="loginBtn"><i class="fas fa-sign-in-alt"></i> دخول</button>
+    </form>
+</div>
 <div id="notification-container"></div>
 
-<div id="advanceModal" class="modal">
-  <div class="modal-content card">
-    <h3><i class="fas fa-money-bill-wave"></i> إضافة سلفة للعامل</h3>
-    <div class="form-group">
-      <label for="advanceAmount">المبلغ:</label>
-      <input type="number" id="advanceAmount" placeholder="المبلغ" min="0" step="0.01" />
-    </div>
-    <div class="form-group">
-      <label for="advanceNotes">ملاحظات:</label>
-      <textarea id="advanceNotes" placeholder="ملاحظات حول السلفة" rows="3"></textarea>
-    </div>
-    <div class="flex-container flex-end">
-      <button id="cancelAdvanceBtn" class="btn-secondary"><i class="fas fa-times"></i> إلغاء</button>
-      <button id="saveAdvanceBtn" class="btn-success"><i class="fas fa-save"></i> حفظ</button>
-    </div>
-  </div>
-</div>
-
-<div id="vacationModal" class="modal">
-  <div class="modal-content card">
-    <h3><i class="fas fa-calendar-alt"></i> إضافة إجازة للعامل</h3>
-    <div class="form-group">
-      <label for="vacationStartDate">تاريخ البدء:</label>
-      <input type="date" id="vacationStartDate" />
-    </div>
-    <div class="form-group">
-      <label for="vacationEndDate">تاريخ الانتهاء:</label>
-      <input type="date" id="vacationEndDate" />
-    </div>
-    <div class="form-group">
-      <label for="vacationNotes">ملاحظات:</label>
-      <textarea id="vacationNotes" placeholder="ملاحظات حول الإجازة" rows="3"></textarea>
-    </div>
-    <div class="flex-container flex-end">
-      <button id="cancelVacationBtn" class="btn-secondary"><i class="fas fa-times"></i> إلغاء</button>
-      <button id="saveVacationBtn" class="btn-success"><i class="fas fa-save"></i> حفظ</button>
-    </div>
-  </div>
-</div>
-
-<div id="settlementModal" class="modal">
-  <div class="modal-content card">
-    <h3><i class="fas fa-money-check"></i> تسوية الفاتورة</h3>
-    <div class="form-group">
-      <p>رقم الفاتورة: <span id="settlementInvoiceId"></span></p>
-      <p>العميل: <span id="settlementCustomerName"></span></p>
-      <p>إجمالي الفاتورة: <span id="settlementTotal"></span> ج.م</p>
-      <p>المدفوع سابقاً: <span id="settlementPaid"></span> ج.م</p>
-      <p>المتبقي: <span id="settlementBalance"></span> ج.م</p>
-    </div>
-    <div class="form-group">
-      <label for="settlementAmount">المبلغ المدفوع:</label>
-      <input type="number" id="settlementAmount" placeholder="المبلغ المدفوع" min="0" step="0.01" />
-    </div>
-    <div class="form-group">
-      <label for="settlementNotes">ملاحظات:</label>
-      <textarea id="settlementNotes" placeholder="ملاحظات حول الدفع" rows="3"></textarea>
-    </div>
-    <div class="flex-container flex-end">
-      <button id="cancelSettlementBtn" class="btn-secondary"><i class="fas fa-times"></i> إلغاء</button>
-      <button id="saveSettlementBtn" class="btn-success"><i class="fas fa-save"></i> حفظ</button>
-    </div>
-  </div>
-</div>
-
-<div id="workerReportModal" class="modal">
-  <div class="modal-content card">
-    <h3><i class="fas fa-file-alt"></i> تقرير العامل: <span id="reportWorkerName"></span></h3>
-    <div id="workerReportContent" style="text-align: right;"></div>
-    <div class="flex-container flex-end" style="margin-top: 20px;">
-      <button id="closeReportBtn" class="btn-danger"><i class="fas fa-times"></i> إغلاق</button>
-    </div>
-  </div>
-</div>
-
 <script type="module">
-// #region Firebase Initialization and Offline Persistence
+// #region Firebase (لا تغيير هنا)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { getFirestore, collection, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc, getDoc, writeBatch, getDocs, where, increment, initializeFirestore, persistentLocalCache, addDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCfOzC8gkqkVSNZ3frtnnCMxbeq-v7yaTY",
-  authDomain: "almas-store-a51eb.firebaseapp.com",
-  databaseURL: "https://almas-store-a51eb-default-rtdb.firebaseio.com",
-  projectId: "almas-store-a51eb",
-  storageBucket: "almas-store-a51eb.firebasestorage.app",
-  messagingSenderId: "502522968593",
-  appId: "1:502522968593:web:52dc253f8ea12f4d5bcfb0",
-  measurementId: "G-G0WC9BJ6JW"
-};
-const app = initializeApp(firebaseConfig);
-const db = initializeFirestore(app, { cache: persistentLocalCache({}) });
-const auth = getAuth(app);
-
-window.db = db; window.doc = doc; window.collection = collection; window.writeBatch = writeBatch; window.serverTimestamp = serverTimestamp; window.getDocs = getDocs; window.query = query; window.where = where; window.increment = increment; window.addDoc = addDoc; window.setDoc = setDoc;
-window.readCollection = (collectionName, callback, orderByField = "name", orderDirection = "asc") => onSnapshot(query(collection(db, collectionName), orderBy(orderByField, orderDirection)), s => callback(s.docs.map(d => ({ id: d.id, ...d.data() }))));
-window.updateDocument = (collectionName, docId, data) => updateDoc(doc(db, collectionName, docId), data);
-window.deleteDocument = (collectionName, docId) => deleteDoc(doc(db, collectionName, docId));
-window.getDocument = async (collectionName, docId) => { const d = await getDoc(doc(db, collectionName, docId)); return d.exists() ? { id: d.id, ...d.data() } : null; };
+// ... (بقية استيرادات Firebase إذا كنت تستخدمها)
+const firebaseConfig = { /* ... بياناتك ... */ };
+//const app = initializeApp(firebaseConfig);
+// ... (بقية إعدادات Firebase)
 // #endregion
 
 // #region Global Variables and DOM Elements
 const DOM = {
-    appContainer: document.getElementById("app-container"), loginContainer: document.getElementById("login-container"), loginForm: document.getElementById("login-form"), usernameInput: document.getElementById("usernameInput"), passwordInput: document.getElementById("passwordInput"),
-    navButtons: document.querySelectorAll(".sidebar-nav a"), mainContent: document.querySelector(".main-content"), sections: document.querySelectorAll("main section"), logoutBtn: document.getElementById("logoutBtn"),
+    appContainer: document.getElementById("app-container"),
+    loginContainer: document.getElementById("login-container"),
+    loginForm: document.getElementById("login-form"),
+    navButtons: document.querySelectorAll("nav button"),
+    sections: document.querySelectorAll("main section"),
     itemsTable: document.getElementById("itemsTable"),
-    filterBarcode1: document.getElementById("filterBarcode1"), filterBarcode2: document.getElementById("filterBarcode2"), filterName: document.getElementById("filterName"), filterUnit: document.getElementById("filterUnit"), filterSku: document.getElementById("filterSku"), filterPrice: document.getElementById("filterPrice"), filterStock: document.getElementById("filterStock"), filterCategory: document.getElementById("filterCategory"),
-    newCustomerId: document.getElementById("newCustomerId"), newCustomerName: document.getElementById("newCustomerName"), newCustomerAddress: document.getElementById("newCustomerAddress"), saveCustomerBtn: document.getElementById("saveCustomerBtn"), customersTableBody: document.getElementById("customersTableBody"),
-    customerName: document.getElementById("customerName"), customerPhone: document.getElementById("customerPhone"), customerSuggestions: document.getElementById("customerSuggestions"), searchItem: document.getElementById("searchItem"), searchResults: document.getElementById("searchResults"), invoiceTable: document.getElementById("invoiceTable"), invoiceTotal: document.getElementById("invoiceTotal"), saveInvoiceBtn: document.getElementById("saveInvoiceBtn"), printInvoiceBtn: document.getElementById("printInvoiceBtn"), sendWhatsAppBtn: document.getElementById("sendWhatsAppBtn"), amountPaidInput: document.getElementById("amountPaidInput"), changeText: document.getElementById("changeText"), changeAmount: document.getElementById("changeAmount"),
-    invoicesList: document.getElementById("invoicesList"),
-    summaryGroupSelect: document.getElementById("summaryGroupSelect"), totalSalesAmount: document.getElementById("totalSalesAmount"), salesSummaryTable: document.getElementById("salesSummaryTable"), bestSellingItems: document.getElementById("bestSellingItems"),
-    adminReportsSection: document.getElementById("admin-reports-section"), workersSummaryContainer: document.getElementById("workersSummaryContainer"), employeesSummaryContainer: document.getElementById("employeesSummaryContainer"),
-    resetInvoicesBtn: document.getElementById("resetInvoicesBtn"), backupBtn: document.getElementById("backupBtn"), restoreBtn: document.getElementById("restoreBtn"), restoreInput: document.getElementById("restoreInput"),
-    newUsernameInput: document.getElementById("newUsernameInput"), newUserPasswordInput: document.getElementById("newUserPasswordInput"), newUserRoleSelect: document.getElementById("newUserRoleSelect"), saveUserBtn: document.getElementById("saveUserBtn"), usersList: document.getElementById("usersList"),
-    changePinBtn: document.getElementById("changePinBtn"), oldPinInput: document.getElementById("oldPinInput"), newPinInput: document.getElementById("newPinInput"), fullResetBtn: document.getElementById("fullResetBtn"),
-    toggleItemsGridBtn: document.getElementById("toggleItemsGridBtn"), salesCategoryFilters: document.getElementById("salesCategoryFilters"), itemGrid: document.getElementById("itemGrid"), startScannerBtn: document.getElementById("startScannerBtn"), scannerContainer: document.getElementById("scanner-container"), readerDiv: document.getElementById("reader"),
-    deliveryFeeValue: document.getElementById("deliveryFeeValue"), increaseDeliveryBtn: document.getElementById("increaseDeliveryBtn"), decreaseDeliveryBtn: document.getElementById("decreaseDeliveryBtn"),
+    invoiceTable: document.getElementById("invoiceTable"),
+    invoiceTotal: document.getElementById("invoiceTotal"),
+    amountPaidInput: document.getElementById("amountPaidInput"),
+    saveInvoiceBtn: document.getElementById("saveInvoiceBtn"),
+    printInvoiceBtn: document.getElementById("printInvoiceBtn"),
+    searchItem: document.getElementById("searchItem"),
+    searchResults: document.getElementById("searchResults"),
+    customerName: document.getElementById("customerName"),
+    customerPhone: document.getElementById("customerPhone"),
+    customerSuggestions: document.getElementById("customerSuggestions"),
     notificationContainer: document.getElementById("notification-container"),
-    categoryScrollerContainer: document.getElementById("categoryScrollerContainer"),
-    adminWorkersSection: document.getElementById("admin-workers-section"), workerNameInput: document.getElementById("workerNameInput"), workerPhoneInput: document.getElementById("workerPhoneInput"), workerAddressInput: document.getElementById("workerAddressInput"), workerSalaryInput: document.getElementById("workerSalaryInput"), workerAbsencesInput: document.getElementById("workerAbsencesInput"), workerOvertimeInput: document.getElementById("workerOvertimeInput"), saveWorkerBtn: document.getElementById("saveWorkerBtn"), workersList: document.getElementById("workersList"),
-    advanceModal: document.getElementById("advanceModal"), vacationModal: document.getElementById("vacationModal"), settlementModal: document.getElementById("settlementModal"), advanceAmount: document.getElementById("advanceAmount"), advanceNotes: document.getElementById("advanceNotes"), saveAdvanceBtn: document.getElementById("saveAdvanceBtn"), cancelAdvanceBtn: document.getElementById("cancelAdvanceBtn"), vacationStartDate: document.getElementById("vacationStartDate"), vacationEndDate: document.getElementById("vacationEndDate"), vacationNotes: document.getElementById("vacationNotes"), saveVacationBtn: document.getElementById("saveVacationBtn"), cancelVacationBtn: document.getElementById("cancelVacationBtn"), settlementInvoiceId: document.getElementById("settlementInvoiceId"), settlementCustomerName: document.getElementById("settlementCustomerName"), settlementTotal: document.getElementById("settlementTotal"), settlementPaid: document.getElementById("settlementPaid"), settlementBalance: document.getElementById("settlementBalance"), settlementAmount: document.getElementById("settlementAmount"), settlementNotes: document.getElementById("settlementNotes"), saveSettlementBtn: document.getElementById("saveSettlementBtn"), cancelSettlementBtn: document.getElementById("cancelSettlementBtn"),
-    workerReportModal: document.getElementById("workerReportModal"), reportWorkerName: document.getElementById("reportWorkerName"), workerReportContent: document.getElementById("workerReportContent"), closeReportBtn: document.getElementById("closeReportBtn")
+    // عناصر الماسح
+    startScannerBtn: document.getElementById("startScannerBtn"),
+    scannerContainer: document.getElementById("scanner-container"),
+    closeScannerBtn: document.getElementById("closeScannerBtn"),
 };
 
 let appState = {
-  items: [], invoices: [], customers: [], users: [], workers: [], advances: [], vacations: [], settlements: [],
-  adminPIN: "790707071", currentUser: null, currentInvoice: [], deliveryFee: 30,
-  editingItemId: null, editingCustomerId: null, editingUserId: null, editingWorkerId: null,
-  html5QrCode: null, unsubscribe: {}, selectedWorkerId: null, selectedInvoiceId: null,
-  scannerMode: 'sales'
+    items: [],
+    invoices: [],
+    customers: [],
+    users: [],
+    currentInvoice: [],
+    html5QrCode: null,
 };
 // #endregion
 
 // #region Helper & Utility Functions
 const Helpers = {
-    showNotification: (message, duration = 3000) => { const n = document.createElement("div"); n.className = "notification"; n.textContent = message; DOM.notificationContainer.appendChild(n); setTimeout(() => n.classList.add("show"), 10); setTimeout(() => { n.classList.remove("show"); setTimeout(() => n.remove(), 500); }, duration); },
-    switchTab: (tabId) => { document.querySelectorAll("main section").forEach(s => s.classList.remove("active")); document.getElementById(tabId)?.classList.add("active"); App.onTabSwitch(tabId); },
-    updateNavButtons: (activeButton) => { DOM.navButtons.forEach(btn => btn.classList.remove("active")); activeButton.classList.add("active"); },
-    calculateChange: () => { const total = parseFloat(DOM.invoiceTotal.textContent) || 0; const paid = parseFloat(DOM.amountPaidInput.value) || 0; const change = paid - total; if (change >= 0) { DOM.changeText.textContent = "الباقي للعميل:"; DOM.changeAmount.textContent = change.toFixed(2); } else { DOM.changeText.textContent = "المطلوب منه:"; DOM.changeAmount.textContent = Math.abs(change).toFixed(2); } },
-    openModal: (modal) => { modal.style.display = 'flex'; },
-    closeModal: (modal) => { modal.style.display = 'none'; },
-    formatDate: (date) => { if (!date) return ''; return new Date(date).toLocaleDateString('ar-EG'); },
-    calculateVacationDays: (start, end) => { const startDate = new Date(start); const endDate = new Date(end); const diffTime = Math.abs(endDate - startDate); return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; }
-};
-// #endregion
-
-// #region Authentication Controller
-const Auth = {
-    login: (username, password) => {
-        if (password === appState.adminPIN) { appState.currentUser = { username: "المدير العام", role: "admin" }; localStorage.setItem('currentUser', JSON.stringify(appState.currentUser)); Auth.showApp("admin"); return; }
-        const user = appState.users.find(u => u.username === username && u.password === password);
-        if (user) { appState.currentUser = user; localStorage.setItem('currentUser', JSON.stringify(user)); Auth.showApp("user"); } 
-        else { Helpers.showNotification("اسم المستخدم أو كلمة المرور غير صحيحة.", 4000); }
+    showNotification: (message, duration = 3000) => {
+        const n = document.createElement("div");
+        n.className = "notification";
+        n.textContent = message;
+        DOM.notificationContainer.appendChild(n);
+        setTimeout(() => n.classList.add("show"), 10);
+        setTimeout(() => {
+            n.classList.remove("show");
+            setTimeout(() => n.remove(), 500);
+        }, duration);
     },
-    logout: () => { appState.currentUser = null; localStorage.removeItem('currentUser'); window.location.reload(); },
-    showApp: (role) => {
-        DOM.loginContainer.style.display = "none";
-        DOM.appContainer.style.display = "flex"; // Changed to flex
-        const isAdmin = role === 'admin';
-        DOM.navButtons.forEach(b => b.dataset.tab === 'users' ? b.classList.toggle("hidden", !isAdmin) : null);
-        if (DOM.adminWorkersSection) {
-            DOM.adminWorkersSection.classList.toggle('hidden', !isAdmin);
-        }
-        document.querySelector('[data-tab="sales"]').click();
-    }
 };
 // #endregion
 
-// #region Items Controller
+// #region Controllers
+const SalesController = {
+    updateTotals: () => {
+        const total = appState.currentInvoice.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        DOM.invoiceTotal.textContent = total.toFixed(2);
+    },
+    renderInvoice: () => {
+        DOM.invoiceTable.innerHTML = appState.currentInvoice.map((item, index) => `<tr><td>${item.name}</td><td><div class="qty-controls"><button class="btn-small btn-success qty-increase" data-index="${index}">+</button><span>${item.qty}</span><button class="btn-small btn-danger qty-decrease" data-index="${index}">-</button></div></td><td>${(item.price || 0).toFixed(2)}</td><td>${((item.price || 0) * item.qty).toFixed(2)}</td><td><button class="btn-small btn-danger remove-from-invoice-btn" data-index="${index}"><i class="fas fa-trash-alt"></i></button></td></tr>`).join("");
+        SalesController.updateTotals();
+    },
+    addToInvoice: (item) => {
+        const existing = appState.currentInvoice.find(i => i.id === item.id);
+        if (existing) {
+            existing.qty++;
+        } else {
+            appState.currentInvoice.push({ ...item, qty: 1 });
+        }
+        SalesController.renderInvoice();
+    },
+    updateItemQty: (index, change) => {
+        const item = appState.currentInvoice[index];
+        if (!item) return;
+        item.qty += change;
+        if (item.qty <= 0) {
+            appState.currentInvoice.splice(index, 1);
+        }
+        SalesController.renderInvoice();
+    },
+};
+
 const ItemsController = {
     render: () => {
-        const filterBarcode1 = DOM.filterBarcode1.value.toLowerCase();
-        const filterBarcode2 = DOM.filterBarcode2.value.toLowerCase();
-        const filterName = DOM.filterName.value.toLowerCase();
-        const filterUnit = DOM.filterUnit.value.toLowerCase();
-        const filterSku = DOM.filterSku.value.toLowerCase();
-        const filterPrice = parseFloat(DOM.filterPrice.value);
-        const filterStock = parseFloat(DOM.filterStock.value);
-        const filterCategory = DOM.filterCategory.value;
-
-        const filteredItems = appState.items.filter(item => {
-            const matchesBarcode1 = !filterBarcode1 || (item.barcode1 && item.barcode1.toLowerCase().includes(filterBarcode1));
-            const matchesBarcode2 = !filterBarcode2 || (item.barcode2 && item.barcode2.toLowerCase().includes(filterBarcode2));
-            const matchesName = !filterName || (item.name && item.name.toLowerCase().includes(filterName));
-            const matchesUnit = !filterUnit || (item.unit && item.unit.toLowerCase().includes(filterUnit));
-            const matchesSku = !filterSku || (item.sku && item.sku.toLowerCase().includes(filterSku));
-            const matchesPrice = isNaN(filterPrice) || (item.price == filterPrice);
-            const matchesStock = isNaN(filterStock) || (item.qunt == filterStock);
-            const matchesCategory = filterCategory === 'all' || item.category === filterCategory;
-            return matchesBarcode1 && matchesBarcode2 && matchesName && matchesUnit && matchesSku && matchesPrice && matchesStock && matchesCategory;
-        });
-        
-        DOM.itemsTable.innerHTML = filteredItems.map(item => `
-          <tr>
-            <td>${item.barcode1}</td>
-            <td>${item.barcode2 || ''}</td>
-            <td>${item.name || 'اسم غير متوفر'}</td>
-            <td>${item.unit || ''}</td>
-            <td>${item.sku || ''}</td>
-            <td>${(item.price || 0).toFixed(2)}</td>
-            <td>${item.qunt || 0}</td>
-            <td>${item.category || 'غير محدد'}</td>
-          </tr>
+        if(!DOM.itemsTable) return;
+        DOM.itemsTable.innerHTML = appState.items.map(item => `
+            <tr>
+                <td>${item.barcode1 || ''}</td>
+                <td>${item.name || 'غير متوفر'}</td>
+                <td>${(item.price || 0).toFixed(2)}</td>
+                <td>${item.qunt || 0}</td>
+                <td>${item.category || 'غير محدد'}</td>
+            </tr>
         `).join("");
-    }
-};
-// #endregion
-
-// #region Customers Controller
-const CustomersController = {
-    render: () => {
-        DOM.customersTableBody.innerHTML = appState.customers.map(cust => {
-            const customerInvoices = appState.invoices.filter(inv => inv.customerPhone === cust.id);
-            let totalBalance = 0;
-            
-            customerInvoices.forEach(inv => {
-                const invoiceSettlements = appState.settlements.filter(s => s.invoiceId === inv.id);
-                const totalPaid = invoiceSettlements.reduce((sum, s) => sum + parseFloat(s.amount || 0), 0);
-                const balance = parseFloat(inv.total || 0) - totalPaid;
-                totalBalance += balance;
-            });
-            
-            const balanceClass = totalBalance > 0 ? "negative" : "";
-            const balanceText = totalBalance !== 0 ? `${totalBalance.toFixed(2)} ج.م` : '0.00 ج.م';
-            
-            return `
-                <tr>
-                    <td>${cust.name}</td>
-                    <td>${cust.id}</td>
-                    <td>${cust.address || 'لا يوجد'}</td>
-                    <td><span class="customer-balance ${balanceClass}">${balanceText}</span></td>
-                    <td class="action-buttons">
-                        <button class="btn-small btn-warning edit-customer-btn" data-id="${cust.id}"><i class="fas fa-edit"></i></button>
-                        <button class="btn-small btn-danger delete-customer-btn" data-id="${cust.id}"><i class="fas fa-trash-alt"></i></button>
-                    </td>
-                </tr>
-            `;
-        }).join("");
-    },
-    save: async () => { 
-        const id = DOM.newCustomerId.value.trim(),
-              name = DOM.newCustomerName.value.trim(),
-              address = DOM.newCustomerAddress.value.trim();
-        if (!id || !name) { Helpers.showNotification("يرجى إدخال اسم ورقم هاتف العميل."); return; } 
-        const ref = doc(db, "customers", id); 
-        if (!appState.editingCustomerId && (await getDoc(ref)).exists()) { Helpers.showNotification("هذا الرقم مسجل لعميل آخر."); return; } 
-        
-        try {
-            await setDoc(ref, { name, address }, { merge: true }); 
-            Helpers.showNotification(appState.editingCustomerId ? "تم تعديل العميل بنجاح." : "تم حفظ العميل بنجاح."); 
-            DOM.newCustomerId.value = "";
-            DOM.newCustomerName.value = "";
-            DOM.newCustomerAddress.value = "";
-            appState.editingCustomerId = null; 
-        } catch (error) {
-            console.error("Error saving customer: ", error);
-            Helpers.showNotification("فشل حفظ العميل. تحقق من اتصالك بالإنترنت.");
-        }
-    },
-    edit: (id) => {
-        const c = appState.customers.find(c => c.id === id);
-        if (!c) return;
-        DOM.newCustomerId.value = c.id;
-        DOM.newCustomerName.value = c.name;
-        DOM.newCustomerAddress.value = c.address || '';
-        appState.editingCustomerId = id;
-    },
-    delete: async (id) => { if (confirm("هل أنت متأكد؟")) { await window.deleteDocument("customers", id); Helpers.showNotification("تم حذف العميل."); } }
-};
-// #endregion
-
-// #region Sales Controller
-const SalesController = {
-    updateTotals: () => { const itemsTotal = appState.currentInvoice.reduce((sum, item) => sum + (item.price * item.qty), 0); const grandTotal = itemsTotal + appState.deliveryFee; DOM.invoiceTotal.textContent = grandTotal.toFixed(2); DOM.deliveryFeeValue.textContent = appState.deliveryFee.toFixed(2); Helpers.calculateChange(); },
-    renderInvoice: () => { DOM.invoiceTable.innerHTML = appState.currentInvoice.map((item, index) => `<tr><td>${item.name}</td><td><div class="qty-controls"><button class="btn-small btn-success qty-increase" data-index="${index}">+</button><span>${item.qty}</span><button class="btn-small btn-danger qty-decrease" data-index="${index}">-</button></div></td><td>${(item.price || 0).toFixed(2)}</td><td>${((item.price || 0) * item.qty).toFixed(2)}</td><td><button class="btn-small btn-danger remove-from-invoice-btn" data-index="${index}"><i class="fas fa-trash-alt"></i></button></td></tr>`).join(""); SalesController.updateTotals(); },
-    addToInvoice: (item) => { const existing = appState.currentInvoice.find(i => i.id === item.id); const stockItem = appState.items.find(i => i.id === item.id); if (!stockItem || stockItem.qunt <= 0) { Helpers.showNotification("المخزون غير متوفر."); return; } if (existing) { if (stockItem.qunt > existing.qty) existing.qty++; else { Helpers.showNotification(`أقصى كمية: ${stockItem.qunt}`); return; } } else appState.currentInvoice.push({ ...item, qty: 1 }); SalesController.renderInvoice(); },
-    updateItemQty: (index, change) => { const item = appState.currentInvoice[index]; if (!item) return; const stockItem = appState.items.find(i => i.id === item.id); if (change > 0 && item.qty + change > stockItem.qunt) { Helpers.showNotification(`أقصى كمية: ${stockItem.qunt}`); return; } item.qty += change; if (item.qty <= 0) appState.currentInvoice.splice(index, 1); SalesController.renderInvoice(); },
-    save: async () => { 
-        if (appState.currentInvoice.length === 0) { Helpers.showNotification("الفاتورة فارغة."); return; } 
-        DOM.saveInvoiceBtn.disabled = true; 
-        const total = parseFloat(DOM.invoiceTotal.textContent); 
-        const data = { 
-            customerName: DOM.customerName.value.trim() || 'عميل نقدي', 
-            customerPhone: DOM.customerPhone.value.trim(), 
-            paymentMethod: document.querySelector('input[name="paymentMethod"]:checked').value, 
-            items: appState.currentInvoice, 
-            deliveryFee: appState.deliveryFee, 
-            total, 
-            createdAt: serverTimestamp() 
-        };
-        
-        try {
-            // Check stock locally and update local state
-            let stockError = false;
-            for (const ci of appState.currentInvoice) {
-                const stockItem = appState.items.find(i => i.id === ci.id);
-                if (!stockItem || stockItem.qunt < ci.qty) {
-                    Helpers.showNotification(`المخزون غير كافٍ للصنف: ${ci.name}`);
-                    stockError = true;
-                    break;
-                }
-            }
-            if (stockError) {
-                DOM.saveInvoiceBtn.disabled = false;
-                return;
-            }
-
-            const batch = writeBatch(db);
-            const invoiceRef = doc(collection(db, "invoices"));
-            batch.set(invoiceRef, data);
-            
-            const paid = parseFloat(DOM.amountPaidInput.value) || 0;
-            if (paid > 0) {
-                const settlementData = {
-                    invoiceId: invoiceRef.id,
-                    amount: paid,
-                    notes: "الدفعة الأولى",
-                    date: serverTimestamp()
-                };
-                const settlementRef = doc(collection(db, "settlements"));
-                batch.set(settlementRef, settlementData);
-            }
-
-            await batch.commit();
-
-            // Update local stock after successful commit
-            appState.currentInvoice.forEach(ci => {
-                const stockItem = appState.items.find(i => i.id === ci.id);
-                if (stockItem) {
-                    stockItem.qunt -= ci.qty;
-                }
-            });
-            
-            Helpers.showNotification("تم حفظ الفاتورة بنجاح!");
-            
-            appState.currentInvoice = [];
-            DOM.customerName.value = "";
-            DOM.customerPhone.value = "";
-            DOM.amountPaidInput.value = "";
-            SalesController.renderInvoice();
-            ItemsController.render(); // Re-render items to show updated local stock
-        } catch (e) {
-            console.error("Save Invoice Error:", e);
-            Helpers.showNotification("فشل الحفظ. تحقق من اتصالك بالانترنت.", 5000);
-        } finally {
-            DOM.saveInvoiceBtn.disabled = false;
-        }
-    },
-    print: () => {
-        if (appState.currentInvoice.length === 0) { Helpers.showNotification("الفاتورة فارغة للطباعة."); return; }
-        const total = parseFloat(DOM.invoiceTotal.textContent).toFixed(2);
-        const paid = parseFloat(DOM.amountPaidInput.value || total).toFixed(2);
-        const change = (paid - total).toFixed(2);
-        let itemsHtml = appState.currentInvoice.map(item => `<tr><td>${item.name}</td><td>${item.qty}</td><td>${(item.price || 0).toFixed(2)}</td><td>${((item.price || 0) * item.qty).toFixed(2)}</td></tr>`).join('');
-        const printContent = `<style> body { font-family: monospace; direction: rtl; margin: 0; padding: 5px; } h2, h4 { text-align: center; margin: 5px 0; } table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; } th, td { border: 1px solid #ccc; padding: 4px; text-align: center; } .summary { text-align: left; margin-top: 10px; font-size: 13px; font-weight: bold; } </style> <h2>فاتورة بيع</h2> <h4>${new Date().toLocaleString('ar-EG')}</h4> <p>العميل: ${DOM.customerName.value || 'عميل نقدي'}</p> <table><thead><tr><th>الصنف</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead><tbody>${itemsHtml}</tbody></table> <div class="summary">خدمة التوصيل: ${appState.deliveryFee.toFixed(2)}</div> <div class="summary">الإجمالي: ${total}</div> <div class="summary">المدفوع: ${paid}</div> <div class="summary">الباقي: ${change}</div>`;
-        const printWindow = window.open('', '', 'height=600,width=800');
-        printWindow.document.write(printContent);
-        printWindow.document.close();
-        printWindow.focus();
-        printWindow.print();
-    },
-    sendWhatsApp: () => {
-        if (appState.currentInvoice.length === 0) { Helpers.showNotification("الفاتورة فارغة."); return; }
-        let phone = DOM.customerPhone.value.replace(/\s+/g, '');
-        if (!phone) { Helpers.showNotification("يرجى إدخال رقم هاتف العميل."); return; }
-        if (phone.startsWith('0')) phone = phone.substring(1);
-        if (!phone.startsWith('20')) phone = '20' + phone;
-        let message = `*فاتورة جديدة*\n-------------------\n${appState.currentInvoice.map(item => `${item.name} (الكمية: ${item.qty}) - ${(item.price || 0).toFixed(2)} ج.م`).join('\n')}\n-------------------\nخدمة التوصيل: ${appState.deliveryFee.toFixed(2)} ج.م\n*الإجمالي: ${DOM.invoiceTotal.textContent} ج.م*`;
-        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
     }
 };
 // #endregion
@@ -801,22 +292,45 @@ const SalesController = {
 // #region Scanner Controller
 const ScannerController = {
     onScanSuccess: (decodedText, decodedResult) => {
-        // Scanner is now only for sales
-        const product = appState.items.find(p => p.sku === decodedText || p.barcode1 === decodedText || p.barcode2 === decodedText);
+        const cleanDecodedText = decodedText.trim();
+        const scanRegion = document.querySelector('.scan-region');
+
+        const product = appState.items.find(p =>
+            String(p.sku || '').trim() === cleanDecodedText ||
+            String(p.barcode1 || '').trim() === cleanDecodedText ||
+            String(p.barcode2 || '').trim() === cleanDecodedText
+        );
+
+        if (appState.html5QrCode && appState.html5QrCode.isScanning) {
+            appState.html5QrCode.pause();
+            setTimeout(() => { if (appState.html5QrCode) appState.html5QrCode.resume(); }, 1500);
+        }
+
         if (product) {
+            scanRegion.classList.add('success-flash');
+            setTimeout(() => scanRegion.classList.remove('success-flash'), 600);
             SalesController.addToInvoice(product);
-            Helpers.showNotification(`تمت إضافة: ${product.name}`);
+            Helpers.showNotification(`✅ تمت إضافة: ${product.name}`);
         } else {
-            Helpers.showNotification("الصنف غير موجود بهذا الباركود.");
+            scanRegion.classList.add('error-flash');
+            setTimeout(() => scanRegion.classList.remove('error-flash'), 600);
+            Helpers.showNotification(`❌ الصنف غير موجود للباركود: ${cleanDecodedText}`);
         }
     },
     start: () => {
         if (!appState.html5QrCode) {
-           appState.html5QrCode = new Html5Qrcode("reader");
+            appState.html5QrCode = new Html5Qrcode("qr-reader", { formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.EAN_8] });
         }
-        DOM.scannerContainer.style.display = 'flex';
-        appState.html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: {width: 250, height: 250} }, ScannerController.onScanSuccess, (errorMessage) => {})
-        .catch((err) => Helpers.showNotification("فشل تشغيل الكاميرا."));
+        DOM.scannerContainer.style.display = 'block';
+        const config = { fps: 10, qrbox: { width: 250, height: 50 } };
+        appState.html5QrCode.start(
+            { facingMode: "environment" }, config,
+            ScannerController.onScanSuccess,
+            (errorMessage) => { /* Ignore */ }
+        ).catch((err) => {
+            Helpers.showNotification("❌ فشل تشغيل الكاميرا. يرجى منح الإذن.");
+            ScannerController.stop();
+        });
     },
     stop: () => {
         if (appState.html5QrCode && appState.html5QrCode.isScanning) {
@@ -827,820 +341,65 @@ const ScannerController = {
 };
 // #endregion
 
-// #region Workers Controller
-const WorkersController = {
-    render: () => {
-        DOM.workersList.innerHTML = appState.workers.map(worker => `
-            <div class="worker-card">
-                <div class="worker-details">
-                    <h4>${worker.name}</h4>
-                    <p>هاتف: ${worker.phone} | عنوان: ${worker.address || 'غير متوفر'}</p>
-                </div>
-                <div class="worker-actions">
-                    <button class="btn-small btn-success view-worker-report-btn" data-id="${worker.id}"><i class="fas fa-chart-line"></i> تقرير</button>
-                    <button class="btn-small btn-warning edit-worker-btn" data-id="${worker.id}"><i class="fas fa-edit"></i></button>
-                    <button class="btn-small btn-info add-advance-btn" data-id="${worker.id}"><i class="fas fa-money-bill-wave"></i> سلفة</button>
-                    <button class="btn-small btn-info add-vacation-btn" data-id="${worker.id}"><i class="fas fa-calendar-alt"></i> إجازة</button>
-                    <button class="btn-small btn-danger delete-worker-btn" data-id="${worker.id}"><i class="fas fa-trash-alt"></i></button>
-                </div>
-            </div>
-        `).join("");
-    },
-    save: async () => {
-        const workerData = {
-            name: DOM.workerNameInput.value.trim(),
-            phone: DOM.workerPhoneInput.value.trim(),
-            address: DOM.workerAddressInput.value.trim(),
-            salary: parseFloat(DOM.workerSalaryInput.value) || 0,
-            absences: parseInt(DOM.workerAbsencesInput.value) || 0,
-            overtime: parseInt(DOM.workerOvertimeInput.value) || 0,
-            createdAt: serverTimestamp()
-        };
-        
-        if (!workerData.name || !workerData.phone) {
-            Helpers.showNotification("يرجى إدخال اسم العامل ورقم الهاتف.");
-            return;
-        }
-        
-        try {
-            const docRef = doc(db, "workers", appState.editingWorkerId || workerData.phone);
-            await setDoc(docRef, workerData, { merge: true });
-            Helpers.showNotification(appState.editingWorkerId ? "تم تعديل بيانات العامل بنجاح." : "تم إضافة العامل بنجاح.");
-            WorkersController.clearForm();
-        } catch (error) {
-            console.error("Error saving worker:", error);
-            Helpers.showNotification("حدث خطأ أثناء حفظ بيانات العامل.");
-        }
-    },
-    edit: (id) => {
-        const worker = appState.workers.find(w => w.id === id);
-        if (!worker) return;
-        appState.editingWorkerId = id;
-        DOM.workerNameInput.value = worker.name;
-        DOM.workerPhoneInput.value = worker.phone;
-        DOM.workerAddressInput.value = worker.address || '';
-        DOM.workerSalaryInput.value = worker.salary || 0;
-        DOM.workerAbsencesInput.value = worker.absences || 0;
-        DOM.workerOvertimeInput.value = worker.overtime || 0;
-        DOM.saveWorkerBtn.innerHTML = '<i class="fas fa-edit"></i> تعديل العامل';
-    },
-    delete: async (id) => {
-        if (confirm("هل أنت متأكد من حذف هذا العامل؟")) {
-            await window.deleteDocument("workers", id);
-            Helpers.showNotification("تم حذف العامل بنجاح.");
-        }
-    },
-    clearForm: () => {
-        DOM.workerNameInput.value = "";
-        DOM.workerPhoneInput.value = "";
-        DOM.workerAddressInput.value = "";
-        DOM.workerSalaryInput.value = "";
-        DOM.workerAbsencesInput.value = "";
-        DOM.workerOvertimeInput.value = "";
-        appState.editingWorkerId = null;
-        DOM.saveWorkerBtn.innerHTML = '<i class="fas fa-save"></i> حفظ العامل';
-    },
-    showWorkerReport: (workerId) => {
-        const worker = appState.workers.find(w => w.id === workerId);
-        if (!worker) return;
-
-        const workerAdvances = appState.advances.filter(a => a.workerId === worker.id);
-        const totalAdvances = workerAdvances.reduce((sum, a) => sum + parseFloat(a.amount || 0), 0);
-
-        const workerVacations = appState.vacations.filter(v => v.workerId === worker.id);
-        const totalVacationDays = workerVacations.reduce((sum, v) => sum + parseInt(v.days || 0), 0);
-        
-        const salary = parseFloat(worker.salary || 0);
-        const absenceDays = parseInt(worker.absences || 0);
-        const overtimeHours = parseInt(worker.overtime || 0);
-        
-        const dailyRate = salary / 30; 
-        const hourlyRate = dailyRate / 8;
-
-        const absenceDeduction = absenceDays * dailyRate;
-        const overtimeBonus = overtimeHours * hourlyRate * 1.5;
-
-        const netSalary = salary - totalAdvances - absenceDeduction + overtimeBonus;
-
-        DOM.reportWorkerName.textContent = worker.name;
-        DOM.workerReportContent.innerHTML = `
-            <p><strong>الراتب الأساسي:</strong> ${salary.toFixed(2)} ج.م</p>
-            <hr>
-            <h4>الخصومات</h4>
-            <p><strong>إجمالي السلف:</strong> ${totalAdvances.toFixed(2)} ج.م</p>
-            <p><strong>أيام الغياب:</strong> ${absenceDays} يوم (خصم تقريبي: ${absenceDeduction.toFixed(2)} ج.م)</p>
-            <hr>
-            <h4>الإضافات</h4>
-            <p><strong>ساعات إضافية:</strong> ${overtimeHours} ساعة (إضافة تقريبية: ${overtimeBonus.toFixed(2)} ج.م)</p>
-            <hr>
-            <h3><strong>صافي الراتب المستحق:</strong> ${netSalary.toFixed(2)} ج.م</h3>
-            <hr>
-            <h4>سجل الإجازات (${totalVacationDays} يوم)</h4>
-            <ul>
-                ${workerVacations.length > 0 ? workerVacations.map(v => `<li>من ${Helpers.formatDate(v.startDate)} إلى ${Helpers.formatDate(v.endDate)} (${v.days} يوم) - ${v.notes || ''}</li>`).join('') : '<li>لا يوجد</li>'}
-            </ul>
-            <h4>سجل السلف</h4>
-            <ul>
-                ${workerAdvances.length > 0 ? workerAdvances.map(a => `<li>${a.amount.toFixed(2)} ج.م في ${Helpers.formatDate(a.date.toDate())} - ${a.notes || ''}</li>`).join('') : '<li>لا يوجد</li>'}
-            </ul>
-        `;
-        Helpers.openModal(DOM.workerReportModal);
-    },
-    addAdvance: (workerId) => {
-        appState.selectedWorkerId = workerId;
-        DOM.advanceAmount.value = "";
-        DOM.advanceNotes.value = "";
-        Helpers.openModal(DOM.advanceModal);
-    },
-    saveAdvance: async () => {
-        const advanceData = {
-            workerId: appState.selectedWorkerId,
-            amount: parseFloat(DOM.advanceAmount.value) || 0,
-            notes: DOM.advanceNotes.value.trim(),
-            date: serverTimestamp()
-        };
-        
-        if (advanceData.amount <= 0) {
-            Helpers.showNotification("يرجى إدخال مبلغ صحيح للسلفة.");
-            return;
-        }
-        
-        try {
-            await addDoc(collection(db, "advances"), advanceData);
-            Helpers.showNotification("تم إضافة السلفة بنجاح.");
-            Helpers.closeModal(DOM.advanceModal);
-        } catch (error) {
-            console.error("Error saving advance:", error);
-            Helpers.showNotification("حدث خطأ أثناء حفظ السلفة.");
-        }
-    },
-    addVacation: (workerId) => {
-        appState.selectedWorkerId = workerId;
-        const today = new Date().toISOString().split('T')[0];
-        DOM.vacationStartDate.value = today;
-        DOM.vacationEndDate.value = today;
-        DOM.vacationNotes.value = "";
-        Helpers.openModal(DOM.vacationModal);
-    },
-    saveVacation: async () => {
-        const vacationData = {
-            workerId: appState.selectedWorkerId,
-            startDate: DOM.vacationStartDate.value,
-            endDate: DOM.vacationEndDate.value,
-            notes: DOM.vacationNotes.value.trim(),
-            days: Helpers.calculateVacationDays(DOM.vacationStartDate.value, DOM.vacationEndDate.value),
-            createdAt: serverTimestamp()
-        };
-        
-        if (!vacationData.startDate || !vacationData.endDate) {
-            Helpers.showNotification("يرجى إدخال تاريخ البدء وتاريخ الانتهاء.");
-            return;
-        }
-        
-        if (new Date(vacationData.startDate) > new Date(vacationData.endDate)) {
-            Helpers.showNotification("تاريخ البدء يجب أن يكون قبل تاريخ الانتهاء.");
-            return;
-        }
-        
-        try {
-            await addDoc(collection(db, "vacations"), vacationData);
-            Helpers.showNotification("تم إضافة الإجازة بنجاح.");
-            Helpers.closeModal(DOM.vacationModal);
-        } catch (error) {
-            console.error("Error saving vacation:", error);
-            Helpers.showNotification("حدث خطأ أثناء حفظ الإجازة.");
-        }
-    }
-};
-// #endregion
-
-// #region Invoices Controller
-const InvoicesController = {
-    render: () => {
-        DOM.invoicesList.innerHTML = "";
-        if (appState.invoices.length === 0) {
-            DOM.invoicesList.innerHTML = "<p>لا توجد فواتير محفوظة.</p>";
-            return;
-        }
-        
-        const sortedInvoices = [...appState.invoices].sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
-        
-        DOM.invoicesList.innerHTML = sortedInvoices.map((inv, index) => {
-            const dateObj = inv.createdAt?.toDate ? inv.createdAt.toDate() : new Date();
-            const date = dateObj.toLocaleString('ar-EG', { dateStyle: 'short', timeStyle: 'short' });
-            
-            const invoiceSettlements = appState.settlements.filter(s => s.invoiceId === inv.id);
-            const totalPaid = invoiceSettlements.reduce((sum, s) => sum + parseFloat(s.amount || 0), 0);
-            const balance = parseFloat(inv.total || 0) - totalPaid;
-            
-            let statusText = "";
-            let statusClass = "";
-            if (balance <= 0) {
-                statusText = "تم السداد بالكامل";
-                statusClass = "paid";
-            } else if (totalPaid > 0) {
-                statusText = `مدفوع جزئياً (المتبقي: ${balance.toFixed(2)} ج.م)`;
-                statusClass = "partially-paid";
-            } else {
-                statusText = `لم يتم السداد (${inv.total.toFixed(2)} ج.م)`;
-                statusClass = "not-paid";
-            }
-            
-            return `
-                <div class="summary-box">
-                    <p><b>فاتورة رقم:</b> ${sortedInvoices.length - index} | <b>التاريخ:</b> ${date}</p>
-                    <p><b>العميل:</b> ${inv.customerName} (${inv.customerPhone})</p>
-                    <p><b>الحالة:</b> <span class="${statusClass}">${statusText}</span></p>
-                    <table style="font-size: 14px;">
-                        <thead>
-                            <tr>
-                                <th>الصنف</th>
-                                <th>الكمية</th>
-                                <th>السعر</th>
-                                <th>الإجمالي</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${(inv.items || []).map(i => `
-                                <tr>
-                                    <td>${i.name}</td>
-                                    <td>${i.qty}</td>
-                                    <td>${(i.price || 0).toFixed(2)}</td>
-                                    <td>${((i.price || 0) * i.qty).toFixed(2)}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                    <p><b>خدمة التوصيل:</b> ${(inv.deliveryFee || 0).toFixed(2)} ج.م</p>
-                    <p style="font-weight:bold;">الإجمالي: ${(inv.total || 0).toFixed(2)} ج.م</p>
-                    <p><b>المدفوع:</b> ${totalPaid.toFixed(2)} ج.م</p>
-                    <p><b>المتبقي:</b> ${balance.toFixed(2)} ج.م</p>
-                    ${balance > 0 ? `
-                        <div class="settlement-section">
-                            <button class="btn-small btn-success settle-invoice-btn" data-id="${inv.id}">
-                                <i class="fas fa-money-check"></i> تسوية الفاتورة
-                            </button>
-                        </div>
-                    ` : ''}
-                </div>
-            `;
-        }).join('');
-    },
-    
-    openSettlementModal: (invoiceId) => {
-        const invoice = appState.invoices.find(inv => inv.id === invoiceId);
-        if (!invoice) return;
-        
-        const invoiceSettlements = appState.settlements.filter(s => s.invoiceId === invoiceId);
-        const totalPaid = invoiceSettlements.reduce((sum, s) => sum + parseFloat(s.amount || 0), 0);
-        const balance = parseFloat(invoice.total || 0) - totalPaid;
-        
-        DOM.settlementInvoiceId.textContent = invoiceId;
-        DOM.settlementCustomerName.textContent = `${invoice.customerName} (${invoice.customerPhone})`;
-        DOM.settlementTotal.textContent = invoice.total.toFixed(2);
-        DOM.settlementPaid.textContent = totalPaid.toFixed(2);
-        DOM.settlementBalance.textContent = balance.toFixed(2);
-        DOM.settlementAmount.value = balance;
-        DOM.settlementNotes.value = "";
-        
-        appState.selectedInvoiceId = invoiceId;
-        Helpers.openModal(DOM.settlementModal);
-    },
-    
-    saveSettlement: async () => {
-        const amount = parseFloat(DOM.settlementAmount.value) || 0;
-        const notes = DOM.settlementNotes.value.trim();
-        
-        if (amount <= 0) {
-            Helpers.showNotification("يرجى إدخال مبلغ صحيح.");
-            return;
-        }
-        
-        try {
-            const settlementData = {
-                invoiceId: appState.selectedInvoiceId,
-                amount: amount,
-                notes: notes,
-                date: serverTimestamp()
-            };
-            
-            await addDoc(collection(db, "settlements"), settlementData);
-            Helpers.showNotification("تم تسوية المبلغ بنجاح.");
-            Helpers.closeModal(DOM.settlementModal);
-        } catch (error) {
-            console.error("Error saving settlement:", error);
-            Helpers.showNotification("حدث خطأ أثناء التسوية.");
-        }
-    }
-};
-// #endregion
-
-// #region Reports Controller
-const ReportsController = {
-    render: () => {
-        ReportsController.renderSalesSummary();
-        ReportsController.renderBestSelling();
-        if (appState.currentUser?.role === 'admin') {
-            DOM.adminReportsSection.classList.remove('hidden');
-            ReportsController.renderWorkersSummary();
-            ReportsController.renderEmployeesSummary();
-        } else {
-            DOM.adminReportsSection.classList.add('hidden');
-        }
-    },
-
-    renderSalesSummary: () => {
-        const group = DOM.summaryGroupSelect.value;
-        const now = new Date();
-        const groupedInvoices = {};
-
-        appState.invoices.forEach(inv => {
-            if (!inv.createdAt || !inv.createdAt.toDate) return;
-            const date = inv.createdAt.toDate();
-            let key;
-
-            if (group === 'day') {
-                key = date.toLocaleDateString('ar-EG');
-            } else if (group === 'week') {
-                const firstDay = new Date(date.setDate(date.getDate() - date.getDay()));
-                key = `أسبوع ${firstDay.toLocaleDateString('ar-EG')}`;
-            } else if (group === 'month') {
-                key = `${date.toLocaleString('ar-EG', { month: 'long' })} ${date.getFullYear()}`;
-            }
-            
-            if (!groupedInvoices[key]) {
-                groupedInvoices[key] = { count: 0, total: 0 };
-            }
-            groupedInvoices[key].count++;
-            groupedInvoices[key].total += inv.total;
-        });
-        
-        DOM.salesSummaryTable.innerHTML = Object.entries(groupedInvoices).map(([key, value]) => `
-            <tr>
-                <td>${key}</td>
-                <td>${value.count}</td>
-                <td>${value.total.toFixed(2)} ج.م</td>
-            </tr>
-        `).join('');
-        
-        const totalSales = appState.invoices.reduce((sum, inv) => sum + inv.total, 0);
-        DOM.totalSalesAmount.textContent = totalSales.toFixed(2);
-    },
-
-    renderBestSelling: () => {
-        const itemCounts = {};
-        appState.invoices.forEach(inv => {
-            (inv.items || []).forEach(item => {
-                itemCounts[item.name] = (itemCounts[item.name] || 0) + item.qty;
-            });
-        });
-
-        const bestSelling = Object.entries(itemCounts)
-            .sort(([, a], [, b]) => b - a)
-            .slice(0, 10);
-
-        if (bestSelling.length > 0) {
-            DOM.bestSellingItems.innerHTML = '<ul>' + bestSelling.map(([name, count]) => {
-                const stockItem = appState.items.find(i => i.name === name);
-                const stock = stockItem ? stockItem.qunt : 'غير معروف';
-                return `<li><strong>${name}</strong>: ${count} مباع (المخزون: ${stock})</li>`
-            }).join('') + '</ul>';
-        } else {
-            DOM.bestSellingItems.innerHTML = '<p>لا توجد بيانات مبيعات كافية.</p>';
-        }
-    },
-
-    renderWorkersSummary: () => {
-        const totalWorkers = appState.workers.length;
-        const totalSalaries = appState.workers.reduce((sum, w) => sum + (w.salary || 0), 0);
-        const totalAbsences = appState.workers.reduce((sum, w) => sum + (w.absences || 0), 0);
-        const totalAdvances = appState.advances.reduce((sum, a) => sum + (a.amount || 0), 0);
-        const totalVacationDays = appState.vacations.reduce((sum, v) => sum + (v.days || 0), 0);
-
-        DOM.workersSummaryContainer.innerHTML = `
-            <table style="font-size: 14px;">
-                <thead>
-                    <tr><th>البند</th><th>الإجمالي</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>عدد العمال</td><td>${totalWorkers}</td></tr>
-                    <tr><td>إجمالي الرواتب الأساسية</td><td>${totalSalaries.toFixed(2)} ج.م</td></tr>
-                    <tr><td>إجمالي السلف</td><td>${totalAdvances.toFixed(2)} ج.م</td></tr>
-                    <tr><td>إجمالي أيام الغياب</td><td>${totalAbsences} يوم</td></tr>
-                    <tr><td>إجمالي أيام الإجازات</td><td>${totalVacationDays} يوم</td></tr>
-                </tbody>
-            </table>
-        `;
-    },
-
-    renderEmployeesSummary: () => {
-        const employees = appState.users.filter(u => u.role === 'user');
-        if (employees.length === 0) {
-            DOM.employeesSummaryContainer.innerHTML = "<p>لا يوجد موظفين مسجلين.</p>";
-            return;
-        }
-
-        DOM.employeesSummaryContainer.innerHTML = `
-             <table style="font-size: 14px;">
-                <thead>
-                    <tr><th>اسم الموظف</th><th>المسمى الوظيفي</th><th>المستحقات</th></tr>
-                </thead>
-                <tbody>
-                    ${employees.map(emp => `
-                        <tr>
-                            <td>${emp.username}</td>
-                            <td>موظف عادي</td>
-                            <td>لم تحدد بعد</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-        `;
-    },
-
-    resetInvoices: async () => {
-        if (confirm("هل أنت متأكد من حذف جميع الفواتير؟ هذا الإجراء لا يمكن التراجع عنه.")) {
-            try {
-                const batch = writeBatch(db);
-                const invoicesSnapshot = await getDocs(collection(db, "invoices"));
-                invoicesSnapshot.forEach((doc) => batch.delete(doc.ref));
-                const settlementsSnapshot = await getDocs(collection(db, "settlements"));
-                settlementsSnapshot.forEach((doc) => batch.delete(doc.ref));
-                await batch.commit();
-                Helpers.showNotification("تم حذف جميع الفواتير والتسويات بنجاح.");
-            } catch (error) {
-                console.error("Error resetting invoices:", error);
-                Helpers.showNotification("حدث خطأ أثناء حذف الفواتير.");
-            }
-        }
-    },
-    fullReset: async () => {
-        if (confirm("هل أنت متأكد من إعادة ضبط النظام بالكامل؟ هذا الإجراء سيمسح جميع البيانات ولا يمكن التراجع عنه.")) {
-            try {
-                const collectionsToDelete = ["customers", "invoices", "users", "workers", "advances", "vacations", "settlements", "items"];
-                const batch = writeBatch(db);
-                for (const collectionName of collectionsToDelete) {
-                    const snapshot = await getDocs(collection(db, collectionName));
-                    snapshot.forEach((doc) => batch.delete(doc.ref));
-                }
-                await batch.commit();
-                Helpers.showNotification("تم إعادة ضبط النظام بالكامل بنجاح.");
-            } catch (error) {
-                console.error("Error resetting system:", error);
-                Helpers.showNotification("حدث خطأ أثناء إعادة ضبط النظام.");
-            }
-        }
-    },
-    backup: async () => {
-        // ... (Backup logic remains the same)
-    },
-    restore: (file) => {
-        // ... (Restore logic remains the same)
-    }
-};
-// #endregion
-
 // #region App Logic & Event Listeners
 const App = {
-    init: async () => {
-        await App.firebaseSignIn(); // Sign in to Firebase first
-        App.listenToFirebase();
-        const savedUser = localStorage.getItem('currentUser'); 
-        if (savedUser) { 
-            appState.currentUser = JSON.parse(savedUser); 
-            Auth.showApp(appState.currentUser.role); 
-        }
+    init: () => {
+        App.loadItemsFromJSON();
         App.bindEvents();
-        
-        const today = new Date().toISOString().split('T')[0];
-        DOM.vacationStartDate.value = today;
-        DOM.vacationEndDate.value = today;
+        // For testing, bypass login
+        DOM.appContainer.style.display = "block";
+        DOM.loginContainer.style.display = "none";
     },
-    
-    firebaseSignIn: async () => {
-        try {
-            await signInAnonymously(auth);
-            console.log("Signed in to Firebase Anonymously");
-        } catch (error) {
-            console.error("Anonymous sign-in failed:", error);
-            Helpers.showNotification("فشل الاتصال بقاعدة البيانات. قد لا تعمل الميزات بشكل صحيح.");
-        }
-    },
-    
+
     loadItemsFromJSON: async () => {
         try {
-            const response = await fetch('p.json'); 
-            if (!response.ok) {
-                throw new Error('فشل في تحميل ملف الأصناف');
-            }
+            const response = await fetch('p.json');
+            if (!response.ok) throw new Error('Network response was not ok');
             const itemsData = await response.json();
             appState.items = itemsData.map(item => ({
                 ...item,
-                id: String(item.barcode1 || item.id || ''),
+                id: String(item.barcode1 || item.sku || Date.now()),
                 price: parseFloat(item.price) || 0,
                 qunt: parseInt(item.qunt) || 0
             }));
-
-            const categories = [...new Set(appState.items.map(i => i.category))].filter(Boolean);
-            const categoryOptions = `<option value="all">جميع الفئات</option>` + categories.map(c => `<option value="${c}">${c}</option>`).join('');
-            DOM.salesCategoryFilters.innerHTML = categories.map(c => `<button class="btn-small" data-category="${c}">${c}</button>`).join('');
-            DOM.filterCategory.innerHTML = categoryOptions;
-            ItemsController.render();
-            Helpers.showNotification("تم تحميل الأصناف محلياً.");
+            ItemsController.render(); // Fill the items table
+            Helpers.showNotification("تم تحميل الأصناف بنجاح.");
         } catch (error) {
             console.error("Error loading items from JSON:", error);
             Helpers.showNotification("خطأ: لم يتم العثور على ملف الأصناف p.json");
         }
     },
-
-    listenToFirebase: () => {
-        Object.values(appState.unsubscribe).forEach(unsub => unsub());
-        
-        App.loadItemsFromJSON();
-        
-        appState.unsubscribe.customers = window.readCollection("customers", (data) => { 
-            appState.customers = data; 
-            if (document.getElementById('customers').classList.contains('active')) CustomersController.render(); 
-        });
-        
-        appState.unsubscribe.invoices = window.readCollection("invoices", (data) => { 
-            appState.invoices = data; 
-            if (document.querySelector('nav button.active')?.dataset.tab === 'invoices') InvoicesController.render();
-            if (document.getElementById('summary').classList.contains('active')) ReportsController.render();
-        }, "createdAt", "desc");
-        
-        appState.unsubscribe.users = window.readCollection("users", (data) => { 
-            appState.users = data; 
-            if (document.getElementById('users').classList.contains('active')) UsersController.render(); 
-        }, "username", "asc");
-        
-        appState.unsubscribe.workers = window.readCollection("workers", (data) => { 
-            appState.workers = data; 
-            if (document.getElementById('users').classList.contains('active')) WorkersController.render(); 
-        }, "name", "asc");
-        
-        appState.unsubscribe.advances = window.readCollection("advances", (data) => { 
-            appState.advances = data; 
-        }, "date", "desc");
-        
-        appState.unsubscribe.vacations = window.readCollection("vacations", (data) => { 
-            appState.vacations = data; 
-        }, "startDate", "desc");
-        
-        appState.unsubscribe.settlements = window.readCollection("settlements", (data) => { 
-            appState.settlements = data; 
-            if (document.querySelector('nav button.active')?.dataset.tab === 'invoices') InvoicesController.render(); 
-            if (document.getElementById('customers').classList.contains('active')) CustomersController.render(); 
-        }, "date", "desc");
-        
-        window.getDocument("config", "admin").then(doc => { if (doc?.pin) appState.adminPIN = doc.pin; });
-    },
-    
-    onTabSwitch: (tabId) => {
-        switch (tabId) {
-            case 'items': ItemsController.render(); break;
-            case 'customers': CustomersController.render(); break;
-            case 'invoices': InvoicesController.render(); break;
-            case 'summary': ReportsController.render(); break;
-            case 'users': 
-                if (appState.currentUser?.role === 'admin') {
-                    UsersController.render(); 
-                    WorkersController.render();
-                }
-                break;
-        }
-    },
-    
-    renderItemsGrid: (category) => {
-        const itemsToShow = category ? appState.items.filter(item => item.category === category && item.qunt > 0) : [];
-        DOM.itemGrid.innerHTML = itemsToShow.map(item => `<div class="item-card" data-id="${item.id}"><h5>${item.name || 'غير متوفر'}</h5><p>${(item.price || 0).toFixed(2)} ج.م</p></div>`).join("");
-    },
     
     bindEvents: () => {
-        DOM.loginForm.addEventListener("submit", (e) => { e.preventDefault(); Auth.login(DOM.usernameInput.value, DOM.passwordInput.value); });
-        DOM.logoutBtn.addEventListener("click", Auth.logout);
+        DOM.startScannerBtn.addEventListener("click", ScannerController.start);
+        DOM.closeScannerBtn.addEventListener("click", ScannerController.stop);
 
-        DOM.navButtons.forEach(btn => {
-            btn.addEventListener("click", (e) => {
-                e.preventDefault();
-                DOM.navButtons.forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
-                const tabId = btn.dataset.tab;
-                DOM.sections.forEach(s => s.classList.remove("active"));
-                const activeSection = document.getElementById(tabId);
-                if (activeSection) {
-                    activeSection.classList.add("active");
-                    App.onTabSwitch(tabId);
-                }
-            });
-        });
-
-        DOM.searchItem.addEventListener("input", () => {
-            const q = DOM.searchItem.value.trim().toLowerCase();
-            DOM.searchResults.style.display = "none";
-            if (q.length < 1) return;
-            const matched = appState.items.filter(i => (i.name || '').toLowerCase().includes(q) || (i.barcode1 || '').includes(q) || (i.barcode2 || '').includes(q)).slice(0, 5);
-            if (matched.length > 0) {
-                DOM.searchResults.innerHTML = matched.map(i => `<div data-id="${i.id}">${i.barcode1} - ${i.name}</div>`).join('');
-                DOM.searchResults.style.display = "block";
-            }
-        });
-        DOM.searchResults.addEventListener("click", (e) => { const div = e.target.closest("div[data-id]"); if (div) { SalesController.addToInvoice(appState.items.find(i => i.id === div.dataset.id)); DOM.searchItem.value = ""; DOM.searchResults.style.display = "none"; }});
-        
-        DOM.customerName.addEventListener("input", () => {
-            const query = DOM.customerName.value.trim().toLowerCase();
-            DOM.customerSuggestions.innerHTML = '';
-            if (query.length === 0) {
-                DOM.customerSuggestions.style.display = 'none';
-                return;
-            }
-            const suggestions = appState.customers.filter(c => c.name.toLowerCase().includes(query));
-            if (suggestions.length > 0) {
-                DOM.customerSuggestions.innerHTML = suggestions.map(c => `<div data-id="${c.id}">${c.name}</div>`).join('');
-                DOM.customerSuggestions.style.display = 'block';
-            } else {
-                DOM.customerSuggestions.style.display = 'none';
-            }
-        });
-
-        DOM.customerSuggestions.addEventListener("click", e => {
-            const div = e.target.closest("div[data-id]");
-            if (div) {
-                const customer = appState.customers.find(c => c.id === div.dataset.id);
-                if (customer) {
-                    DOM.customerName.value = customer.name;
-                    DOM.customerPhone.value = customer.id;
-                }
-                DOM.customerSuggestions.style.display = 'none';
-            }
-        });
-
-        document.addEventListener('click', (e) => {
-            const salesHeader = document.getElementById('sales-header');
-            if (!salesHeader.contains(e.target)) {
-                 DOM.customerSuggestions.style.display = 'none';
-                 DOM.searchResults.style.display = 'none';
-            }
-        });
-
-
-        DOM.toggleItemsGridBtn.addEventListener("click", () => {
-            const isHidden = DOM.categoryScrollerContainer.style.display === 'none';
-            DOM.categoryScrollerContainer.style.display = isHidden ? 'block' : 'none';
-            DOM.itemGrid.style.display = isHidden ? 'grid' : 'none';
-            DOM.toggleItemsGridBtn.innerHTML = isHidden ? '<i class="fas fa-eye-slash"></i> إخفاء الأصناف' : '<i class="fas fa-th-large"></i> عرض الأصناف';
-            if(isHidden && DOM.salesCategoryFilters.querySelector('button')){
-                DOM.salesCategoryFilters.querySelector('button').click();
-            }
-        });
-        DOM.salesCategoryFilters.addEventListener("click", (e) => {
-            const btn = e.target.closest("button[data-category]");
-            if(btn){
-                DOM.salesCategoryFilters.querySelectorAll("button").forEach(b => b.classList.remove("active"));
-                btn.classList.add("active");
-                App.renderItemsGrid(btn.dataset.category);
-            }
-        });
-        DOM.itemGrid.addEventListener("click", (e) => {
-            const card = e.target.closest(".item-card[data-id]");
-            if (card) {
-                const item = appState.items.find(i => i.id === card.dataset.id);
-                if (item) SalesController.addToInvoice(item);
-            }
-        });
-
-        DOM.invoiceTable.addEventListener("click", (e) => { 
-            const btn = e.target.closest("button"); 
-            if (!btn) return; 
-            const idx = parseInt(btn.dataset.index); 
-            if (btn.classList.contains("qty-increase")) SalesController.updateItemQty(idx, 1); 
-            if (btn.classList.contains("qty-decrease")) SalesController.updateItemQty(idx, -1); 
-            if (btn.classList.contains("remove-from-invoice-btn")) { 
-                appState.currentInvoice.splice(idx, 1); 
+        DOM.invoiceTable.addEventListener("click", (e) => {
+            const btn = e.target.closest("button");
+            if (!btn) return;
+            const index = parseInt(btn.dataset.index);
+            if (btn.classList.contains("qty-increase")) SalesController.updateItemQty(index, 1);
+            if (btn.classList.contains("qty-decrease")) SalesController.updateItemQty(index, -1);
+            if (btn.classList.contains("remove-from-invoice-btn")) {
+                appState.currentInvoice.splice(index, 1);
                 SalesController.renderInvoice();
             }
         });
-
-        DOM.saveInvoiceBtn.addEventListener("click", SalesController.save);
-        DOM.printInvoiceBtn.addEventListener("click", SalesController.print);
-        DOM.sendWhatsAppBtn.addEventListener("click", SalesController.sendWhatsApp);
-        DOM.amountPaidInput.addEventListener("input", Helpers.calculateChange);
-        DOM.increaseDeliveryBtn.addEventListener("click", () => { appState.deliveryFee += 5; SalesController.updateTotals(); });
-        DOM.decreaseDeliveryBtn.addEventListener("click", () => { appState.deliveryFee = Math.max(0, appState.deliveryFee - 5); SalesController.updateTotals(); });
         
-        const filterInputs = [DOM.filterBarcode1, DOM.filterBarcode2, DOM.filterName, DOM.filterUnit, DOM.filterSku, DOM.filterPrice, DOM.filterStock, DOM.filterCategory];
-        filterInputs.forEach(input => input.addEventListener("input", ItemsController.render));
-        
-        DOM.saveCustomerBtn.addEventListener("click", CustomersController.save);
-        DOM.customersTableBody.addEventListener("click", e => { const btn = e.target.closest("button"); if(!btn) return; if (btn.classList.contains("edit-customer-btn")) CustomersController.edit(btn.dataset.id); if (btn.classList.contains("delete-customer-btn")) CustomersController.delete(btn.dataset.id); });
-        
-        DOM.saveUserBtn.addEventListener("click", UsersController.save);
-        DOM.usersList.addEventListener("click", e => { const btn = e.target.closest("button"); if(btn) { if (btn.classList.contains("edit-user-btn")) UsersController.edit(btn.dataset.id); if (btn.classList.contains("delete-user-btn")) UsersController.delete(btn.dataset.id); }});
-        DOM.changePinBtn.addEventListener("click", UsersController.changeAdminPin);
-        
-        DOM.summaryGroupSelect.addEventListener("change", ReportsController.renderSalesSummary);
-        DOM.fullResetBtn.addEventListener("click", ReportsController.fullReset);
-        DOM.resetInvoicesBtn.addEventListener("click", ReportsController.resetInvoices);
-        DOM.backupBtn.addEventListener("click", ReportsController.backup);
-        DOM.restoreBtn.addEventListener("click", () => DOM.restoreInput.click());
-        DOM.restoreInput.addEventListener("change", (e) => ReportsController.restore(e.target.files[0]));
-        
-        DOM.startScannerBtn.addEventListener("click", () => {
-            appState.scannerMode = 'sales'; 
-            ScannerController.start();
-        });
-        DOM.scannerContainer.addEventListener("click", (e) => { if(e.target === DOM.scannerContainer) ScannerController.stop(); });
-        
-        DOM.saveWorkerBtn.addEventListener('click', WorkersController.save);
-        DOM.workersList.addEventListener('click', (e) => {
-            const btn = e.target.closest('button');
-            if (!btn) return;
-            if (btn.classList.contains('edit-worker-btn')) WorkersController.edit(btn.dataset.id);
-            else if (btn.classList.contains('delete-worker-btn')) WorkersController.delete(btn.dataset.id);
-            else if (btn.classList.contains('add-advance-btn')) WorkersController.addAdvance(btn.dataset.id);
-            else if (btn.classList.contains('add-vacation-btn')) WorkersController.addVacation(btn.dataset.id);
-            else if (btn.classList.contains('view-worker-report-btn')) WorkersController.showWorkerReport(btn.dataset.id);
-        });
-        
-        DOM.saveAdvanceBtn.addEventListener('click', WorkersController.saveAdvance);
-        DOM.cancelAdvanceBtn.addEventListener('click', () => Helpers.closeModal(DOM.advanceModal));
-        DOM.saveVacationBtn.addEventListener('click', WorkersController.saveVacation);
-        DOM.cancelVacationBtn.addEventListener('click', () => Helpers.closeModal(DOM.vacationModal));
-        
-        DOM.invoicesList.addEventListener('click', (e) => {
-            const btn = e.target.closest('.settle-invoice-btn');
-            if (btn) InvoicesController.openSettlementModal(btn.dataset.id);
-        });
-        
-        DOM.saveSettlementBtn.addEventListener('click', InvoicesController.saveSettlement);
-        DOM.cancelSettlementBtn.addEventListener('click', () => Helpers.closeModal(DOM.settlementModal));
-        DOM.closeReportBtn.addEventListener('click', () => Helpers.closeModal(DOM.workerReportModal));
-        
-        [DOM.advanceModal, DOM.vacationModal, DOM.settlementModal, DOM.workerReportModal].forEach(modal => {
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) Helpers.closeModal(modal);
+        DOM.navButtons.forEach(btn => {
+            btn.addEventListener("click", () => {
+                DOM.navButtons.forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                DOM.sections.forEach(s => s.classList.remove("active"));
+                const activeSection = document.getElementById(btn.dataset.tab);
+                if (activeSection) activeSection.classList.add("active");
             });
         });
     }
 };
 
-const UsersController = {
-  save: async () => {
-      const username = DOM.newUsernameInput.value.trim();
-      const password = DOM.newUserPasswordInput.value.trim();
-      const role = DOM.newUserRoleSelect.value;
-      if (!username || !password) {
-          Helpers.showNotification("يرجى إدخال اسم المستخدم وكلمة المرور.");
-          return;
-      }
-      try {
-          const docRef = doc(db, "users", username);
-          await setDoc(docRef, { username, password, role });
-          Helpers.showNotification("تم إضافة المستخدم بنجاح.");
-          DOM.newUsernameInput.value = "";
-          DOM.newUserPasswordInput.value = "";
-      } catch (error) {
-          console.error("Error saving user:", error);
-          Helpers.showNotification("فشل حفظ المستخدم.");
-      }
-  },
-  edit: () => {},
-  delete: () => {},
-  render: () => {
-    DOM.usersList.innerHTML = appState.users.map(user => `
-        <div class="user-card">
-            <span>${user.username} (${user.role})</span>
-        </div>
-    `).join("");
-  },
-  changeAdminPin: async () => {
-      const oldPin = DOM.oldPinInput.value;
-      const newPin = DOM.newPinInput.value;
-      if (oldPin !== appState.adminPIN) {
-          Helpers.showNotification("كلمة المرور القديمة غير صحيحة.");
-          return;
-      }
-      if (newPin.length < 4) {
-          Helpers.showNotification("كلمة المرور الجديدة قصيرة جدًا.");
-          return;
-      }
-      try {
-          await setDoc(doc(db, "config", "admin"), { pin: newPin });
-          appState.adminPIN = newPin;
-          Helpers.showNotification("تم تغيير كلمة مرور المدير بنجاح.");
-          DOM.oldPinInput.value = "";
-          DOM.newPinInput.value = "";
-      } catch (e) {
-          Helpers.showNotification("فشل تغيير كلمة المرور.");
-      }
-  }
-};
-
-
 App.init();
+
 </script>
 </body>
 </html>
-"
- I have made a slight mistake in the event listener for hiding the suggestion box. Please correct the line `if (!DOM.sales-header.contains(e.target)) {` to `if (!document.getElementById('sales-header').contains(e.target)) {`.
-
