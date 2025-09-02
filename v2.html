@@ -65,8 +65,8 @@
         position: sticky; /* يلتصق بأعلى الصفحة عند التمرير */
         top: 0;
         z-index: 9998;
-        width: 100%;
-        height: 150px; /* الارتفاع المطلوب */
+        width: 90%;
+        height: 120px; /* الارتفاع المطلوب */
         margin: 0;
         border: none;
         border-bottom: 3px solid var(--secondary-color);
@@ -294,7 +294,7 @@ const ScannerController = {
     },
     start: () => {
         if (!appState.html5QrCode) {
-            appState.html5QrCode = new Html5Qrcode("qr-reader", { formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.EAN_8] });
+            appState.html5QrCode = new Html5Qrcode("qr-reader");
         }
         DOM.scannerContainer.style.display = 'block';
         const config = { fps: 10, qrbox: { width: 250, height: 100 } };
