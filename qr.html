@@ -710,50 +710,71 @@ const SalesController = {
 };
 // #endregion
 
-// #region Scanner Controller - تم إعادة كتابته بالكامل
+// #region Scanner Controller - تم التصحيح والتحسين
 const ScannerController = {
-  onScanSuccess: (decodedText, decodedResult) => {
-    const product = appState.items.find(p => p.sku === decodedText || p.barcode1 === decodedText || p.barcode2 === decodedText);
-    if (product) {
-        SalesController.addToInvoice(product);
-        Helpers.showNotification(`تمت إضافة: ${product.name}`);
-        // لا نوقف الماسح تلقائيًا للسماح بالمسح المتتالي
-    } else {
-        Helpers.showNotification("الصنف غير موجود بهذا الباركود.");
-    }
-  },
-  start: () => {
-    if (!appState.html5QrCode) {
-      appState.html5QrCode = new Html5Qrcode("qr-reader");
-    }
-    // إظهار حاوية الماسح
-    DOM.scannerContainer.style.display = 'block';
-    
-    appState.html5QrCode.start(
-      { facingMode: "environment" },
-      { fps: 10, qrbox: { width: 250, height: 100 } }
-    )
-    .then(() => {
-        // بمجرد بدء الكاميرا بنجاح، قم بتمرير دالة النجاح
-        appState.html5QrCode.scan(ScannerController.onScanSuccess, (errorMessage) => {});
-        // تطبيق التقريب (Zoom)
-        const videoTrack = document.querySelector('#qr-reader video')?.srcObject?.getVideoTracks()[0];
-        if (videoTrack) {
-            const capabilities = videoTrack.getCapabilities();
-            if (capabilities.zoom) {
-                videoTrack.applyConstraints({ advanced: [{ zoom: 2.0 }] }); // يمكنك تعديل قيمة التقريب
+    // دالة النجاح عند قراءة باركود صحيح
+    onScanSuccess: (decodedText, decodedResult) => {
+        const product = appState.items.find(p => p.sku === decodedText || p.barcode1 === decodedText || p.barcode2 === decodedText);
+
+        if (product) {
+            // إيقاف مؤقت للكاميرا لمنع المسح المتكرر
+            if (appState.html5QrCode && appState.html5QrCode.isScanning) {
+                appState.html5QrCode.pause();
+                setTimeout(() => {
+                    if (appState.html5QrCode) appState.html5QrCode.resume();
+                }, 1500); // يستأنف بعد 1.5 ثانية
             }
+            
+            SalesController.addToInvoice(product);
+            Helpers.showNotification(`✅ تمت إضافة: ${product.name}`);
+        } else {
+            // لا داعي لعرض رسالة فشل هنا حتى لا تزعج المستخدم مع كل إطار فيديو
+            // يمكن إضافة صوت فشل خفيف إذا أردت
         }
-    })
-    .catch((err) => Helpers.showNotification("فشل تشغيل الكاميرا."));
-  },
-  stop: () => {
-    if (appState.html5QrCode && appState.html5QrCode.isScanning) {
-        appState.html5QrCode.stop().catch(err => console.error("Scanner stop failed", err));
+    },
+
+    // دالة بدء تشغيل الماسح
+    start: () => {
+        // إذا لم يتم إنشاء الماسح من قبل، قم بإنشائه مرة واحدة
+        if (!appState.html5QrCode) {
+            appState.html5QrCode = new Html5Qrcode("qr-reader", { formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.EAN_8] });
+        }
+        
+        DOM.scannerContainer.style.display = 'block';
+        
+        const config = { fps: 10, qrbox: { width: 250, height: 80 } };
+
+        // الطريقة الصحيحة لتشغيل الكاميرا وتمرير دالة النجاح
+        appState.html5QrCode.start(
+            { facingMode: "environment" },
+            config,
+            ScannerController.onScanSuccess,
+            (errorMessage) => { /* تجاهل رسائل الخطأ المستمرة مثل "QR code not found" */ }
+        )
+        .then(() => {
+            // تطبيق التقريب بعد التأكد من تشغيل الفيديو
+            const videoTrack = document.querySelector('#qr-reader video')?.srcObject?.getVideoTracks()[0];
+            if (videoTrack) {
+                const capabilities = videoTrack.getCapabilities();
+                if (capabilities.zoom) {
+                    videoTrack.applyConstraints({ advanced: [{ zoom: 2.0 }] });
+                }
+            }
+        })
+        .catch((err) => {
+            console.error("Scanner start failed:", err);
+            Helpers.showNotification("❌ فشل تشغيل الكاميرا. يرجى منح الإذن والمحاولة مرة أخرى.");
+            ScannerController.stop(); // أغلق الماسح إذا فشل التشغيل
+        });
+    },
+
+    // دالة إيقاف الماسح
+    stop: () => {
+        if (appState.html5QrCode && appState.html5QrCode.isScanning) {
+            appState.html5QrCode.stop().catch(err => console.error("Scanner stop failed", err));
+        }
+        DOM.scannerContainer.style.display = 'none';
     }
-    // إخفاء حاوية الماسح
-    DOM.scannerContainer.style.display = 'none';
-  }
 };
 // #endregion
 
