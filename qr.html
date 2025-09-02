@@ -19,43 +19,30 @@
             box-sizing: border-box;
         }
 
+        /* --- التعديل الرئيسي هنا --- */
+        /* الآن، هذه الحاوية هي نفسها منطقة المسح المرئية */
         #scanner-container {
-            position: relative;
-            width: 90%;
+            position: relative; /* ضروري لعمل overflow: hidden مع الفيديو */
+            width: 90%; /* عرض منطقة المسح */
             max-width: 500px;
+            height: 150px; /* ارتفاع منطقة المسح، يمكنك تعديله */
             margin: 5vh auto 0 auto;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            overflow: hidden;
-            background-color: black;
+            border: 3px solid #4CAF50; /* الإطار الأخضر مباشرة على الحاوية */
+            border-radius: 12px; /* زوايا دائرية أكثر */
+            overflow: hidden; /* أهم خاصية: تخفي أي شيء خارج هذا الإطار */
+            background-color: #333; /* لون يظهر أثناء تحميل الكاميرا */
         }
 
-        #qr-reader {
-            width: 100%;
-            border-radius: 8px;
-        }
-
-        .scanner-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
+        /* نجعل الفيديو يملأ الحاوية بالكامل ويتجاوزها ليتم قصه */
+        #qr-reader video {
             width: 100%;
             height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding-top: 10%;
-            box-sizing: border-box;
+            object-fit: cover; /* يضمن ملء الفيديو للمساحة دون تشويه */
         }
+        
+        /* --- تم حذف .scanner-overlay و .scan-region بالكامل --- */
+        /* لم نعد بحاجة إليهما */
 
-        .scan-region {
-            width: 80%;
-            height: calc(40% * 2 / 3);
-            border: 3px solid #4CAF50;
-            border-radius: 10px;
-        }
-
-        /* --- منطقة عرض النتيجة الجديدة --- */
         #scan-result-display {
             width: 90%;
             max-width: 500px;
@@ -68,7 +55,7 @@
             font-size: 1.2em;
             font-weight: bold;
             color: #333;
-            min-height: 2.5em; /* ارتفاع بسيط عشان الشكل يكون ثابت */
+            min-height: 2.5em;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -76,24 +63,20 @@
         }
         
         #scan-result-display.success {
-            background-color: #e8f5e9; /* أخضر فاتح للنجاح */
+            background-color: #e8f5e9;
             color: #2e7d32;
         }
 
         #scan-result-display.error {
-            background-color: #ffebee; /* أحمر فاتح للفشل */
+            background-color: #ffebee;
             color: #c62828;
         }
-        /* ------------------------------ */
     </style>
 </head>
 <body>
 
     <div id="scanner-container">
         <div id="qr-reader"></div>
-        <div class="scanner-overlay">
-            <div class="scan-region"></div>
-        </div>
     </div>
     
     <div id="scan-result-display">
@@ -107,8 +90,6 @@
             const successSound = new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_2b28b2b93d.mp3');
             const failSound = new Audio('https://cdn.pixabay.com/audio/2022/11/10/audio_c89b3f4e3c.mp3');
             let productsData = [];
-            
-            // --- الإشارة إلى منطقة عرض النتيجة ---
             const resultDisplay = document.getElementById('scan-result-display');
             
             fetch('p.json')
@@ -118,12 +99,9 @@
                 })
                 .then(data => {
                     productsData = data;
-                    console.log("تم تحميل المنتجات بنجاح من p.json");
-                    // --- تحديث الواجهة لتأكيد تحميل البيانات ---
                     resultDisplay.textContent = '✅ جاهز للمسح';
                 })
                 .catch(error => {
-                    console.error('حدث خطأ أثناء جلب ملف المنتجات:', error);
                     resultDisplay.textContent = '❌ فشل تحميل البيانات';
                     resultDisplay.classList.add('error');
                 });
@@ -139,21 +117,22 @@
                 const product = findProductByBarcode(decodedText);
                 if (product) {
                     successSound.play();
-                    // --- عرض بيانات المنتج الممسوح في المنطقة المخصصة ---
                     resultDisplay.innerHTML = `<strong>${product.name}</strong> | السعر: ${product.price.toFixed(2)} ج.م`;
-                    resultDisplay.className = 'success'; // تطبيق الستايل الأخضر
-                    
+                    resultDisplay.className = 'success';
                     html5QrCode.pause();
                     setTimeout(() => html5QrCode.resume(), 1500);
                 } else {
                     failSound.play();
-                    // --- عرض رسالة خطأ ---
                     resultDisplay.textContent = 'المنتج غير موجود!';
-                    resultDisplay.className = 'error'; // تطبيق الستايل الأحمر
+                    resultDisplay.className = 'error';
                 }
             };
             
-            const config = { fps: 10, qrbox: { width: 250, height: 100 } };
+            // بما أن منطقة العرض كلها أصبحت للمسح، يمكننا تبسيط الإعدادات
+            const config = { 
+                fps: 10,
+                // لم نعد بحاجة لـ qrbox لأن المكتبة ستستخدم كل المنطقة المرئية
+            };
 
             html5QrCode.start(
                 { facingMode: "environment" },
@@ -161,17 +140,14 @@
                 qrCodeSuccessCallback,
                 (errorMessage) => {}
             ).then(() => {
-                console.log("تم بدء تشغيل الماسح.");
                 const videoTrack = document.querySelector('#qr-reader video')?.srcObject?.getVideoTracks()[0];
                 if (videoTrack) {
                     const capabilities = videoTrack.getCapabilities();
                     if (capabilities.zoom) {
-                        videoTrack.applyConstraints({ advanced: [{ zoom: 2.5 }] }); 
-                        console.log("تم تثبيت التقريب على 2.5.");
+                        videoTrack.applyConstraints({ advanced: [{ zoom: 2.5 }] });
                     }
                 }
             }).catch((err) => {
-                console.error("فشل في تشغيل الكاميرا الخلفية:", err);
                 resultDisplay.textContent = '❌ فشل تشغيل الكاميرا';
                 resultDisplay.classList.add('error');
             });
