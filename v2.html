@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Apples-Mart - Final Version</title>
+    <title>Apples-Mart - Final</title>
 
     <meta name="theme-color" content="#007bff"/>
     <link rel="manifest" href="manifest.json">
@@ -17,7 +17,7 @@
         --primary-color: #007bff; --secondary-color: #343a40; --success-color: #28a745;
         --danger-color: #dc3545; --warning-color: #ffc107; --text-dark: #222;
         --bg-light: #f8f9fa; --white: #fff; --border-color: #dee2e6;
-        --shadow-light: 0 0 6px rgba(0, 0, 0, 0.1);
+        --shadow-light: 0 0 6px rgba(0, 0, 0, 0.1); --whatsapp-color: #25D366;
     }
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background: var(--bg-light); color: var(--text-dark); direction: rtl; }
     #app-container { display: none; }
@@ -58,6 +58,8 @@
     #sales-header .search-group { display: flex; align-items: center; }
     #sales-header .search-group input { border-radius: 0 4px 4px 0; }
     #sales-header .search-group button { border-radius: 4px 0 0 4px; flex-shrink: 0; width: 50px; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 10000; justify-content: center; align-items: center; }
+    .modal-content { background-color: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
 
     /* --- أنماط الماسح الضوئي النهائية --- */
     #scanner-container {
@@ -66,7 +68,7 @@
         top: 0;
         z-index: 9998;
         width: 90%;
-        height: 120px; /* الارتفاع المطلوب */
+        height: 125px; /* تم تقليل الارتفاع للنصف */
         margin: 0;
         border: none;
         border-bottom: 3px solid var(--secondary-color);
@@ -75,7 +77,22 @@
     }
     #qr-reader { position: relative; height: 100%; width: 100%; }
     #qr-reader video { width: 100%; height: 100%; object-fit: cover; }
-    .scanner-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    .scanner-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
+    .scan-region {
+        width: 100%;
+        height: 100%;
+        border: 3px solid #4CAF50; /* اللون الأخضر الافتراضي */
+        border-radius: 10px;
+        transition: all 0.2s ease-in-out;
+    }
+    .scan-region.success-flash {
+        border-color: #28a745;
+        box-shadow: 0 0 20px #28a745;
+    }
+    .scan-region.error-flash {
+        border-color: #dc3545;
+        box-shadow: 0 0 20px #dc3545;
+    }
     #closeScannerBtn {
         position: absolute;
         top: 8px;
@@ -95,7 +112,8 @@
 
 <div id="scanner-container">
     <div id="qr-reader"></div>
-    <div class="scanner-overlay"></div> <button id="closeScannerBtn" title="إغلاق الماسح"><i class="fas fa-times"></i></button>
+    <div class="scanner-overlay"><div class="scan-region"></div></div>
+    <button id="closeScannerBtn" title="إغلاق الماسح"><i class="fas fa-times"></i></button>
 </div>
 
 <div id="app-container">
@@ -166,6 +184,14 @@
 <div id="notification-container"></div>
 
 <script type="module">
+// #region Firebase (لا تغيير هنا)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+// ... (بقية استيرادات Firebase إذا كنت تستخدمها)
+const firebaseConfig = { /* ... بياناتك ... */ };
+//const app = initializeApp(firebaseConfig);
+// ... (بقية إعدادات Firebase)
+// #endregion
+
 // #region Global Variables and DOM Elements
 const DOM = {
     appContainer: document.getElementById("app-container"),
@@ -185,6 +211,7 @@ const DOM = {
     customerPhone: document.getElementById("customerPhone"),
     customerSuggestions: document.getElementById("customerSuggestions"),
     notificationContainer: document.getElementById("notification-container"),
+    // عناصر الماسح
     startScannerBtn: document.getElementById("startScannerBtn"),
     scannerContainer: document.getElementById("scanner-container"),
     closeScannerBtn: document.getElementById("closeScannerBtn"),
@@ -198,9 +225,6 @@ let appState = {
     currentInvoice: [],
     html5QrCode: null,
 };
-
-const successSound = new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_2b28b2b93d.mp3');
-const errorSound = new Audio('https://cdn.pixabay.com/audio/2021/08/04/audio_12b0c74412.mp3');
 // #endregion
 
 // #region Helper & Utility Functions
@@ -269,8 +293,7 @@ const ItemsController = {
 const ScannerController = {
     onScanSuccess: (decodedText, decodedResult) => {
         const cleanDecodedText = decodedText.trim();
-        
-        console.log(`Searching for: "${cleanDecodedText}"`);
+        const scanRegion = document.querySelector('.scan-region');
 
         const product = appState.items.find(p =>
             String(p.sku || '').trim() === cleanDecodedText ||
@@ -284,20 +307,22 @@ const ScannerController = {
         }
 
         if (product) {
-            successSound.play();
+            scanRegion.classList.add('success-flash');
+            setTimeout(() => scanRegion.classList.remove('success-flash'), 600);
             SalesController.addToInvoice(product);
             Helpers.showNotification(`✅ تمت إضافة: ${product.name}`);
         } else {
-            errorSound.play();
+            scanRegion.classList.add('error-flash');
+            setTimeout(() => scanRegion.classList.remove('error-flash'), 600);
             Helpers.showNotification(`❌ الصنف غير موجود للباركود: ${cleanDecodedText}`);
         }
     },
     start: () => {
         if (!appState.html5QrCode) {
-            appState.html5QrCode = new Html5Qrcode("qr-reader");
+            appState.html5QrCode = new Html5Qrcode("qr-reader", { formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.EAN_8] });
         }
         DOM.scannerContainer.style.display = 'block';
-        const config = { fps: 10, qrbox: { width: 250, height: 100 } };
+        const config = { fps: 10, qrbox: { width: 250, height: 50 } };
         appState.html5QrCode.start(
             { facingMode: "environment" }, config,
             ScannerController.onScanSuccess,
