@@ -713,25 +713,42 @@ const SalesController = {
 // #region Scanner Controller - تم التصحيح والتحسين
 const ScannerController = {
     // دالة النجاح عند قراءة باركود صحيح
-    onScanSuccess: (decodedText, decodedResult) => {
-        const product = appState.items.find(p => p.sku === decodedText || p.barcode1 === decodedText || p.barcode2 === decodedText);
+   onScanSuccess: (decodedText, decodedResult) => {
+    // خطوة 1: تنظيف النص المقروء من أي مسافات زائدة
+    const cleanDecodedText = decodedText.trim();
 
-        if (product) {
-            // إيقاف مؤقت للكاميرا لمنع المسح المتكرر
-            if (appState.html5QrCode && appState.html5QrCode.isScanning) {
-                appState.html5QrCode.pause();
-                setTimeout(() => {
-                    if (appState.html5QrCode) appState.html5QrCode.resume();
-                }, 1500); // يستأنف بعد 1.5 ثانية
-            }
-            
-            SalesController.addToInvoice(product);
-            Helpers.showNotification(`✅ تمت إضافة: ${product.name}`);
-        } else {
-            // لا داعي لعرض رسالة فشل هنا حتى لا تزعج المستخدم مع كل إطار فيديو
-            // يمكن إضافة صوت فشل خفيف إذا أردت
-        }
-    },
+    // خطوة 2: عرض ما قرأته الكاميرا دائمًا لمساعدتك على التشخيص
+    Helpers.showNotification(`🔍 تم مسح: ${cleanDecodedText}`, 2000);
+
+    // خطوة 3: البحث عن المنتج مع تحويل بياناتك إلى نصوص للمقارنة الآمنة
+    const product = appState.items.find(p =>
+        String(p.sku || '').trim() === cleanDecodedText ||
+        String(p.barcode1 || '').trim() === cleanDecodedText ||
+        String(p.barcode2 || '').trim() === cleanDecodedText
+    );
+
+    // إيقاف مؤقت للكاميرا بعد كل قراءة لمنع التكرار
+    if (appState.html5QrCode && appState.html5QrCode.isScanning) {
+        appState.html5QrCode.pause();
+        setTimeout(() => {
+            if (appState.html5QrCode) appState.html5QrCode.resume();
+        }, 2000); // زدنا الوقت قليلاً لإعطاء فرصة لقراءة الرسائل
+    }
+
+    if (product) {
+        // خطوة 4أ: في حالة النجاح، أضف المنتج وأظهر رسالة نجاح
+        SalesController.addToInvoice(product);
+        // تأخير بسيط لرسالة النجاح لتظهر بعد رسالة المسح
+        setTimeout(() => {
+            Helpers.showNotification(`✅ تمت إضافة: ${product.name}`, 3000);
+        }, 500);
+    } else {
+        // خطوة 4ب: في حالة الفشل، أظهر رسالة خطأ واضحة
+        setTimeout(() => {
+            Helpers.showNotification(`❌ الصنف غير موجود للباركود: ${cleanDecodedText}`, 4000);
+        }, 500);
+    }
+},
 
     // دالة بدء تشغيل الماسح
     start: () => {
