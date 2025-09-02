@@ -10,24 +10,24 @@
             font-family: Arial, sans-serif;
             background-color: #f0f2f5;
             margin: 0;
-            padding: 0; /* إزالة البادينج من الجسم لزيادة المساحة المتاحة للمسح */
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh; /* لجعل الجسم يغطي كامل ارتفاع الشاشة */
+            min-height: 100vh;
             direction: rtl;
+            box-sizing: border-box;
         }
 
         #scanner-container {
             position: relative;
             width: 90%;
             max-width: 500px;
-            /* تم تعديل الهامش العلوي لدفعه لأعلى منتصف الصفحة */
-            margin: 5vh auto 0 auto; /* 5% من ارتفاع الشاشة من الأعلى */
+            margin: 5vh auto 0 auto;
             border: 2px solid #ddd;
             border-radius: 10px;
             overflow: hidden;
-            background-color: black; /* خلفية سوداء لمنطقة الكاميرا */
+            background-color: black;
         }
 
         #qr-reader {
@@ -43,23 +43,48 @@
             height: 100%;
             display: flex;
             justify-content: center;
-            /* تم تعديل محاذاة المنطقة الخضراء لتبقى في منتصف الجزء العلوي */
-            align-items: flex-start; /* تبدأ من الأعلى */
-            padding-top: 10%; /* مسافة بادئة من الأعلى لتوسيط الإطار */
-            box-sizing: border-box; /* لضمان أن البادينج لا يؤثر على الحجم الكلي */
+            align-items: flex-start;
+            padding-top: 10%;
+            box-sizing: border-box;
         }
 
         .scan-region {
-            width: 80%; /* نفس العرض */
-            height: calc(40% * 2 / 3); /* ثلثي الارتفاع الأصلي */
+            width: 80%;
+            height: calc(40% * 2 / 3);
             border: 3px solid #4CAF50;
             border-radius: 10px;
-            /* تم حذف box-shadow لإزالة المنطقة الرمادية */
         }
 
-        /* تم حذف .controls لإزالة شريط التقريب */
-        /* تم حذف #results-container لإزالة الجدول */
-        /* تم حذف #close-scanner-btn لإزالة زر الإغلاق */
+        /* --- منطقة عرض النتيجة الجديدة --- */
+        #scan-result-display {
+            width: 90%;
+            max-width: 500px;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            min-height: 2.5em; /* ارتفاع بسيط عشان الشكل يكون ثابت */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.3s;
+        }
+        
+        #scan-result-display.success {
+            background-color: #e8f5e9; /* أخضر فاتح للنجاح */
+            color: #2e7d32;
+        }
+
+        #scan-result-display.error {
+            background-color: #ffebee; /* أحمر فاتح للفشل */
+            color: #c62828;
+        }
+        /* ------------------------------ */
     </style>
 </head>
 <body>
@@ -70,6 +95,10 @@
             <div class="scan-region"></div>
         </div>
     </div>
+    
+    <div id="scan-result-display">
+        جاري تحميل البيانات...
+    </div>
 
     <script src="https://unpkg.com/html5-qrcode/html5-qrcode.min.js"></script>
     
@@ -78,10 +107,10 @@
             const successSound = new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_2b28b2b93d.mp3');
             const failSound = new Audio('https://cdn.pixabay.com/audio/2022/11/10/audio_c89b3f4e3c.mp3');
             let productsData = [];
-
-            // بما أن الجدول والزر حُذفا، لم تعد هناك حاجة لـ scannedProducts أو functions متعلقة بهما.
-            // لكن سنبقيها مؤقتا في حال أردت عرض رسائل النجاح/الفشل في مكان آخر.
-
+            
+            // --- الإشارة إلى منطقة عرض النتيجة ---
+            const resultDisplay = document.getElementById('scan-result-display');
+            
             fetch('p.json')
                 .then(response => {
                     if (!response.ok) { throw new Error('فشل تحميل الملف: ' + response.statusText); }
@@ -90,39 +119,41 @@
                 .then(data => {
                     productsData = data;
                     console.log("تم تحميل المنتجات بنجاح من p.json");
+                    // --- تحديث الواجهة لتأكيد تحميل البيانات ---
+                    resultDisplay.textContent = '✅ جاهز للمسح';
                 })
                 .catch(error => {
                     console.error('حدث خطأ أثناء جلب ملف المنتجات:', error);
-                    alert('فشل تحميل ملف المنتجات p.json. تأكد من وجود الملف في نفس المسار وأنه بصيغة JSON صحيحة.');
+                    resultDisplay.textContent = '❌ فشل تحميل البيانات';
+                    resultDisplay.classList.add('error');
                 });
 
             const html5QrCode = new Html5Qrcode("qr-reader");
             const qrCodeSuccessCallback = (decodedText, decodedResult) => {
                 if (productsData.length === 0) {
                     failSound.play();
+                    resultDisplay.textContent = 'البيانات لم تحمل بعد!';
+                    resultDisplay.className = 'error';
                     return;
                 }
                 const product = findProductByBarcode(decodedText);
                 if (product) {
                     successSound.play();
-                    console.log("تم مسح المنتج بنجاح:", product.name);
-                    // هنا يمكنك إضافة منطق آخر لما يحدث بعد المسح الناجح
-                    // مثل إرسال الباركود إلى خادم أو عرض رسالة تأكيد.
+                    // --- عرض بيانات المنتج الممسوح في المنطقة المخصصة ---
+                    resultDisplay.innerHTML = `<strong>${product.name}</strong> | السعر: ${product.price.toFixed(2)} ج.م`;
+                    resultDisplay.className = 'success'; // تطبيق الستايل الأخضر
                     
                     html5QrCode.pause();
-                    setTimeout(() => html5QrCode.resume(), 1500); // استئناف المسح بعد 1.5 ثانية
+                    setTimeout(() => html5QrCode.resume(), 1500);
                 } else {
                     failSound.play();
-                    console.warn(`الباركود ${decodedText} غير موجود في قاعدة البيانات.`);
+                    // --- عرض رسالة خطأ ---
+                    resultDisplay.textContent = 'المنتج غير موجود!';
+                    resultDisplay.className = 'error'; // تطبيق الستايل الأحمر
                 }
             };
-
-            // تم تعديل qrbox ليعكس الارتفاع الجديد، ولكن facingMode سيهتم بمنطقة المسح الفعلية.
-            // الـ qrbox هنا لتحديد المنطقة التي يبحث فيها المحرك، وليس لتغيير الـ overlay
-            const config = { 
-                fps: 10, 
-                qrbox: { width: 250, height: 100 } // تقليل ارتفاع منطقة البحث الداخلية للمحرك
-            };
+            
+            const config = { fps: 10, qrbox: { width: 250, height: 100 } };
 
             html5QrCode.start(
                 { facingMode: "environment" },
@@ -131,35 +162,23 @@
                 (errorMessage) => {}
             ).then(() => {
                 console.log("تم بدء تشغيل الماسح.");
-                // تثبيت التقريب عند القيمة الموضحة في الصورة (سنفترض 2.5 كقيمة افتراضية مناسبة)
-                // يجب أن يتم ذلك بعد بدء تشغيل الكاميرا بنجاح
                 const videoTrack = document.querySelector('#qr-reader video')?.srcObject?.getVideoTracks()[0];
                 if (videoTrack) {
                     const capabilities = videoTrack.getCapabilities();
                     if (capabilities.zoom) {
-                        // سنثبت التقريب على 2.5 (يمكنك تعديل هذه القيمة)
                         videoTrack.applyConstraints({ advanced: [{ zoom: 2.5 }] }); 
                         console.log("تم تثبيت التقريب على 2.5.");
-                    } else {
-                        console.warn('التقريب غير مدعوم في هذا الجهاز/المتصفح.');
                     }
                 }
             }).catch((err) => {
                 console.error("فشل في تشغيل الكاميرا الخلفية:", err);
-                alert("لم يتم العثور على كاميرا خلفية أو فشل تشغيلها. قد تحتاج لتجربة هذا على هاتف محمول.");
+                resultDisplay.textContent = '❌ فشل تشغيل الكاميرا';
+                resultDisplay.classList.add('error');
             });
-
-            // تم حذف شريط التقريب، لذا لم تعد هناك حاجة لمستمع الحدث الخاص به.
-
-            // بما أن زر الإغلاق حُذف، لم تعد هناك حاجة لمستمع الحدث الخاص به.
 
             function findProductByBarcode(barcode) {
                 return productsData.find(p => p.barcode1 === barcode || p.barcode2 === barcode || p.sku === barcode);
             }
-
-            // تم حذف كل الوظائف المتعلقة بالجدول (addProductToTable, updateSubtotal, event listener)
-            // لأن الجدول لم يعد موجودًا.
-
         });
     </script>
 </body>
