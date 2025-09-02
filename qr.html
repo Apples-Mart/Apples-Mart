@@ -13,7 +13,6 @@
             padding: 20px;
             direction: rtl;
         }
-
         #scanner-container {
             position: relative;
             width: 90%;
@@ -23,12 +22,10 @@
             border-radius: 10px;
             overflow: hidden;
         }
-
         #qr-reader {
             width: 100%;
             border-radius: 8px;
         }
-
         .scanner-overlay {
             position: absolute;
             top: 0;
@@ -39,20 +36,14 @@
             justify-content: center;
             align-items: center;
         }
-
         .scan-region {
             width: 80%;
             height: 40%;
             border: 3px solid #4CAF50;
-            box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.5);
+            /* تم حذف خاصية box-shadow لإزالة التظليل الرمادي */
             border-radius: 10px;
         }
-
-        .controls {
-            text-align: center;
-            margin: 10px 0;
-        }
-
+        .controls { text-align: center; margin: 10px 0; }
         #results-container {
             margin-top: 30px;
             padding: 15px;
@@ -60,23 +51,17 @@
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 15px;
         }
-
         th, td {
             text-align: right;
             padding: 12px;
             border-bottom: 1px solid #ddd;
         }
-
-        th {
-            background-color: #f7f7f7;
-        }
-
+        th { background-color: #f7f7f7; }
         .quantity-controls button {
             width: 30px;
             height: 30px;
@@ -86,7 +71,6 @@
             font-size: 16px;
             margin: 0 5px;
         }
-
         .delete-btn {
             background-color: #f44336;
             color: white;
@@ -95,7 +79,6 @@
             border-radius: 5px;
             cursor: pointer;
         }
-
         #close-scanner-btn {
             display: block;
             width: 90%;
@@ -137,8 +120,7 @@
                     <th>حذف</th>
                 </tr>
             </thead>
-            <tbody>
-                </tbody>
+            <tbody></tbody>
         </table>
     </div>
 
@@ -148,19 +130,14 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // تحميل ملفات الصوت
             const successSound = new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_2b28b2b93d.mp3');
             const failSound = new Audio('https://cdn.pixabay.com/audio/2022/11/10/audio_c89b3f4e3c.mp3');
-
-            let productsData = []; // سيتم ملؤه من ملف JSON
+            let productsData = [];
             const scannedProducts = new Map();
             
-            // --- جلب بيانات المنتجات من ملف p.json ---
             fetch('p.json')
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error('فشل تحميل الملف: ' + response.statusText);
-                    }
+                    if (!response.ok) { throw new Error('فشل تحميل الملف: ' + response.statusText); }
                     return response.json();
                 })
                 .then(data => {
@@ -169,22 +146,16 @@
                 })
                 .catch(error => {
                     console.error('حدث خطأ أثناء جلب ملف المنتجات:', error);
-                    alert('فشل تحميل ملف المنتجات p.json. تأكد من وجود الملف في نفس المسار وأنه بصيغة JSON صحيحة.');
+                    alert('فشل تحميل ملف المنتجات p.json.');
                 });
-            // -------------------------------------------
 
             const html5QrCode = new Html5Qrcode("qr-reader");
-
             const qrCodeSuccessCallback = (decodedText, decodedResult) => {
-                // تأكد من أن بيانات المنتجات قد تم تحميلها أولاً
                 if (productsData.length === 0) {
-                    console.warn("بيانات المنتجات لم تحمل بعد، يرجى الانتظار.");
                     failSound.play();
                     return;
                 }
-
                 const product = findProductByBarcode(decodedText);
-
                 if (product) {
                     successSound.play();
                     addProductToTable(product);
@@ -192,27 +163,21 @@
                     setTimeout(() => html5QrCode.resume(), 1500);
                 } else {
                     failSound.play();
-                    console.warn(`الباركود ${decodedText} غير موجود في قاعدة البيانات.`);
                 }
             };
-
             const config = { fps: 10, qrbox: { width: 250, height: 150 } };
 
-            Html5Qrcode.getCameras().then(devices => {
-                if (devices && devices.length) {
-                    const cameraId = devices[0].id;
-                    html5QrCode.start(
-                        cameraId,
-                        config,
-                        qrCodeSuccessCallback,
-                        (errorMessage) => {}
-                    ).catch((err) => {
-                        console.error("فشل في تشغيل الكاميرا:", err);
-                    });
-                }
-            }).catch(err => {
-                console.error("لا يمكن الوصول للكاميرات:", err);
+            // --- التعديل هنا: طلب الكاميرا الخلفية مباشرة ---
+            html5QrCode.start(
+                { facingMode: "environment" },
+                config,
+                qrCodeSuccessCallback,
+                (errorMessage) => {}
+            ).catch((err) => {
+                console.error("فشل في تشغيل الكاميرا الخلفية:", err);
+                alert("لم يتم العثور على كاميرا خلفية أو فشل تشغيلها. قد تحتاج لتجربة هذا على هاتف محمول.");
             });
+            // ---------------------------------------------
 
             const zoomSlider = document.getElementById('zoom-slider');
             zoomSlider.addEventListener('input', (e) => {
@@ -221,14 +186,11 @@
                 const capabilities = videoTrack.getCapabilities();
                 if (capabilities.zoom) {
                     videoTrack.applyConstraints({ advanced: [{ zoom: parseFloat(e.target.value) }] });
-                } else {
-                    console.warn('التقريب غير مدعوم.');
                 }
             });
 
             document.getElementById('close-scanner-btn').addEventListener('click', () => {
                 html5QrCode.stop().then(() => {
-                    console.log("تم إيقاف الماسح.");
                     alert("تم إغلاق الماسح الضوئي.");
                 }).catch(err => console.error("فشل إيقاف الماسح:", err));
             });
