@@ -10,7 +10,7 @@
             font-family: Arial, sans-serif;
             background-color: #f0f2f5;
             margin: 0;
-            padding: 0; /* تم التعديل: إلغاء المسافات البادئة حول الصفحة */
+            padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -21,12 +21,12 @@
 
         #scanner-container {
             position: relative;
-            width: 100%; /* تم التعديل: ليمتد بعرض الشاشة بالكامل */
+            width: 100%;
             height: 150px;
-            margin: 0; /* تم التعديل: لإزالة أي هوامش */
-            border: none; /* تم إزالة الإطار ليصبح جزءًا من السقف */
-            border-bottom: 3px solid #4CAF50; /* جعل الإطار خطًا سفليًا فقط */
-            border-radius: 0; /* تم التعديل: لإزالة أي زوايا دائرية */
+            margin: 0;
+            border: none;
+            border-bottom: 3px solid #4CAF50;
+            border-radius: 0;
             overflow: hidden;
             background-color: #333;
         }
@@ -111,7 +111,9 @@
                 const product = findProductByBarcode(decodedText);
                 if (product) {
                     successSound.play();
-                    resultDisplay.innerHTML = `<strong>${product.name}</strong> | السعر: ${product.price.toFixed(2)} ج.م`;
+                    // --- التعديل هنا ---
+                    // استخدمنا الأسماء الصحيحة من ملفك: product.name و product.price
+                    resultDisplay.innerHTML = `<strong>${product.name}</strong> | السعر: ${parseFloat(product.price).toFixed(2)} ج.م`;
                     resultDisplay.className = 'success';
                     html5QrCode.pause();
                     setTimeout(() => html5QrCode.resume(), 1500);
@@ -143,6 +145,8 @@
             });
 
             function findProductByBarcode(barcode) {
+                // --- التعديل هنا ---
+                // تم التأكد من أن أسماء الحقول (barcode1, barcode2, sku) مطابقة لملف JSON
                 return productsData.find(p => p.barcode1 === barcode || p.barcode2 === barcode || p.sku === barcode);
             }
         });
