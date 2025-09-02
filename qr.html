@@ -10,22 +10,31 @@
             font-family: Arial, sans-serif;
             background-color: #f0f2f5;
             margin: 0;
-            padding: 20px;
+            padding: 0; /* إزالة البادينج من الجسم لزيادة المساحة المتاحة للمسح */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh; /* لجعل الجسم يغطي كامل ارتفاع الشاشة */
             direction: rtl;
         }
+
         #scanner-container {
             position: relative;
             width: 90%;
             max-width: 500px;
-            margin: 20px auto;
+            /* تم تعديل الهامش العلوي لدفعه لأعلى منتصف الصفحة */
+            margin: 5vh auto 0 auto; /* 5% من ارتفاع الشاشة من الأعلى */
             border: 2px solid #ddd;
             border-radius: 10px;
             overflow: hidden;
+            background-color: black; /* خلفية سوداء لمنطقة الكاميرا */
         }
+
         #qr-reader {
             width: 100%;
             border-radius: 8px;
         }
+
         .scanner-overlay {
             position: absolute;
             top: 0;
@@ -34,64 +43,23 @@
             height: 100%;
             display: flex;
             justify-content: center;
-            align-items: center;
+            /* تم تعديل محاذاة المنطقة الخضراء لتبقى في منتصف الجزء العلوي */
+            align-items: flex-start; /* تبدأ من الأعلى */
+            padding-top: 10%; /* مسافة بادئة من الأعلى لتوسيط الإطار */
+            box-sizing: border-box; /* لضمان أن البادينج لا يؤثر على الحجم الكلي */
         }
+
         .scan-region {
-            width: 80%;
-            height: 40%;
+            width: 80%; /* نفس العرض */
+            height: calc(40% * 2 / 3); /* ثلثي الارتفاع الأصلي */
             border: 3px solid #4CAF50;
-            /* تم حذف خاصية box-shadow لإزالة التظليل الرمادي */
             border-radius: 10px;
+            /* تم حذف box-shadow لإزالة المنطقة الرمادية */
         }
-        .controls { text-align: center; margin: 10px 0; }
-        #results-container {
-            margin-top: 30px;
-            padding: 15px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        th, td {
-            text-align: right;
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-        }
-        th { background-color: #f7f7f7; }
-        .quantity-controls button {
-            width: 30px;
-            height: 30px;
-            border: 1px solid #ccc;
-            background-color: #f0f0f0;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 0 5px;
-        }
-        .delete-btn {
-            background-color: #f44336;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        #close-scanner-btn {
-            display: block;
-            width: 90%;
-            max-width: 500px;
-            margin: 20px auto;
-            padding: 15px;
-            font-size: 18px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-        }
+
+        /* تم حذف .controls لإزالة شريط التقريب */
+        /* تم حذف #results-container لإزالة الجدول */
+        /* تم حذف #close-scanner-btn لإزالة زر الإغلاق */
     </style>
 </head>
 <body>
@@ -103,29 +71,6 @@
         </div>
     </div>
 
-    <div class="controls">
-        <label for="zoom-slider">تقريب:</label>
-        <input id="zoom-slider" type="range" min="1" max="5" step="0.1" value="1">
-    </div>
-
-    <div id="results-container">
-        <h2>النتائج</h2>
-        <table id="results-table">
-            <thead>
-                <tr>
-                    <th>الاسم</th>
-                    <th>الكمية</th>
-                    <th>سعر الوحدة</th>
-                    <th>المجموع الجزئي</th>
-                    <th>حذف</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
-
-    <button id="close-scanner-btn">إغلاق الماسح</button>
-
     <script src="https://unpkg.com/html5-qrcode/html5-qrcode.min.js"></script>
     
     <script>
@@ -133,8 +78,10 @@
             const successSound = new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_2b28b2b93d.mp3');
             const failSound = new Audio('https://cdn.pixabay.com/audio/2022/11/10/audio_c89b3f4e3c.mp3');
             let productsData = [];
-            const scannedProducts = new Map();
-            
+
+            // بما أن الجدول والزر حُذفا، لم تعد هناك حاجة لـ scannedProducts أو functions متعلقة بهما.
+            // لكن سنبقيها مؤقتا في حال أردت عرض رسائل النجاح/الفشل في مكان آخر.
+
             fetch('p.json')
                 .then(response => {
                     if (!response.ok) { throw new Error('فشل تحميل الملف: ' + response.statusText); }
@@ -146,7 +93,7 @@
                 })
                 .catch(error => {
                     console.error('حدث خطأ أثناء جلب ملف المنتجات:', error);
-                    alert('فشل تحميل ملف المنتجات p.json.');
+                    alert('فشل تحميل ملف المنتجات p.json. تأكد من وجود الملف في نفس المسار وأنه بصيغة JSON صحيحة.');
                 });
 
             const html5QrCode = new Html5Qrcode("qr-reader");
@@ -158,100 +105,61 @@
                 const product = findProductByBarcode(decodedText);
                 if (product) {
                     successSound.play();
-                    addProductToTable(product);
+                    console.log("تم مسح المنتج بنجاح:", product.name);
+                    // هنا يمكنك إضافة منطق آخر لما يحدث بعد المسح الناجح
+                    // مثل إرسال الباركود إلى خادم أو عرض رسالة تأكيد.
+                    
                     html5QrCode.pause();
-                    setTimeout(() => html5QrCode.resume(), 1500);
+                    setTimeout(() => html5QrCode.resume(), 1500); // استئناف المسح بعد 1.5 ثانية
                 } else {
                     failSound.play();
+                    console.warn(`الباركود ${decodedText} غير موجود في قاعدة البيانات.`);
                 }
             };
-            const config = { fps: 10, qrbox: { width: 250, height: 150 } };
 
-            // --- التعديل هنا: طلب الكاميرا الخلفية مباشرة ---
+            // تم تعديل qrbox ليعكس الارتفاع الجديد، ولكن facingMode سيهتم بمنطقة المسح الفعلية.
+            // الـ qrbox هنا لتحديد المنطقة التي يبحث فيها المحرك، وليس لتغيير الـ overlay
+            const config = { 
+                fps: 10, 
+                qrbox: { width: 250, height: 100 } // تقليل ارتفاع منطقة البحث الداخلية للمحرك
+            };
+
             html5QrCode.start(
                 { facingMode: "environment" },
                 config,
                 qrCodeSuccessCallback,
                 (errorMessage) => {}
-            ).catch((err) => {
+            ).then(() => {
+                console.log("تم بدء تشغيل الماسح.");
+                // تثبيت التقريب عند القيمة الموضحة في الصورة (سنفترض 2.5 كقيمة افتراضية مناسبة)
+                // يجب أن يتم ذلك بعد بدء تشغيل الكاميرا بنجاح
+                const videoTrack = document.querySelector('#qr-reader video')?.srcObject?.getVideoTracks()[0];
+                if (videoTrack) {
+                    const capabilities = videoTrack.getCapabilities();
+                    if (capabilities.zoom) {
+                        // سنثبت التقريب على 2.5 (يمكنك تعديل هذه القيمة)
+                        videoTrack.applyConstraints({ advanced: [{ zoom: 2.5 }] }); 
+                        console.log("تم تثبيت التقريب على 2.5.");
+                    } else {
+                        console.warn('التقريب غير مدعوم في هذا الجهاز/المتصفح.');
+                    }
+                }
+            }).catch((err) => {
                 console.error("فشل في تشغيل الكاميرا الخلفية:", err);
                 alert("لم يتم العثور على كاميرا خلفية أو فشل تشغيلها. قد تحتاج لتجربة هذا على هاتف محمول.");
             });
-            // ---------------------------------------------
 
-            const zoomSlider = document.getElementById('zoom-slider');
-            zoomSlider.addEventListener('input', (e) => {
-                const videoTrack = document.querySelector('#qr-reader video')?.srcObject?.getVideoTracks()[0];
-                if (!videoTrack) return;
-                const capabilities = videoTrack.getCapabilities();
-                if (capabilities.zoom) {
-                    videoTrack.applyConstraints({ advanced: [{ zoom: parseFloat(e.target.value) }] });
-                }
-            });
+            // تم حذف شريط التقريب، لذا لم تعد هناك حاجة لمستمع الحدث الخاص به.
 
-            document.getElementById('close-scanner-btn').addEventListener('click', () => {
-                html5QrCode.stop().then(() => {
-                    alert("تم إغلاق الماسح الضوئي.");
-                }).catch(err => console.error("فشل إيقاف الماسح:", err));
-            });
+            // بما أن زر الإغلاق حُذف، لم تعد هناك حاجة لمستمع الحدث الخاص به.
 
             function findProductByBarcode(barcode) {
                 return productsData.find(p => p.barcode1 === barcode || p.barcode2 === barcode || p.sku === barcode);
             }
 
-            function addProductToTable(product) {
-                const tableBody = document.getElementById('results-table').getElementsByTagName('tbody')[0];
-                const productKey = product.sku;
+            // تم حذف كل الوظائف المتعلقة بالجدول (addProductToTable, updateSubtotal, event listener)
+            // لأن الجدول لم يعد موجودًا.
 
-                if (scannedProducts.has(productKey)) {
-                    const existingProduct = scannedProducts.get(productKey);
-                    existingProduct.quantity++;
-                    const row = document.getElementById(`row-${productKey}`);
-                    row.cells[1].querySelector('.quantity-display').textContent = existingProduct.quantity;
-                    updateSubtotal(row, existingProduct.quantity, product.price);
-                } else {
-                    const quantity = 1;
-                    scannedProducts.set(productKey, { ...product, quantity });
-                    const newRow = tableBody.insertRow();
-                    newRow.id = `row-${productKey}`;
-                    newRow.innerHTML = `
-                        <td>${product.name}</td>
-                        <td>
-                            <div class="quantity-controls">
-                                <button class="quantity-btn minus-btn" data-key="${productKey}">-</button>
-                                <span class="quantity-display">${quantity}</span>
-                                <button class="quantity-btn plus-btn" data-key="${productKey}">+</button>
-                            </div>
-                        </td>
-                        <td>${product.price.toFixed(2)}</td>
-                        <td class="subtotal">${(quantity * product.price).toFixed(2)}</td>
-                        <td><button class="delete-btn" data-key="${productKey}">حذف</button></td>
-                    `;
-                }
-            }
-
-            document.getElementById('results-table').addEventListener('click', (e) => {
-                const target = e.target;
-                const productKey = target.dataset.key;
-                if (!productKey) return;
-                const productInfo = scannedProducts.get(productKey);
-                const row = document.getElementById(`row-${productKey}`);
-                if (target.classList.contains('plus-btn')) {
-                    productInfo.quantity++;
-                } else if (target.classList.contains('minus-btn')) {
-                    if (productInfo.quantity > 1) productInfo.quantity--;
-                } else if (target.classList.contains('delete-btn')) {
-                    row.remove();
-                    scannedProducts.delete(productKey);
-                    return;
-                }
-                row.cells[1].querySelector('.quantity-display').textContent = productInfo.quantity;
-                updateSubtotal(row, productInfo.quantity, productInfo.price);
-            });
-
-            function updateSubtotal(row, quantity, price) {
-                row.cells[3].textContent = (quantity * price).toFixed(2);
-            }
         });
     </script>
 </body>
