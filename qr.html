@@ -80,13 +80,30 @@
   #itemGrid { display: none; grid-auto-flow: column; grid-template-rows: repeat(3, auto); gap: 10px; overflow-x: auto; padding: 10px; background: #e9ecef; border-radius: 6px; }
   
   /* --- Modified Scanner Styles --- */
-  #scanner-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 10001; display: none; justify-content: center; align-items: flex-start; padding-top: 5vh; }
-  #reader { width: 250px; height: 250px; max-width: 80vw; max-height: 80vw; background: #000; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.5); box-shadow: 0 4px 15px rgba(0,0,0,0.3); overflow: hidden; position: relative; }
+  #scanner-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 10001; display: none; justify-content: center; align-items: center; }
+  #reader { 
+    width: 90vw; 
+    height: 45vw; 
+    max-width: 600px;
+    max-height: 300px;
+    background: #000; 
+    border-radius: 12px; 
+    border: 2px solid rgba(255, 255, 255, 0.5); 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+    overflow: hidden; 
+    position: relative; 
+  }
   #reader::after { content: ''; position: absolute; top: 0; left: 5%; right: 5%; height: 2px; background: #ff4747; box-shadow: 0 0 5px #ff4747, 0 0 10px #ff4747; animation: laser-beam 2.5s infinite linear; border-radius: 2px; }
   #closeScannerBtn { position: absolute; top: 20px; right: 20px; background: white; color: black; border: 2px solid #333; border-radius: 50%; width: 35px; height: 35px; font-size: 24px; line-height: 30px; text-align: center; cursor: pointer; z-index: 10002; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
   #toggleFlashlightBtn { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: rgba(0, 0, 0, 0.5); color: white; border: 1px solid white; border-radius: 50%; width: 50px; height: 50px; font-size: 20px; cursor: pointer; z-index: 10002; display: none; }
   #toggleFlashlightBtn.active { color: yellow; }
-  @keyframes laser-beam { 0% { transform: translateY(10px); } 50% { transform: translateY(calc(250px - 10px)); } 100% { transform: translateY(10px); } }
+  #cameraSelection { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10003; display: none; flex-direction: column; gap: 10px; width: 80%; max-width: 220px; }
+  #cameraSelection button { width: 100%; background: rgba(255,255,255,0.8); color: #333; font-weight: bold; border: 1px solid #333; }
+  @keyframes laser-beam { 
+    0% { transform: translateY(10px); } 
+    50% { transform: translateY(calc(100% - 10px)); }
+    100% { transform: translateY(10px); } 
+  }
   /* --- End of Modified Scanner Styles --- */
 
   .qty-controls { display: flex; align-items: center; justify-content: space-evenly; }
@@ -184,7 +201,6 @@
     #sales-header .form-group { min-width: 100%; margin-bottom: 10px; }
     .sales-footer-row .btn-group { justify-content: center; }
     nav button { font-size: 14px; } #login-form { width: 90%; }
-    @keyframes laser-beam { 0% { transform: translateY(10px); } 50% { transform: translateY(calc(80vw - 10px)); } 100% { transform: translateY(10px); } }
   }
 </style>
 </head>
@@ -369,6 +385,7 @@
 </div>
 <div id="scanner-container">
   <button id="closeScannerBtn">&times;</button>
+  <div id="cameraSelection"></div>
   <div id="reader"></div>
   <button id="toggleFlashlightBtn"><i class="fas fa-bolt"></i></button>
 </div>
@@ -490,7 +507,7 @@ const DOM = {
     resetInvoicesBtn: document.getElementById("resetInvoicesBtn"), backupBtn: document.getElementById("backupBtn"), restoreBtn: document.getElementById("restoreBtn"), restoreInput: document.getElementById("restoreInput"),
     newUsernameInput: document.getElementById("newUsernameInput"), newUserPasswordInput: document.getElementById("newUserPasswordInput"), newUserRoleSelect: document.getElementById("newUserRoleSelect"), saveUserBtn: document.getElementById("saveUserBtn"), usersList: document.getElementById("usersList"),
     changePinBtn: document.getElementById("changePinBtn"), oldPinInput: document.getElementById("oldPinInput"), newPinInput: document.getElementById("newPinInput"), fullResetBtn: document.getElementById("fullResetBtn"),
-    toggleItemsGridBtn: document.getElementById("toggleItemsGridBtn"), salesCategoryFilters: document.getElementById("salesCategoryFilters"), itemGrid: document.getElementById("itemGrid"), startScannerBtn: document.getElementById("startScannerBtn"), scannerContainer: document.getElementById("scanner-container"), readerDiv: document.getElementById("reader"), closeScannerBtn: document.getElementById("closeScannerBtn"), toggleFlashlightBtn: document.getElementById("toggleFlashlightBtn"),
+    toggleItemsGridBtn: document.getElementById("toggleItemsGridBtn"), salesCategoryFilters: document.getElementById("salesCategoryFilters"), itemGrid: document.getElementById("itemGrid"), startScannerBtn: document.getElementById("startScannerBtn"), scannerContainer: document.getElementById("scanner-container"), readerDiv: document.getElementById("reader"), closeScannerBtn: document.getElementById("closeScannerBtn"), toggleFlashlightBtn: document.getElementById("toggleFlashlightBtn"), cameraSelection: document.getElementById("cameraSelection"),
     deliveryFeeValue: document.getElementById("deliveryFeeValue"), increaseDeliveryBtn: document.getElementById("increaseDeliveryBtn"), decreaseDeliveryBtn: document.getElementById("decreaseDeliveryBtn"),
     notificationContainer: document.getElementById("notification-container"),
     categoryScrollerContainer: document.getElementById("categoryScrollerContainer"),
@@ -775,15 +792,47 @@ const ScannerController = {
         }
     },
 
-    start: () => {
+    start: async () => {
         if (!appState.html5QrCode) {
-           appState.html5QrCode = new Html5Qrcode("reader");
+            appState.html5QrCode = new Html5Qrcode("reader");
         }
         DOM.scannerContainer.style.display = 'flex';
-        const config = { fps: 10, qrbox: {width: 250, height: 250} };
+        DOM.cameraSelection.innerHTML = ''; // Clear previous buttons
 
+        try {
+            const cameras = await Html5Qrcode.getCameras();
+            const backCameras = cameras.filter(camera => camera.label.toLowerCase().includes('back'));
+
+            if (backCameras.length > 1) {
+                Helpers.showNotification(`تم العثور على ${backCameras.length} كاميرا خلفية. اختر واحدة.`);
+                backCameras.forEach((camera, index) => {
+                    const button = document.createElement('button');
+                    let name = `كاميرا ${index + 1}`;
+                    if (camera.label.toLowerCase().includes('wide')) name += ' (عريضة)';
+                    if (camera.label.toLowerCase().includes('macro')) name += ' (ماكرو)';
+                    if (camera.label.toLowerCase().includes('telephoto')) name += ' (تقريب)';
+                    button.textContent = name;
+                    button.dataset.id = camera.id;
+                    button.onclick = () => {
+                        DOM.cameraSelection.style.display = 'none';
+                        ScannerController.startScanning(camera.id);
+                    };
+                    DOM.cameraSelection.appendChild(button);
+                });
+                DOM.cameraSelection.style.display = 'flex';
+            } else {
+                ScannerController.startScanning({ facingMode: "environment" });
+            }
+        } catch (err) {
+            console.error("Error getting cameras, falling back to default:", err);
+            ScannerController.startScanning({ facingMode: "environment" });
+        }
+    },
+
+    startScanning: (cameraConfig) => {
+        const config = { fps: 10, qrbox: { width: 250, height: 125 } };
         appState.html5QrCode.start(
-            { facingMode: "environment" },
+            cameraConfig,
             config,
             ScannerController.onScanSuccess,
             (errorMessage) => {}
@@ -804,6 +853,12 @@ const ScannerController = {
         .catch((err) => {
             console.error("Camera start error:", err);
             Helpers.showNotification("فشل تشغيل الكاميرا. تأكد من منح الأذونات.");
+            if (typeof cameraConfig === 'string') {
+                Helpers.showNotification("فشل الكاميرا المحددة، محاولة الكاميرا الافتراضية.");
+                ScannerController.startScanning({ facingMode: "environment" });
+            } else {
+                ScannerController.stop();
+            }
         });
     },
 
@@ -825,9 +880,11 @@ const ScannerController = {
                 appState.isFlashOn = false;
                 DOM.toggleFlashlightBtn.style.display = 'none';
                 DOM.toggleFlashlightBtn.classList.remove('active');
+                DOM.cameraSelection.style.display = 'none';
                 DOM.scannerContainer.style.display = 'none';
             }
         } else {
+            DOM.cameraSelection.style.display = 'none';
             DOM.scannerContainer.style.display = 'none';
         }
     }
@@ -1353,10 +1410,26 @@ const App = {
             DOM.salesCategoryFilters.innerHTML = categories.map(c => `<button class="btn-small" data-category="${c}">${c}</button>`).join('');
             DOM.filterCategory.innerHTML = categoryOptions;
             ItemsController.render();
-            Helpers.showNotification("تم تحميل الأصناف محلياً.");
         } catch (error) {
             console.error("Error loading items from JSON:", error);
-            Helpers.showNotification("خطأ: لم يتم العثور على ملف الأصناف p.json");
+            Helpers.showNotification("خطأ: لم يتم العثور على ملف الأصناف p.json. سيتم استخدام بيانات تجريبية.");
+            // Fallback to sample data if fetch fails
+            const itemsData = [
+                { "id": "1", "barcode1": "1234567890123", "name": "كوكا كولا", "price": 10.50, "qunt": 100, "category": "مشروبات" },
+                { "id": "2", "barcode1": "2345678901234", "name": "شيبسي بالملح", "price": 5.00, "qunt": 50, "category": "مقرمشات" },
+                { "id": "3", "barcode1": "3456789012345", "name": "مياه معدنية", "price": 4.00, "qunt": 200, "category": "مشروبات" }
+            ];
+             appState.items = itemsData.map(item => ({
+                ...item,
+                id: String(item.barcode1 || item.id || ''),
+                price: parseFloat(item.price) || 0,
+                qunt: parseInt(item.qunt) || 0
+            }));
+            const categories = [...new Set(appState.items.map(i => i.category))].filter(Boolean);
+            const categoryOptions = `<option value="all">جميع الفئات</option>` + categories.map(c => `<option value="${c}">${c}</option>`).join('');
+            DOM.salesCategoryFilters.innerHTML = categories.map(c => `<button class="btn-small" data-category="${c}">${c}</button>`).join('');
+            DOM.filterCategory.innerHTML = categoryOptions;
+            ItemsController.render();
         }
     },
 
