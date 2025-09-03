@@ -818,8 +818,13 @@ const ScannerController = {
         
         console.log("Scanned:", cleanDecodedText); // إضافة سجل للمسح
         
+        // إيقاف الماسح فوراً لتجنب قراءات متعددة
+        if (appState.html5QrCode && appState.html5QrCode.isScanning) {
+            appState.html5QrCode.stop().catch(err => console.error("Scanner stop failed", err));
+            DOM.scannerContainer.style.display = 'none';
+        }
+        
         const product = appState.items.find(p => {
-            // إضافة سجل لمقارنات البحث
             const match = String(p.sku || '').trim() === cleanDecodedText ||
                           String(p.barcode1 || '').trim() === cleanDecodedText ||
                           String(p.barcode2 || '').trim() === cleanDecodedText;
@@ -828,12 +833,6 @@ const ScannerController = {
             }
             return match;
         });
-        
-        // إيقاف الماسح مؤقتًا بعد قراءة واحدة ناجحة
-        if (appState.html5QrCode && appState.html5QrCode.isScanning) {
-            appState.html5QrCode.stop().catch(err => console.error("Scanner stop failed", err));
-            DOM.scannerContainer.style.display = 'none';
-        }
 
         if (product) {
             scanRegion.classList.add('success-flash');
@@ -851,12 +850,14 @@ const ScannerController = {
             appState.html5QrCode = new Html5Qrcode("qr-reader", { formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.EAN_8] });
         }
         DOM.scannerContainer.style.display = 'block';
-        const config = { fps: 10, qrbox: { width: 250, height: 50 } };
+        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
         appState.html5QrCode.start(
             { facingMode: "environment" }, config,
             ScannerController.onScanSuccess,
             (errorMessage) => { /* تجاهل الأخطاء غير الحرجة */ }
-        ).catch((err) => {
+        ).then(() => {
+            Helpers.showNotification("✅ تم تشغيل الكاميرا بنجاح.");
+        }).catch((err) => {
             Helpers.showNotification("❌ فشل تشغيل الكاميرا. يرجى منح الإذن.");
             ScannerController.stop();
         });
