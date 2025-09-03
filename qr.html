@@ -84,6 +84,8 @@
   #reader { width: 250px; height: 250px; max-width: 80vw; max-height: 80vw; background: #000; border-radius: 12px; border: 2px solid rgba(255, 255, 255, 0.5); box-shadow: 0 4px 15px rgba(0,0,0,0.3); overflow: hidden; position: relative; }
   #reader::after { content: ''; position: absolute; top: 0; left: 5%; right: 5%; height: 2px; background: #ff4747; box-shadow: 0 0 5px #ff4747, 0 0 10px #ff4747; animation: laser-beam 2.5s infinite linear; border-radius: 2px; }
   #closeScannerBtn { position: absolute; top: 20px; right: 20px; background: white; color: black; border: 2px solid #333; border-radius: 50%; width: 35px; height: 35px; font-size: 24px; line-height: 30px; text-align: center; cursor: pointer; z-index: 10002; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+  #toggleFlashlightBtn { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: rgba(0, 0, 0, 0.5); color: white; border: 1px solid white; border-radius: 50%; width: 50px; height: 50px; font-size: 20px; cursor: pointer; z-index: 10002; display: none; }
+  #toggleFlashlightBtn.active { color: yellow; }
   @keyframes laser-beam { 0% { transform: translateY(10px); } 50% { transform: translateY(calc(250px - 10px)); } 100% { transform: translateY(10px); } }
   /* --- End of Modified Scanner Styles --- */
 
@@ -368,6 +370,7 @@
 <div id="scanner-container">
   <button id="closeScannerBtn">&times;</button>
   <div id="reader"></div>
+  <button id="toggleFlashlightBtn"><i class="fas fa-bolt"></i></button>
 </div>
 <div id="notification-container"></div>
 
@@ -487,7 +490,7 @@ const DOM = {
     resetInvoicesBtn: document.getElementById("resetInvoicesBtn"), backupBtn: document.getElementById("backupBtn"), restoreBtn: document.getElementById("restoreBtn"), restoreInput: document.getElementById("restoreInput"),
     newUsernameInput: document.getElementById("newUsernameInput"), newUserPasswordInput: document.getElementById("newUserPasswordInput"), newUserRoleSelect: document.getElementById("newUserRoleSelect"), saveUserBtn: document.getElementById("saveUserBtn"), usersList: document.getElementById("usersList"),
     changePinBtn: document.getElementById("changePinBtn"), oldPinInput: document.getElementById("oldPinInput"), newPinInput: document.getElementById("newPinInput"), fullResetBtn: document.getElementById("fullResetBtn"),
-    toggleItemsGridBtn: document.getElementById("toggleItemsGridBtn"), salesCategoryFilters: document.getElementById("salesCategoryFilters"), itemGrid: document.getElementById("itemGrid"), startScannerBtn: document.getElementById("startScannerBtn"), scannerContainer: document.getElementById("scanner-container"), readerDiv: document.getElementById("reader"), closeScannerBtn: document.getElementById("closeScannerBtn"),
+    toggleItemsGridBtn: document.getElementById("toggleItemsGridBtn"), salesCategoryFilters: document.getElementById("salesCategoryFilters"), itemGrid: document.getElementById("itemGrid"), startScannerBtn: document.getElementById("startScannerBtn"), scannerContainer: document.getElementById("scanner-container"), readerDiv: document.getElementById("reader"), closeScannerBtn: document.getElementById("closeScannerBtn"), toggleFlashlightBtn: document.getElementById("toggleFlashlightBtn"),
     deliveryFeeValue: document.getElementById("deliveryFeeValue"), increaseDeliveryBtn: document.getElementById("increaseDeliveryBtn"), decreaseDeliveryBtn: document.getElementById("decreaseDeliveryBtn"),
     notificationContainer: document.getElementById("notification-container"),
     categoryScrollerContainer: document.getElementById("categoryScrollerContainer"),
@@ -501,7 +504,7 @@ let appState = {
   adminPIN: "790707071", currentUser: null, currentInvoice: [], deliveryFee: 30,
   editingItemId: null, editingCustomerId: null, editingUserId: null, editingWorkerId: null,
   html5QrCode: null, unsubscribe: {}, selectedWorkerId: null, selectedInvoiceId: null,
-  scannerMode: 'sales'
+  scannerMode: 'sales', cameraTrack: null, isFlashOn: false
 };
 // #endregion
 
@@ -748,7 +751,6 @@ const SalesController = {
 // #region Scanner Controller
 const ScannerController = {
     onScanSuccess: (decodedText, decodedResult) => {
-        // Scanner is now only for sales
         const product = appState.items.find(p => p.sku === decodedText || p.barcode1 === decodedText || p.barcode2 === decodedText);
         if (product) {
             SalesController.addToInvoice(product);
@@ -757,19 +759,77 @@ const ScannerController = {
             Helpers.showNotification("الصنف غير موجود بهذا الباركود.");
         }
     },
+
+    toggleFlashlight: () => {
+        if (appState.cameraTrack && appState.cameraTrack.getCapabilities().torch) {
+            const isFlashOn = !appState.isFlashOn;
+            appState.cameraTrack.applyConstraints({
+                advanced: [{ torch: isFlashOn }]
+            }).then(() => {
+                appState.isFlashOn = isFlashOn;
+                DOM.toggleFlashlightBtn.classList.toggle('active', isFlashOn);
+            }).catch(e => {
+                console.error("Failed to toggle flashlight", e);
+                Helpers.showNotification("فشل تشغيل الكشاف.");
+            });
+        }
+    },
+
     start: () => {
         if (!appState.html5QrCode) {
            appState.html5QrCode = new Html5Qrcode("reader");
         }
         DOM.scannerContainer.style.display = 'flex';
-        appState.html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: {width: 250, height: 250} }, ScannerController.onScanSuccess, (errorMessage) => {})
-        .catch((err) => Helpers.showNotification("فشل تشغيل الكاميرا."));
+        const config = { fps: 10, qrbox: {width: 250, height: 250} };
+
+        appState.html5QrCode.start(
+            { facingMode: "environment" },
+            config,
+            ScannerController.onScanSuccess,
+            (errorMessage) => {}
+        )
+        .then(() => {
+            const video = document.querySelector('#reader video');
+            if (video && video.srcObject) {
+                const track = video.srcObject.getVideoTracks()[0];
+                appState.cameraTrack = track;
+                const capabilities = track.getCapabilities();
+                if (capabilities.torch) {
+                    DOM.toggleFlashlightBtn.style.display = 'block';
+                } else {
+                    DOM.toggleFlashlightBtn.style.display = 'none';
+                }
+            }
+        })
+        .catch((err) => {
+            console.error("Camera start error:", err);
+            Helpers.showNotification("فشل تشغيل الكاميرا. تأكد من منح الأذونات.");
+        });
     },
-    stop: () => {
+
+    stop: async () => {
         if (appState.html5QrCode && appState.html5QrCode.isScanning) {
-            appState.html5QrCode.stop().catch(err => console.error("Scanner stop failed", err));
+            try {
+                if (appState.cameraTrack && appState.isFlashOn) {
+                    await appState.cameraTrack.applyConstraints({ advanced: [{ torch: false }] });
+                }
+            } catch (e) {
+                console.error("Could not turn off flash.", e);
+            } finally {
+                try {
+                    await appState.html5QrCode.stop();
+                } catch(e) {
+                     console.error("Scanner stop failed", e);
+                }
+                appState.cameraTrack = null;
+                appState.isFlashOn = false;
+                DOM.toggleFlashlightBtn.style.display = 'none';
+                DOM.toggleFlashlightBtn.classList.remove('active');
+                DOM.scannerContainer.style.display = 'none';
+            }
+        } else {
+            DOM.scannerContainer.style.display = 'none';
         }
-        DOM.scannerContainer.style.display = 'none';
     }
 };
 // #endregion
@@ -1495,6 +1555,7 @@ const App = {
             ScannerController.start();
         });
         DOM.closeScannerBtn.addEventListener("click", ScannerController.stop);
+        DOM.toggleFlashlightBtn.addEventListener("click", ScannerController.toggleFlashlight);
         
         DOM.saveWorkerBtn.addEventListener('click', WorkersController.save);
         DOM.workersList.addEventListener('click', (e) => {
@@ -1599,3 +1660,4 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
