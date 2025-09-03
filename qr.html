@@ -159,15 +159,34 @@
   }
   #cameraSelection {
     display: flex;
-    flex-direction: row;
-    gap: 8px;
+    gap: 10px;
+    align-items: center;
   }
-  #cameraSelection button {
+  #cameraSelection span {
+    display: inline-block;
+  }
+  #cameraSelection input[type="radio"] {
+    display: none;
+  }
+  #cameraSelection label {
     font-size: 12px;
     padding: 8px 10px;
     background-color: #444;
     border: 1px solid #666;
     border-radius: 6px;
+    cursor: pointer;
+    color: white;
+    transition: all 0.2s;
+  }
+  #cameraSelection input[type="radio"]:checked + label {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+  }
+  #zoomSlider {
+    flex-grow: 1;
+    margin: 0 15px;
+    direction: ltr; /* Important for sliders */
   }
   /* --- End of Modified Scanner Styles --- */
 
@@ -344,6 +363,7 @@
         </div>
         <div id="scanner-controls">
           <div id="cameraSelection"></div>
+          <input type="range" id="zoomSlider" style="display: none;">
           <button id="toggleFlashlightBtn"><i class="fas fa-bolt"></i></button>
         </div>
       </div>
@@ -583,12 +603,12 @@ const DOM = {
     newUsernameInput: document.getElementById("newUsernameInput"), newUserPasswordInput: document.getElementById("newUserPasswordInput"), newUserRoleSelect: document.getElementById("newUserRoleSelect"), saveUserBtn: document.getElementById("saveUserBtn"), usersList: document.getElementById("usersList"),
     changePinBtn: document.getElementById("changePinBtn"), oldPinInput: document.getElementById("oldPinInput"), newPinInput: document.getElementById("newPinInput"), fullResetBtn: document.getElementById("fullResetBtn"),
     toggleItemsGridBtn: document.getElementById("toggleItemsGridBtn"), salesCategoryFilters: document.getElementById("salesCategoryFilters"), itemGrid: document.getElementById("itemGrid"), startScannerBtn: document.getElementById("startScannerBtn"), 
-    // Scanner elements are now inside the sales section, so we get them dynamically
     scannerContainer: document.getElementById("scanner-container"), 
     readerDiv: document.getElementById("reader"), 
     closeScannerBtn: document.getElementById("closeScannerBtn"), 
     toggleFlashlightBtn: document.getElementById("toggleFlashlightBtn"), 
     cameraSelection: document.getElementById("cameraSelection"),
+    zoomSlider: document.getElementById("zoomSlider"),
     deliveryFeeValue: document.getElementById("deliveryFeeValue"), increaseDeliveryBtn: document.getElementById("increaseDeliveryBtn"), decreaseDeliveryBtn: document.getElementById("decreaseDeliveryBtn"),
     notificationContainer: document.getElementById("notification-container"),
     categoryScrollerContainer: document.getElementById("categoryScrollerContainer"),
@@ -885,19 +905,26 @@ const ScannerController = {
 
             if (backCameras.length > 1) {
                 Helpers.showNotification(`تم العثور على ${backCameras.length} كاميرا خلفية.`);
-                backCameras.forEach((camera, index) => {
-                    const button = document.createElement('button');
+                DOM.cameraSelection.innerHTML = backCameras.map((camera, index) => {
+                    const radioId = `cam_${index}`;
                     let name = `كاميرا ${index + 1}`;
-                    if (camera.label.toLowerCase().includes('wide')) name += ' (عريضة)';
                     if (camera.label.toLowerCase().includes('macro')) name += ' (ماكرو)';
-                    if (camera.label.toLowerCase().includes('telephoto')) name += ' (تقريب)';
-                    button.textContent = name;
-                    button.dataset.id = camera.id;
-                    button.onclick = () => {
-                        ScannerController.startScanning(camera.id);
-                    };
-                    DOM.cameraSelection.appendChild(button);
+                    return `
+                        <span>
+                            <input type="radio" name="camera-select" id="${radioId}" value="${camera.id}" ${index === 0 ? 'checked' : ''}>
+                            <label for="${radioId}">${name}</label>
+                        </span>
+                    `;
+                }).join('');
+
+                DOM.cameraSelection.querySelectorAll('input[name="camera-select"]').forEach(radio => {
+                    radio.addEventListener('change', (event) => {
+                        if (event.target.checked) {
+                            ScannerController.startScanning(event.target.value);
+                        }
+                    });
                 });
+                
                 ScannerController.startScanning(backCameras[0].id); // Start with the first one
             } else {
                 ScannerController.startScanning({ facingMode: "environment" });
@@ -926,17 +953,32 @@ const ScannerController = {
                 const track = video.srcObject.getVideoTracks()[0];
                 appState.cameraTrack = track;
                 const capabilities = track.getCapabilities();
+
                 if (capabilities.torch) {
                     DOM.toggleFlashlightBtn.style.display = 'block';
                 } else {
                     DOM.toggleFlashlightBtn.style.display = 'none';
+                }
+
+                if (capabilities.zoom) {
+                    DOM.zoomSlider.style.display = 'block';
+                    DOM.zoomSlider.min = capabilities.zoom.min;
+                    DOM.zoomSlider.max = capabilities.zoom.max;
+                    DOM.zoomSlider.step = capabilities.zoom.step;
+                    DOM.zoomSlider.value = track.getSettings().zoom || capabilities.zoom.min;
+                    
+                    DOM.zoomSlider.oninput = (event) => {
+                        track.applyConstraints({ advanced: [{ zoom: event.target.value }] });
+                    };
+                } else {
+                    DOM.zoomSlider.style.display = 'none';
                 }
             }
         })
         .catch((err) => {
             console.error("Camera start error:", err);
             Helpers.showNotification("فشل تشغيل الكاميرا. تأكد من منح الأذونات.");
-            ScannerController.stop(); // Stop completely on error
+            ScannerController.stop();
         });
     },
 
@@ -952,6 +994,7 @@ const ScannerController = {
         appState.isFlashOn = false;
         DOM.toggleFlashlightBtn.style.display = 'none';
         DOM.toggleFlashlightBtn.classList.remove('active');
+        DOM.zoomSlider.style.display = 'none';
     }
 };
 // #endregion
