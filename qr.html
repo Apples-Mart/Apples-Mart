@@ -1583,7 +1583,7 @@ const App = {
             const q = DOM.searchItem.value.trim().toLowerCase();
             DOM.searchResults.style.display = "none";
             if (q.length < 1) return;
-            const matched = appState.items.filter(i => (i.name || '').toLowerCase().includes(q) || (i.barcode1 || '').includes(q) || (i.barcode2 || '').includes(q)).slice(0, 5);
+            const matched = appState.items.filter(i => (i.name || '').toLowerCase().includes(q) || (i.barcode1 || '').includes(q) || (i.barcode2 || '').includes(q) || (i.sku || '').includes(q)).slice(0, 5);
             if (matched.length > 0) {
                 DOM.searchResults.innerHTML = matched.map(i => `<div data-id="${i.id}">${i.barcode1} - ${i.name}</div>`).join('');
                 DOM.searchResults.style.display = "block";
