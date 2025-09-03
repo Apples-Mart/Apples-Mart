@@ -80,29 +80,94 @@
   #itemGrid { display: none; grid-auto-flow: column; grid-template-rows: repeat(3, auto); gap: 10px; overflow-x: auto; padding: 10px; background: #e9ecef; border-radius: 6px; }
   
   /* --- Modified Scanner Styles --- */
-  #scanner-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 10001; display: none; justify-content: center; align-items: center; }
-  #reader { 
-    width: 90vw; 
-    height: 45vw; 
-    max-width: 600px;
-    max-height: 300px;
-    background: #000; 
-    border-radius: 12px; 
-    border: 2px solid rgba(255, 255, 255, 0.5); 
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
-    overflow: hidden; 
-    position: relative; 
+  #scanner-container {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    background-color: #111;
+    padding: 10px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    position: relative;
+    border: 1px solid #444;
   }
-  #reader::after { content: ''; position: absolute; top: 0; left: 5%; right: 5%; height: 2px; background: #ff4747; box-shadow: 0 0 5px #ff4747, 0 0 10px #ff4747; animation: laser-beam 2.5s infinite linear; border-radius: 2px; }
-  #closeScannerBtn { position: absolute; top: 20px; right: 20px; background: white; color: black; border: 2px solid #333; border-radius: 50%; width: 35px; height: 35px; font-size: 24px; line-height: 30px; text-align: center; cursor: pointer; z-index: 10002; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-  #toggleFlashlightBtn { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: rgba(0, 0, 0, 0.5); color: white; border: 1px solid white; border-radius: 50%; width: 50px; height: 50px; font-size: 20px; cursor: pointer; z-index: 10002; display: none; }
-  #toggleFlashlightBtn.active { color: yellow; }
-  #cameraSelection { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10003; display: none; flex-direction: column; gap: 10px; width: 80%; max-width: 220px; }
-  #cameraSelection button { width: 100%; background: rgba(255,255,255,0.8); color: #333; font-weight: bold; border: 1px solid #333; }
-  @keyframes laser-beam { 
-    0% { transform: translateY(10px); } 
-    50% { transform: translateY(calc(100% - 10px)); }
-    100% { transform: translateY(10px); } 
+  #reader-wrapper {
+    position: relative;
+    width: 100%;
+    height: 45vw;
+    max-height: 300px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  #reader {
+    width: 100%;
+    height: 100%;
+    background: #000;
+  }
+  #reader::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    right: 10%;
+    height: 2px;
+    background: #ff4747;
+    box-shadow: 0 0 8px #ff4747;
+    transform: translateY(-50%);
+    border-radius: 2px;
+  }
+  #closeScannerBtn {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+    line-height: 28px;
+    padding: 0;
+    text-align: center;
+    cursor: pointer;
+    z-index: 10;
+  }
+  #scanner-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: 10px;
+    padding: 0 5px;
+  }
+  #toggleFlashlightBtn {
+    background-color: #444;
+    color: white;
+    border: 1px solid #666;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    font-size: 18px;
+    cursor: pointer;
+    display: none; /* JS will show it if available */
+  }
+  #toggleFlashlightBtn.active {
+    color: yellow;
+    background-color: #554;
+    border-color: yellow;
+  }
+  #cameraSelection {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+  }
+  #cameraSelection button {
+    font-size: 12px;
+    padding: 8px 10px;
+    background-color: #444;
+    border: 1px solid #666;
+    border-radius: 6px;
   }
   /* --- End of Modified Scanner Styles --- */
 
@@ -271,6 +336,18 @@
     
     <section id="sales" class="active" style="position: relative;">
       <h2><i class="fas fa-cash-register"></i> عملية بيع</h2>
+      
+      <div id="scanner-container">
+        <div id="reader-wrapper">
+          <div id="reader"></div>
+          <button id="closeScannerBtn">&times;</button>
+        </div>
+        <div id="scanner-controls">
+          <div id="cameraSelection"></div>
+          <button id="toggleFlashlightBtn"><i class="fas fa-bolt"></i></button>
+        </div>
+      </div>
+      
       <div id="sales-header">
         <div class="form-group">
           <div class="search-group"><input type="text" id="searchItem" placeholder="بحث بالاسم أو الباركود" autocomplete="off" /><button id="startScannerBtn" title="فتح ماسح الكاميرا (SKU)"><i class="fas fa-barcode"></i></button></div>
@@ -383,12 +460,10 @@
       <button type="submit" id="loginBtn"><i class="fas fa-sign-in-alt"></i> دخول</button>
     </form>
 </div>
-<div id="scanner-container">
-  <button id="closeScannerBtn">&times;</button>
-  <div id="cameraSelection"></div>
-  <div id="reader"></div>
-  <button id="toggleFlashlightBtn"><i class="fas fa-bolt"></i></button>
-</div>
+
+<!-- This div is moved inside the sales section, but a placeholder is kept for the JS DOM object -->
+<div id="scanner-placeholder"></div>
+
 <div id="notification-container"></div>
 
 <div id="advanceModal" class="modal">
@@ -507,7 +582,13 @@ const DOM = {
     resetInvoicesBtn: document.getElementById("resetInvoicesBtn"), backupBtn: document.getElementById("backupBtn"), restoreBtn: document.getElementById("restoreBtn"), restoreInput: document.getElementById("restoreInput"),
     newUsernameInput: document.getElementById("newUsernameInput"), newUserPasswordInput: document.getElementById("newUserPasswordInput"), newUserRoleSelect: document.getElementById("newUserRoleSelect"), saveUserBtn: document.getElementById("saveUserBtn"), usersList: document.getElementById("usersList"),
     changePinBtn: document.getElementById("changePinBtn"), oldPinInput: document.getElementById("oldPinInput"), newPinInput: document.getElementById("newPinInput"), fullResetBtn: document.getElementById("fullResetBtn"),
-    toggleItemsGridBtn: document.getElementById("toggleItemsGridBtn"), salesCategoryFilters: document.getElementById("salesCategoryFilters"), itemGrid: document.getElementById("itemGrid"), startScannerBtn: document.getElementById("startScannerBtn"), scannerContainer: document.getElementById("scanner-container"), readerDiv: document.getElementById("reader"), closeScannerBtn: document.getElementById("closeScannerBtn"), toggleFlashlightBtn: document.getElementById("toggleFlashlightBtn"), cameraSelection: document.getElementById("cameraSelection"),
+    toggleItemsGridBtn: document.getElementById("toggleItemsGridBtn"), salesCategoryFilters: document.getElementById("salesCategoryFilters"), itemGrid: document.getElementById("itemGrid"), startScannerBtn: document.getElementById("startScannerBtn"), 
+    // Scanner elements are now inside the sales section, so we get them dynamically
+    scannerContainer: document.getElementById("scanner-container"), 
+    readerDiv: document.getElementById("reader"), 
+    closeScannerBtn: document.getElementById("closeScannerBtn"), 
+    toggleFlashlightBtn: document.getElementById("toggleFlashlightBtn"), 
+    cameraSelection: document.getElementById("cameraSelection"),
     deliveryFeeValue: document.getElementById("deliveryFeeValue"), increaseDeliveryBtn: document.getElementById("increaseDeliveryBtn"), decreaseDeliveryBtn: document.getElementById("decreaseDeliveryBtn"),
     notificationContainer: document.getElementById("notification-container"),
     categoryScrollerContainer: document.getElementById("categoryScrollerContainer"),
@@ -796,15 +877,14 @@ const ScannerController = {
         if (!appState.html5QrCode) {
             appState.html5QrCode = new Html5Qrcode("reader");
         }
-        DOM.scannerContainer.style.display = 'flex';
-        DOM.cameraSelection.innerHTML = ''; // Clear previous buttons
+        DOM.cameraSelection.innerHTML = ''; 
 
         try {
             const cameras = await Html5Qrcode.getCameras();
             const backCameras = cameras.filter(camera => camera.label.toLowerCase().includes('back'));
 
             if (backCameras.length > 1) {
-                Helpers.showNotification(`تم العثور على ${backCameras.length} كاميرا خلفية. اختر واحدة.`);
+                Helpers.showNotification(`تم العثور على ${backCameras.length} كاميرا خلفية.`);
                 backCameras.forEach((camera, index) => {
                     const button = document.createElement('button');
                     let name = `كاميرا ${index + 1}`;
@@ -814,12 +894,11 @@ const ScannerController = {
                     button.textContent = name;
                     button.dataset.id = camera.id;
                     button.onclick = () => {
-                        DOM.cameraSelection.style.display = 'none';
                         ScannerController.startScanning(camera.id);
                     };
                     DOM.cameraSelection.appendChild(button);
                 });
-                DOM.cameraSelection.style.display = 'flex';
+                ScannerController.startScanning(backCameras[0].id); // Start with the first one
             } else {
                 ScannerController.startScanning({ facingMode: "environment" });
             }
@@ -830,6 +909,10 @@ const ScannerController = {
     },
 
     startScanning: (cameraConfig) => {
+        if (appState.html5QrCode && appState.html5QrCode.isScanning) {
+            appState.html5QrCode.stop();
+        }
+        
         const config = { fps: 10, qrbox: { width: 250, height: 125 } };
         appState.html5QrCode.start(
             cameraConfig,
@@ -853,40 +936,22 @@ const ScannerController = {
         .catch((err) => {
             console.error("Camera start error:", err);
             Helpers.showNotification("فشل تشغيل الكاميرا. تأكد من منح الأذونات.");
-            if (typeof cameraConfig === 'string') {
-                Helpers.showNotification("فشل الكاميرا المحددة، محاولة الكاميرا الافتراضية.");
-                ScannerController.startScanning({ facingMode: "environment" });
-            } else {
-                ScannerController.stop();
-            }
+            ScannerController.stop(); // Stop completely on error
         });
     },
 
     stop: async () => {
         if (appState.html5QrCode && appState.html5QrCode.isScanning) {
             try {
-                if (appState.cameraTrack && appState.isFlashOn) {
-                    await appState.cameraTrack.applyConstraints({ advanced: [{ torch: false }] });
-                }
-            } catch (e) {
-                console.error("Could not turn off flash.", e);
-            } finally {
-                try {
-                    await appState.html5QrCode.stop();
-                } catch(e) {
-                     console.error("Scanner stop failed", e);
-                }
-                appState.cameraTrack = null;
-                appState.isFlashOn = false;
-                DOM.toggleFlashlightBtn.style.display = 'none';
-                DOM.toggleFlashlightBtn.classList.remove('active');
-                DOM.cameraSelection.style.display = 'none';
-                DOM.scannerContainer.style.display = 'none';
+                await appState.html5QrCode.stop();
+            } catch(e) {
+                 console.error("Scanner stop failed", e);
             }
-        } else {
-            DOM.cameraSelection.style.display = 'none';
-            DOM.scannerContainer.style.display = 'none';
         }
+        appState.cameraTrack = null;
+        appState.isFlashOn = false;
+        DOM.toggleFlashlightBtn.style.display = 'none';
+        DOM.toggleFlashlightBtn.classList.remove('active');
     }
 };
 // #endregion
@@ -1624,10 +1689,13 @@ const App = {
         DOM.restoreInput.addEventListener("change", (e) => ReportsController.restore(e.target.files[0]));
         
         DOM.startScannerBtn.addEventListener("click", () => {
-            appState.scannerMode = 'sales'; 
+            DOM.scannerContainer.style.display = 'flex';
             ScannerController.start();
         });
-        DOM.closeScannerBtn.addEventListener("click", ScannerController.stop);
+        DOM.closeScannerBtn.addEventListener("click", () => {
+            DOM.scannerContainer.style.display = 'none';
+            ScannerController.stop();
+        });
         DOM.toggleFlashlightBtn.addEventListener("click", ScannerController.toggleFlashlight);
         
         DOM.saveWorkerBtn.addEventListener('click', WorkersController.save);
