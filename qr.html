@@ -966,12 +966,10 @@ const WorkersController = {
             overtime: parseInt(DOM.workerOvertimeInput.value) || 0,
             createdAt: serverTimestamp()
         };
-        
         if (!workerData.name || !workerData.phone) {
             Helpers.showNotification("يرجى إدخال اسم العامل ورقم الهاتف.");
             return;
         }
-        
         try {
             const docRef = doc(db, "workers", appState.editingWorkerId || workerData.phone);
             await setDoc(docRef, workerData, { merge: true });
@@ -1069,12 +1067,10 @@ const WorkersController = {
             notes: DOM.advanceNotes.value.trim(),
             date: serverTimestamp()
         };
-        
         if (advanceData.amount <= 0) {
             Helpers.showNotification("يرجى إدخال مبلغ صحيح للسلفة.");
             return;
         }
-        
         try {
             await addDoc(collection(db, "advances"), advanceData);
             Helpers.showNotification("تم إضافة السلفة بنجاح.");
@@ -1101,17 +1097,14 @@ const WorkersController = {
             days: Helpers.calculateVacationDays(DOM.vacationStartDate.value, DOM.vacationEndDate.value),
             createdAt: serverTimestamp()
         };
-        
         if (!vacationData.startDate || !vacationData.endDate) {
             Helpers.showNotification("يرجى إدخال تاريخ البدء وتاريخ الانتهاء.");
             return;
         }
-        
         if (new Date(vacationData.startDate) > new Date(vacationData.endDate)) {
             Helpers.showNotification("تاريخ البدء يجب أن يكون قبل تاريخ الانتهاء.");
             return;
         }
-        
         try {
             await addDoc(collection(db, "vacations"), vacationData);
             Helpers.showNotification("تم إضافة الإجازة بنجاح.");
