@@ -261,13 +261,11 @@
 </head>
 <body>
 
-<!-- إشعار المسح الناجح -->
 <div class="notification-badge" id="scanNotification">
   <i class="fas fa-check-circle"></i> تم مسح الباركود بنجاح
 </div>
 
 <div class="container">
-  <!-- الماسح الضوئي في الأعلى -->
   <div id="scanner-container">
     <div id="reader-wrapper">
       <div id="reader"></div>
@@ -284,7 +282,6 @@
     </div>
   </div>
 
-  <!-- محتوى إضافي تحت الماسح -->
   <div class="content-below">
     <h2 class="section-title">ماسح الباركود المتطور</h2>
     
@@ -367,30 +364,36 @@ function initScanner() {
       const backCameras = cameras.filter(camera => camera.label.toLowerCase().includes('back'));
       const camerasToUse = backCameras.length > 0 ? backCameras : cameras;
       
-      cameraSelection.innerHTML = '';
-      
-      camerasToUse.forEach((camera, index) => {
-        const radioId = `cam_${index}`;
-        let name = `كاميرا ${index + 1}`;
-        if (camera.label.toLowerCase().includes('back')) name += ' (خلفية)';
-        if (camera.label.toLowerCase().includes('front')) name += ' (أمامية)';
+      // -- START MODIFICATION: Hide camera selection if there's only one camera --
+      if (camerasToUse.length > 1) {
+        cameraSelection.innerHTML = '';
         
-        cameraSelection.innerHTML += `
-          <span>
-            <input type="radio" name="camera-select" id="${radioId}" value="${camera.id}" ${index === 0 ? 'checked' : ''}>
-            <label for="${radioId}">${name}</label>
-          </span>
-        `;
-      });
-      
-      // إضافة مستمعي الأحداث للكاميرات
-      document.querySelectorAll('input[name="camera-select"]').forEach(radio => {
-        radio.addEventListener('change', (event) => {
-          if (event.target.checked) {
-            startScanning(event.target.value);
-          }
+        camerasToUse.forEach((camera, index) => {
+          const radioId = `cam_${index}`;
+          let name = `كاميرا ${index + 1}`;
+          if (camera.label.toLowerCase().includes('back')) name += ' (خلفية)';
+          if (camera.label.toLowerCase().includes('front')) name += ' (أمامية)';
+          
+          cameraSelection.innerHTML += `
+            <span>
+              <input type="radio" name="camera-select" id="${radioId}" value="${camera.id}" ${index === 0 ? 'checked' : ''}>
+              <label for="${radioId}">${name}</label>
+            </span>
+          `;
         });
-      });
+        
+        // إضافة مستمعي الأحداث للكاميرات
+        document.querySelectorAll('input[name="camera-select"]').forEach(radio => {
+          radio.addEventListener('change', (event) => {
+            if (event.target.checked) {
+              startScanning(event.target.value);
+            }
+          });
+        });
+      } else {
+        cameraSelection.innerHTML = ''; // إفراغ الحاوية إذا كانت هناك كاميرا واحدة فقط
+      }
+      // -- END MODIFICATION --
       
       // بدء المسح بالكاميرا الأولى
       startScanning(camerasToUse[0].id);
@@ -439,17 +442,31 @@ function startCamera(cameraId) {
         toggleFlashlightBtn.style.display = 'none';
       }
       
-      // التحقق من دعم التكبير
+      // -- START MODIFICATION: Set zoom to middle by default --
       if (cameraTrack && cameraTrack.getCapabilities().zoom) {
-        const capabilities = cameraTrack.getCapabilities();
-        zoomSlider.min = capabilities.zoom.min;
-        zoomSlider.max = capabilities.zoom.max;
-        zoomSlider.step = capabilities.zoom.step;
-        zoomSlider.value = currentZoom;
-        document.getElementById('zoomSliderContainer').style.display = 'flex';
+          const capabilities = cameraTrack.getCapabilities();
+          const minZoom = capabilities.zoom.min;
+          const maxZoom = capabilities.zoom.max;
+
+          const midZoom = (minZoom + maxZoom) / 2;
+
+          zoomSlider.min = minZoom;
+          zoomSlider.max = maxZoom;
+          zoomSlider.step = capabilities.zoom.step;
+
+          zoomSlider.value = midZoom;
+          currentZoom = midZoom;
+
+          cameraTrack.applyConstraints({
+              advanced: [{ zoom: midZoom }]
+          });
+
+          document.getElementById('zoomSliderContainer').style.display = 'flex';
       } else {
-        document.getElementById('zoomSliderContainer').style.display = 'none';
+          document.getElementById('zoomSliderContainer').style.display = 'none';
       }
+      // -- END MODIFICATION --
+
     }).catch(e => {
       console.error("لا يمكن الوصول إلى الكاميرا للكشاف:", e);
       toggleFlashlightBtn.style.display = 'none';
