@@ -3,15 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
 <meta name="theme-color" content="#007bff"/>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-192x192.png">
-
-<title>Apples-Mart - Firebase</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Apples-Mart - Firebase</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -91,20 +85,20 @@
     position: relative;
     border: 1px solid #444;
   }
-#reader-wrapper {
+  #reader-wrapper {
     position: relative;
     width: 100%;
     height: 100vh !important;
     max-height: 100vh !important;
     border-radius: 8px;
     overflow: hidden;
-}
-#reader {
+  }
+  #reader {
     width: 100%;
     height: 100vh !important;
     max-height: 100vh !important;
     background: #000;
-}
+  }
   #reader::after {
     content: '';
     position: absolute;
@@ -894,7 +888,42 @@ const ScannerController = {
         }
     },
 
-   start: async () => {
+    startScanning: async (cameraId) => {
+        try {
+            await appState.html5QrCode.start(
+                cameraId,
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 }
+                },
+                ScannerController.onScanSuccess,
+                () => {} // Ignore scan failure
+            );
+            
+            // Try to get camera track for flashlight control
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { deviceId: cameraId }
+                });
+                appState.cameraTrack = stream.getVideoTracks()[0];
+                
+                // Show flashlight button if available
+                if (appState.cameraTrack && appState.cameraTrack.getCapabilities().torch) {
+                    DOM.toggleFlashlightBtn.style.display = 'block';
+                } else {
+                    DOM.toggleFlashlightBtn.style.display = 'none';
+                }
+            } catch (e) {
+                console.error("Cannot access camera for flashlight:", e);
+                DOM.toggleFlashlightBtn.style.display = 'none';
+            }
+        } catch (err) {
+            console.error("Failed to start scanning:", err);
+            Helpers.showNotification("فشل تشغيل الماسح الضوئي.");
+        }
+    },
+
+    start: async () => {
         if (!appState.html5QrCode) {
             appState.html5QrCode = new Html5Qrcode("reader");
         }
@@ -935,10 +964,24 @@ const ScannerController = {
             ScannerController.startScanning({ facingMode: "environment" });
         }
     },
+
+    stop: async () => {
+        if (appState.html5QrCode && appState.html5QrCode.isScanning) {
+            try {
+                await appState.html5QrCode.stop();
+                DOM.toggleFlashlightBtn.style.display = 'none';
+                appState.isFlashOn = false;
+                DOM.toggleFlashlightBtn.classList.remove('active');
+            } catch (err) {
+                console.error("Failed to stop scanner:", err);
+            }
+        }
+    }
+};
 // #endregion
 
 // #region Workers Controller
-const WorkersController =
+const WorkersController = {
     render: () => {
         DOM.workersList.innerHTML = appState.workers.map(worker => `
             <div class="worker-card">
@@ -1177,7 +1220,7 @@ const InvoicesController = {
                     <p><b>خدمة التوصيل:</b> ${(inv.deliveryFee || 0).toFixed(2)} ج.م</p>
                     <p style="font-weight:bold;">الإجمالي: ${(inv.total || 0).toFixed(2)} ج.م</p>
                     <p><b>المدفوع:</b> ${totalPaid.toFixed(2)} ج.م</p>
-                    <p><b>المتبقي:</b> ${balance.toFixed(2)} ج.م</p>
+                    <p><b>المتبقي:</b> ${balance.toFixed(2)} ج.м</p>
                     ${balance > 0 ? `
                         <div class="settlement-section">
                             <button class="btn-small btn-success settle-invoice-btn" data-id="${inv.id}">
@@ -1775,4 +1818,3 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
-
