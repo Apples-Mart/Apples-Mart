@@ -91,19 +91,20 @@
     position: relative;
     border: 1px solid #444;
   }
-  #reader-wrapper {
+#reader-wrapper {
     position: relative;
     width: 100%;
-    height: 45vw;
-    max-height: 300px;
+    height: 100vh !important;
+    max-height: 100vh !important;
     border-radius: 8px;
     overflow: hidden;
-  }
-  #reader {
+}
+#reader {
     width: 100%;
-    height: 100%;
+    height: 100vh !important;
+    max-height: 100vh !important;
     background: #000;
-  }
+}
   #reader::after {
     content: '';
     position: absolute;
@@ -893,18 +894,18 @@ const ScannerController = {
         }
     },
 
-    start: async () => {
+   start: async () => {
         if (!appState.html5QrCode) {
             appState.html5QrCode = new Html5Qrcode("reader");
         }
-        DOM.cameraSelection.innerHTML = ''; 
+        DOM.cameraSelection.innerHTML = '';
 
         try {
             const cameras = await Html5Qrcode.getCameras();
             const backCameras = cameras.filter(camera => camera.label.toLowerCase().includes('back'));
 
-            if (backCameras.length > 1) {
-                Helpers.showNotification(`تم العثور على ${backCameras.length} كاميرا خلفية.`);
+            // جميع الكاميرات الخلفية تظهر للمستخدم مع تمييز (ماكرو)
+            if (backCameras.length > 0) {
                 DOM.cameraSelection.innerHTML = backCameras.map((camera, index) => {
                     const radioId = `cam_${index}`;
                     let name = `كاميرا ${index + 1}`;
@@ -924,8 +925,8 @@ const ScannerController = {
                         }
                     });
                 });
-                
-                ScannerController.startScanning(backCameras[0].id); // Start with the first one
+
+                ScannerController.startScanning(backCameras[0].id);
             } else {
                 ScannerController.startScanning({ facingMode: "environment" });
             }
@@ -934,69 +935,6 @@ const ScannerController = {
             ScannerController.startScanning({ facingMode: "environment" });
         }
     },
-
-    startScanning: (cameraConfig) => {
-        if (appState.html5QrCode && appState.html5QrCode.isScanning) {
-            appState.html5QrCode.stop();
-        }
-        
-        const config = { fps: 10, qrbox: { width: 250, height: 125 } };
-        appState.html5QrCode.start(
-            cameraConfig,
-            config,
-            ScannerController.onScanSuccess,
-            (errorMessage) => {}
-        )
-        .then(() => {
-            const video = document.querySelector('#reader video');
-            if (video && video.srcObject) {
-                const track = video.srcObject.getVideoTracks()[0];
-                appState.cameraTrack = track;
-                const capabilities = track.getCapabilities();
-
-                if (capabilities.torch) {
-                    DOM.toggleFlashlightBtn.style.display = 'block';
-                } else {
-                    DOM.toggleFlashlightBtn.style.display = 'none';
-                }
-
-                if (capabilities.zoom) {
-                    DOM.zoomSlider.style.display = 'block';
-                    DOM.zoomSlider.min = capabilities.zoom.min;
-                    DOM.zoomSlider.max = capabilities.zoom.max;
-                    DOM.zoomSlider.step = capabilities.zoom.step;
-                    DOM.zoomSlider.value = track.getSettings().zoom || capabilities.zoom.min;
-                    
-                    DOM.zoomSlider.oninput = (event) => {
-                        track.applyConstraints({ advanced: [{ zoom: event.target.value }] });
-                    };
-                } else {
-                    DOM.zoomSlider.style.display = 'none';
-                }
-            }
-        })
-        .catch((err) => {
-            console.error("Camera start error:", err);
-            Helpers.showNotification("فشل تشغيل الكاميرا. تأكد من منح الأذونات.");
-            ScannerController.stop();
-        });
-    },
-
-    stop: async () => {
-        if (appState.html5QrCode && appState.html5QrCode.isScanning) {
-            try {
-                await appState.html5QrCode.stop();
-            } catch(e) {
-                 console.error("Scanner stop failed", e);
-            }
-        }
-        appState.cameraTrack = null;
-        appState.isFlashOn = false;
-        DOM.toggleFlashlightBtn.style.display = 'none';
-        DOM.toggleFlashlightBtn.classList.remove('active');
-        DOM.zoomSlider.style.display = 'none';
-    }
-};
 // #endregion
 
 // #region Workers Controller
