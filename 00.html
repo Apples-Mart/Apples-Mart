@@ -60,9 +60,6 @@
   .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
   .flex-container { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
   .flex-end { justify-content: flex-end; }
-  #notification-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10002; display: flex; flex-direction: column; gap: 10px; max-width: 90%; }
-  .notification { background-color: rgba(0, 0, 0, 0.8); color: white; padding: 15px 25px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); text-align: center; font-size: 16px; opacity: 0; transition: opacity 0.5s ease-in-out; }
-  .notification.show { opacity: 1; }
   #login-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #e9ecef; }
   #login-form { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 350px; text-align: center; }
   #logoutBtn { background: var(--danger-color); }
@@ -87,25 +84,27 @@
     z-index: 10001;
     display: none;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start; /* Aligns to top */
     align-items: center;
   }
   #reader-wrapper {
     position: relative;
-    width: 90vw;
-    max-width: 500px;
+    width: 100vw; /* Full width */
+    height: 50vw; /* Width is double the height */
+    max-height: 45vh;
     background-color: #000;
   }
   #reader {
     width: 100%;
+    height: 100%;
     background: #000;
     position: relative;
   }
   #scanner-controls {
     position: absolute;
-    bottom: -70px; /* Position below the scanner window */
-    left: 0;
-    right: 0;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -115,7 +114,7 @@
   #closeScannerBtn {
     position: absolute;
     top: 15px;
-    left: 15px;
+    right: 15px;
     background: rgba(0, 0, 0, 0.6);
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.7);
@@ -249,7 +248,7 @@
     <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> خروج</button>
   </header>
   <nav>
-    <button data-tab="items"><i class="fas fa-box"></i> الأصناف</button>
+    <button data-tab="items" class="hidden"><i class="fas fa-box"></i> الأصناف</button>
     <button data-tab="customers"><i class="fas fa-users"></i> العملاء</button>
     <button class="active" data-tab="sales"><i class="fas fa-cash-register"></i> المبيعات</button>
     <button data-tab="invoices"><i class="fas fa-file-invoice"></i> الفواتير</button>
@@ -397,6 +396,16 @@
       </div>
       
       <hr>
+      <div id="admin-settings-section">
+        <h4><i class="fas fa-cog"></i> إعدادات النظام</h4>
+        <div class="form-group">
+          <label style="display: flex; align-items: center; gap: 10px;">
+            <input type="checkbox" id="showItemsTabToggle" style="width: auto; margin: 0;">
+            <span>إظهار تبويب الأصناف للمستخدمين</span>
+          </label>
+        </div>
+      </div>
+      <hr>
       
       <div id="changePinSection">
         <h4><i class="fas fa-key"></i> تغيير كلمة مرور المدير العام</h4>
@@ -423,15 +432,15 @@
 <div id="scanner-container">
     <div id="reader-wrapper">
       <div id="reader"></div>
-      <button id="closeScannerBtn">&times;</button>
-    </div>
-    <div id="scanner-controls">
-      <div id="zoomSliderContainer" class="control-btn" style="display:none;">
-        <i class="fas fa-search-minus"></i>
-        <input type="range" id="zoomSlider" min="1" max="10" step="0.1" style="width:100px; direction:ltr; margin: 0 10px;">
-        <i class="fas fa-search-plus"></i>
+      <div id="scanner-controls">
+        <div id="zoomSliderContainer" class="control-btn" style="display:none;">
+          <i class="fas fa-search-minus"></i>
+          <input type="range" id="zoomSlider" min="1" max="10" step="0.1" style="width:100px; direction:ltr; margin: 0 10px;">
+          <i class="fas fa-search-plus"></i>
+        </div>
+        <button id="toggleFlashlightBtn" class="control-btn" style="width: 50px; border-radius: 50%; display:none;"><i class="fas fa-bolt"></i></button>
       </div>
-      <button id="toggleFlashlightBtn" class="control-btn" style="width: 50px; border-radius: 50%; display:none;"><i class="fas fa-bolt"></i></button>
+       <button id="closeScannerBtn">&times;</button>
     </div>
 </div>
 <div id="notification-container"></div>
@@ -559,6 +568,7 @@ const DOM = {
     adminWorkersSection: document.getElementById("admin-workers-section"), workerNameInput: document.getElementById("workerNameInput"), workerPhoneInput: document.getElementById("workerPhoneInput"), workerAddressInput: document.getElementById("workerAddressInput"), workerSalaryInput: document.getElementById("workerSalaryInput"), workerAbsencesInput: document.getElementById("workerAbsencesInput"), workerOvertimeInput: document.getElementById("workerOvertimeInput"), saveWorkerBtn: document.getElementById("saveWorkerBtn"), workersList: document.getElementById("workersList"),
     advanceModal: document.getElementById("advanceModal"), vacationModal: document.getElementById("vacationModal"), settlementModal: document.getElementById("settlementModal"), advanceAmount: document.getElementById("advanceAmount"), advanceNotes: document.getElementById("advanceNotes"), saveAdvanceBtn: document.getElementById("saveAdvanceBtn"), cancelAdvanceBtn: document.getElementById("cancelAdvanceBtn"), vacationStartDate: document.getElementById("vacationStartDate"), vacationEndDate: document.getElementById("vacationEndDate"), vacationNotes: document.getElementById("vacationNotes"), saveVacationBtn: document.getElementById("saveVacationBtn"), cancelVacationBtn: document.getElementById("cancelVacationBtn"), settlementInvoiceId: document.getElementById("settlementInvoiceId"), settlementCustomerName: document.getElementById("settlementCustomerName"), settlementTotal: document.getElementById("settlementTotal"), settlementPaid: document.getElementById("settlementPaid"), settlementBalance: document.getElementById("settlementBalance"), settlementAmount: document.getElementById("settlementAmount"), settlementNotes: document.getElementById("settlementNotes"), saveSettlementBtn: document.getElementById("saveSettlementBtn"), cancelSettlementBtn: document.getElementById("cancelSettlementBtn"),
     workerReportModal: document.getElementById("workerReportModal"), reportWorkerName: document.getElementById("reportWorkerName"), workerReportContent: document.getElementById("workerReportContent"), closeReportBtn: document.getElementById("closeReportBtn"),
+    showItemsTabToggle: document.getElementById('showItemsTabToggle'),
     
     // Scanner DOM Elements
     startScannerBtn: document.getElementById("startScannerBtn"),
@@ -573,6 +583,7 @@ const DOM = {
 let appState = {
   items: [], invoices: [], customers: [], users: [], workers: [], advances: [], vacations: [], settlements: [],
   adminPIN: "790707071", currentUser: null, currentInvoice: [], deliveryFee: 30,
+  settings: { showItemsTab: false },
   editingItemId: null, editingCustomerId: null, editingUserId: null, editingWorkerId: null,
   html5QrCode: null, unsubscribe: {}, selectedWorkerId: null, selectedInvoiceId: null,
 };
@@ -589,7 +600,7 @@ const Helpers = {
     formatDate: (date) => { if (!date) return ''; return new Date(date).toLocaleDateString('ar-EG'); },
     calculateVacationDays: (start, end) => { const startDate = new Date(start); const endDate = new Date(end); const diffTime = Math.abs(endDate - startDate); return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; }
 };
-const notyf = new Notyf({ duration: 3000, position: { x: 'center', y: 'top' } });
+const notyf = new Notyf({ duration: 3000, position: { x: 'center', y: 'top' }, ripple: false });
 // #endregion
 
 // #region Authentication Controller
@@ -604,11 +615,7 @@ const Auth = {
     showApp: (role) => {
         DOM.loginContainer.style.display = "none";
         DOM.appContainer.style.display = "block";
-        const isAdmin = role === 'admin';
-        DOM.navButtons.forEach(b => b.dataset.tab === 'users' ? b.classList.toggle("hidden", !isAdmin) : null);
-        if (DOM.adminWorkersSection) {
-            DOM.adminWorkersSection.classList.toggle('hidden', !isAdmin);
-        }
+        App.updateUIVisibility();
         document.querySelector('[data-tab="sales"]').click();
     }
 };
@@ -721,7 +728,7 @@ const CustomersController = {
 const SalesController = {
     updateTotals: () => { const itemsTotal = appState.currentInvoice.reduce((sum, item) => sum + (item.price * item.qty), 0); const grandTotal = itemsTotal + appState.deliveryFee; DOM.invoiceTotal.textContent = grandTotal.toFixed(2); DOM.deliveryFeeValue.textContent = appState.deliveryFee.toFixed(2); Helpers.calculateChange(); },
     renderInvoice: () => { DOM.invoiceTable.innerHTML = appState.currentInvoice.map((item, index) => `<tr><td>${item.name}</td><td><div class="qty-controls"><button class="btn-small btn-success qty-increase" data-index="${index}">+</button><span>${item.qty}</span><button class="btn-small btn-danger qty-decrease" data-index="${index}">-</button></div></td><td>${(item.price || 0).toFixed(2)}</td><td>${((item.price || 0) * item.qty).toFixed(2)}</td><td><button class="btn-small btn-danger remove-from-invoice-btn" data-index="${index}"><i class="fas fa-trash-alt"></i></button></td></tr>`).join(""); SalesController.updateTotals(); },
-    addToInvoice: (item) => { const existing = appState.currentInvoice.find(i => i.id === item.id); const stockItem = appState.items.find(i => i.id === item.id); if (!stockItem || stockItem.qunt <= 0) { Helpers.showNotification("المخزون غير متوفر."); return; } if (existing) { if (stockItem.qunt > existing.qty) existing.qty++; else { Helpers.showNotification(`أقصى كمية: ${stockItem.qunt}`); return; } } else appState.currentInvoice.push({ ...item, qty: 1 }); SalesController.renderInvoice(); },
+    addToInvoice: (item) => { const existing = appState.currentInvoice.find(i => i.id === item.id); const stockItem = appState.items.find(i => i.id === item.id); if (!stockItem || stockItem.qunt <= 0) { notyf.error("المخزون غير متوفر."); return; } if (existing) { if (stockItem.qunt > existing.qty) existing.qty++; else { notyf.error(`أقصى كمية: ${stockItem.qunt}`); return; } } else appState.currentInvoice.push({ ...item, qty: 1 }); SalesController.renderInvoice(); },
     updateItemQty: (index, change) => { const item = appState.currentInvoice[index]; if (!item) return; const stockItem = appState.items.find(i => i.id === item.id); if (change > 0 && item.qty + change > stockItem.qunt) { Helpers.showNotification(`أقصى كمية: ${stockItem.qunt}`); return; } item.qty += change; if (item.qty <= 0) appState.currentInvoice.splice(index, 1); SalesController.renderInvoice(); },
     save: async () => { 
         if (appState.currentInvoice.length === 0) { Helpers.showNotification("الفاتورة فارغة."); return; } 
@@ -825,7 +832,7 @@ const ScannerController = {
     
     onScanSuccess: (decodedText) => {
         if ('vibrate' in navigator) {
-            navigator.vibrate(200);
+            navigator.vibrate(100);
         }
         const product = appState.items.find(p =>
             (p.barcode1 && p.barcode1 === decodedText) ||
@@ -833,7 +840,7 @@ const ScannerController = {
             (p.sku && p.sku === decodedText)
         );
         if (product) {
-            notyf.success(`تم العثور على: ${product.name}`);
+            notyf.success(`+ ${product.name}`);
             SalesController.addToInvoice(product);
         } else {
             notyf.error("هذا الباركود غير مسجل");
@@ -877,11 +884,12 @@ const ScannerController = {
                   }
                   if (capabilities.zoom) {
                       const { min, max, step } = capabilities.zoom;
+                      const midZoom = (min + max) / 2;
                       DOM.zoomSlider.min = min;
                       DOM.zoomSlider.max = max;
                       DOM.zoomSlider.step = step || 0.1;
-                      DOM.zoomSlider.value = min;
-                      ScannerController.cameraTrack.applyConstraints({ advanced: [{ zoom: min }] });
+                      DOM.zoomSlider.value = midZoom;
+                      ScannerController.cameraTrack.applyConstraints({ advanced: [{ zoom: midZoom }] });
                       DOM.zoomSliderContainer.style.display = 'flex';
                   }
               });
@@ -895,6 +903,9 @@ const ScannerController = {
         if (appState.html5QrCode && appState.html5QrCode.isScanning) {
             appState.html5QrCode.stop().then(() => {
                 DOM.scannerContainer.style.display = 'none';
+                if(ScannerController.cameraTrack) {
+                    ScannerController.cameraTrack.stop();
+                }
                 ScannerController.cameraTrack = null;
             });
         } else {
@@ -1415,7 +1426,7 @@ const App = {
             console.log("Signed in to Firebase Anonymously");
         } catch (error) {
             console.error("Anonymous sign-in failed:", error);
-            Helpers.showNotification("فشل الاتصال بقاعدة البيانات. قد لا تعمل الميزات بشكل صحيح.");
+            notyf.error("فشل الاتصال بقاعدة البيانات.");
         }
     },
     
@@ -1486,6 +1497,33 @@ const App = {
         }, "date", "desc");
         
         window.getDocument("config", "admin").then(doc => { if (doc?.pin) appState.adminPIN = doc.pin; });
+
+        onSnapshot(doc(db, "config", "settings"), (doc) => {
+            if (doc.exists()) {
+                appState.settings = { ...appState.settings, ...doc.data() };
+            }
+            App.updateUIVisibility();
+        });
+    },
+    
+    updateUIVisibility: () => {
+        if (!appState.currentUser) return;
+        const isAdmin = appState.currentUser.role === 'admin';
+        
+        document.querySelector('button[data-tab="users"]').classList.toggle('hidden', !isAdmin);
+        if (DOM.adminWorkersSection) {
+            DOM.adminWorkersSection.classList.toggle('hidden', !isAdmin);
+        }
+
+        const itemsTabButton = document.querySelector('button[data-tab="items"]');
+        if (itemsTabButton) {
+            itemsTabButton.classList.toggle('hidden', !isAdmin && !appState.settings.showItemsTab);
+        }
+
+        const toggle = DOM.showItemsTabToggle;
+        if (toggle) {
+            toggle.checked = appState.settings.showItemsTab;
+        }
     },
     
     onTabSwitch: (tabId) => {
@@ -1641,6 +1679,17 @@ const App = {
         DOM.toggleFlashlightBtn.addEventListener('click', ScannerController.toggleFlashlight);
         DOM.zoomSlider.addEventListener('input', ScannerController.handleZoomChange);
         
+        DOM.showItemsTabToggle.addEventListener('change', async () => {
+            const show = DOM.showItemsTabToggle.checked;
+            try {
+                await setDoc(doc(db, "config", "settings"), { showItemsTab: show }, { merge: true });
+                notyf.success("تم تحديث الإعداد.");
+            } catch (e) {
+                notyf.error("فشل تحديث الإعداد.");
+                DOM.showItemsTabToggle.checked = !show; // Revert on failure
+            }
+        });
+        
         DOM.saveWorkerBtn.addEventListener('click', WorkersController.save);
         DOM.workersList.addEventListener('click', (e) => {
             const btn = e.target.closest('button');
@@ -1726,9 +1775,6 @@ const UsersController = {
   }
 };
 App.init();
-// =========================================================
-// ▼▼▼ أضف هذا الكود في نهاية ملف الجافاسكريبت داخل الوسم ▼▼▼
-// =========================================================
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
