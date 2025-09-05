@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+<script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#007bff"/>
@@ -10,7 +12,47 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <style>
-  /* جميع أنماط CSS الأصلية تبقى كما هي */
+  :root {
+    --primary-color: #007bff;
+    --danger-color: #dc3545;
+    --light-gray: #f8f9fa;
+    --dark-gray: #343a40;
+    --border-color: #dee2e6;
+}
+#scanner-container {
+    position: relative; width: 100vw; height: 40vh;
+    background-color: #000; overflow: hidden; margin: 0; padding: 0; border: none;
+}
+#reader-wrapper { position: relative; width: 100%; height: 100%; }
+#reader { width: 100%; height: 100%; background: #000; position: relative; }
+#reader::after {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%); width: 90%; height: 60%;
+    border: 10px solid #ff4747;
+    box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.8);
+    border-radius: 12px; pointer-events: none;
+}
+#scanner-controls {
+    position: absolute; bottom: 15px; left: 0; right: 0;
+    display: flex; justify-content: center; align-items: center; gap: 15px; z-index: 100;
+}
+#closeScannerBtn {
+    position: absolute; top: 15px; left: 15px; background: rgba(0, 0, 0, 0.6);
+    color: white; border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 50%;
+    width: 40px; height: 40px; font-size: 24px; line-height: 38px;
+    text-align: center; cursor: pointer; z-index: 10;
+}
+.control-btn {
+    background-color: rgba(0,0,0,0.5); color: white; border: 1px solid #666;
+    border-radius: 25px; padding: 10px; height: 50px; font-size: 20px;
+    cursor: pointer; display: flex; justify-content: center; align-items: center;
+}
+.control-btn.active { color: yellow; border-color: yellow; }
+.btn-large {
+    display: block; width: 100%; padding: 15px; font-size: 18px;
+    background: var(--primary-color); color: white; border: none;
+    border-radius: 5px; cursor: pointer; margin-top: 20px;
+}
   :root {
     --primary-color: #007bff; --secondary-color: #343a40; --success-color: #28a745;
     --danger-color: #dc3545; --warning-color: #ffc107; --text-dark: #222;
@@ -238,12 +280,30 @@
     
     <section id="sales" class="active" style="position: relative;">
       <h2><i class="fas fa-cash-register"></i> عملية بيع</h2>
-      
-      <div id="sales-header">
+      <div id="scanner-container">
+    <div id="reader-wrapper">
+        <div id="reader"></div>
+        <button id="closeScannerBtn">&times;</button>
+    </div>
+    <div id="scanner-controls">
+        <div id="zoomSliderContainer" class="control-btn" style="display:none;">
+            <i class="fas fa-search-minus"></i>
+            <input type="range" id="zoomSlider" min="1" max="10" step="0.1" style="width:100px; direction:ltr; margin: 0 10px;">
+            <i class="fas fa-search-plus"></i>
+        </div>
+        <button id="toggleFlashlightBtn" class="control-btn" style="width: 50px; border-radius: 50%; display:none;">
+            <i class="fas fa-bolt"></i>
+        </button>
+    </div>
+</div>
+        <div id="sales-header">
         <div class="form-group">
           <div class="search-group"><input type="text" id="searchItem" placeholder="بحث بالاسم أو الباركود" autocomplete="off" /></div>
           <div id="searchResults"></div>
         </div>
+          <button id="startScannerBtn" class="btn-large">
+    <i class="fas fa-barcode"></i>
+</button>
         <div class="form-group">
           <input type="text" id="customerName" placeholder="اسم العميل (اختياري)" autocomplete="off" />
           <div id="customerSuggestions"></div>
@@ -1545,8 +1605,173 @@ const UsersController = {
 };
 App.init();
 
-// --- تم حذف كود Service Worker و Zoom Slider من هنا ---
+// --- تهيئة المكتبات والعناصر الأساسية ---
+const notyf = new Notyf({ duration: 3000, position: { x: 'center', y: 'top' } });
+let html5QrCode = null;
+let cameraTrack = null;
+let productsData = []; // بيانات المنتجات التي يتم البحث فيها
 
+// عناصر DOM الخاصة بالماسح الضوئي
+const scannerContainer = document.getElementById('scanner-container');
+const startScannerBtn = document.getElementById('startScannerBtn');
+const closeScannerBtn = document.getElementById('closeScannerBtn');
+const toggleFlashlightBtn = document.getElementById('toggleFlashlightBtn');
+const zoomSlider = document.getElementById('zoomSlider');
+const zoomSliderContainer = document.getElementById('zoomSliderContainer');
+
+// رابط ملف JSON الذي يحتوي على بيانات المنتجات
+const JSON_URL = 'https://raw.githubusercontent.com/Apples-Mart/Apples-Mart/refs/heads/main/p.json';
+
+
+// --- دوال الماسح الضوئي ---
+
+/**
+ * جلب بيانات المنتجات من ملف JSON
+ */
+async function fetchProductData() {
+    try {
+        const response = await fetch(JSON_URL);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        productsData = await response.json();
+        console.log("تم تحميل بيانات المنتجات بنجاح");
+        notyf.success("قاعدة بيانات الأصناف جاهزة");
+    } catch (error) {
+        console.error("فشل في جلب بيانات المنتجات:", error);
+        notyf.error("فشل تحميل بيانات الأصناف.");
+    }
+}
+
+/**
+ * يتم استدعاؤها عند المسح الناجح للباركود
+ * @param {string} decodedText - الباركود الذي تم مسحه
+ */
+function onScanSuccess(decodedText) {
+    // اهتزاز عند النجاح (يعمل على الموبايل)
+    if ('vibrate' in navigator) {
+        navigator.vibrate(200);
+    }
+
+    // البحث عن المنتج في البيانات
+    const product = productsData.find(p =>
+        (p.barcode1 && p.barcode1 === decodedText) ||
+        (p.barcode2 && p.barcode2 === decodedText) ||
+        (p.sku && p.sku === decodedText)
+    );
+
+    if (product) {
+        notyf.success(`تم العثور على: ${product.name}`);
+        // هنا يمكنك إضافة منطق إضافة المنتج إلى الفاتورة
+        // ... addToInvoice(product);
+    } else {
+        notyf.error("هذا الباركود غير مسجل");
+    }
+}
+
+/**
+ * تهيئة وتشغيل الماسح الضوئي
+ */
+function initScanner() {
+    scannerContainer.style.display = 'block';
+    startScannerBtn.style.display = 'none';
+    if (!html5QrCode) {
+        html5QrCode = new Html5Qrcode("reader");
+    }
+
+    // محاولة العثور على الكاميرا الخلفية
+    Html5Qrcode.getCameras().then(cameras => {
+        if (cameras && cameras.length) {
+            const backCameras = cameras.filter(camera => camera.label.toLowerCase().includes('back'));
+            const cameraId = (backCameras.length > 0 ? backCameras[0] : cameras[0]).id;
+            startCamera(cameraId);
+        }
+    }).catch(err => {
+        console.error(err);
+        // في حالة الفشل، اطلب من المتصفح اختيار كاميرا البيئة (الخلفية عادةً)
+        startCamera({ facingMode: "environment" });
+    });
+}
+
+/**
+ * بدء تشغيل الكاميرا المحددة
+ * @param {string|object} cameraId - معرف الكاميرا أو كائن الإعدادات
+ */
+function startCamera(cameraId) {
+    html5QrCode.start(
+        cameraId, 
+        { fps: 10, qrbox: { width: 250, height: 150 } }, // إعدادات الماسح
+        onScanSuccess, // الدالة التي تُستدعى عند النجاح
+        () => {} // دالة الخطأ (يمكن تركها فارغة)
+    ).then(() => {
+        // بعد تشغيل الكاميرا، تحقق من قدرات التحكم (فلاش، تقريب)
+        navigator.mediaDevices.getUserMedia({ video: { deviceId: { exact: cameraId } } })
+            .then(stream => {
+                cameraTrack = stream.getVideoTracks()[0];
+                const capabilities = cameraTrack.getCapabilities();
+                
+                // إظهار زر الفلاش إذا كان مدعومًا
+                if (capabilities.torch) {
+                    toggleFlashlightBtn.style.display = 'flex';
+                }
+                // إظهار شريط التقريب إذا كان مدعومًا
+                if (capabilities.zoom) {
+                    zoomSlider.min = capabilities.zoom.min;
+                    zoomSlider.max = capabilities.zoom.max;
+                    zoomSlider.step = capabilities.zoom.step || 0.1;
+                    zoomSlider.value = capabilities.zoom.min;
+                    zoomSliderContainer.style.display = 'flex';
+                }
+            });
+    }).catch(err => {
+        notyf.error("فشل تشغيل الكاميرا. يرجى منح الإذن.");
+    });
+}
+
+/**
+ * إيقاف الماسح الضوئي وإخفائه
+ */
+function stopScanner() {
+    if (html5QrCode && html5QrCode.isScanning) {
+        html5QrCode.stop().then(() => {
+            scannerContainer.style.display = 'none';
+            startScannerBtn.style.display = 'block';
+            // إطفاء الفلاش عند إغلاق الكاميرا
+            if (toggleFlashlightBtn.classList.contains('active')) {
+                toggleFlashlight();
+            }
+        });
+    }
+}
+
+/**
+ * تشغيل أو إطفاء فلاش الكاميرا
+ */
+function toggleFlashlight() {
+    if (cameraTrack && cameraTrack.getCapabilities().torch) {
+        const isFlashOn = !toggleFlashlightBtn.classList.contains('active');
+        cameraTrack.applyConstraints({ advanced: [{ torch: isFlashOn }] })
+            .then(() => toggleFlashlightBtn.classList.toggle('active', isFlashOn));
+    }
+}
+
+/**
+ * التعامل مع تغيير قيمة شريط التقريب
+ */
+function handleZoomChange() {
+    if (cameraTrack && cameraTrack.getCapabilities().zoom) {
+        const zoomValue = parseFloat(zoomSlider.value);
+        cameraTrack.applyConstraints({ advanced: [{ zoom: zoomValue }] });
+    }
+}
+
+// --- ربط الأحداث وبدء التشغيل ---
+startScannerBtn.addEventListener('click', initScanner);
+closeScannerBtn.addEventListener('click', stopScanner);
+toggleFlashlightBtn.addEventListener('click', toggleFlashlight);
+zoomSlider.addEventListener('input', handleZoomChange);
+
+// تهيئة أولية: إخفاء الماسح وجلب بيانات المنتجات
+scannerContainer.style.display = 'none';
+fetchProductData();
 </script>
 </body>
 </html>
