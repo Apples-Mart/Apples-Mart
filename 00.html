@@ -73,79 +73,70 @@
   #salesCategoryFilters button.active { background-color: var(--success-color); color: white; }
   #itemGrid { display: none; grid-auto-flow: column; grid-template-rows: repeat(3, auto); gap: 10px; overflow-x: auto; padding: 10px; background: #e9ecef; border-radius: 6px; }
   
-   /* --- تصميم الماسح الضوئي --- */
-
-  /* الحاوية الرئيسية للماسح الضوئي بأكمله */
+  /* --- تصميم الماسح الضوئي --- */
   #scanner-container {
-    width: 100%; /* العرض يملأ المساحة المتاحة */
-    z-index: 100; /* يضمن ظهوره فوق العناصر الأخرى */
-    display: none; /* يكون مخفياً بشكل افتراضي */
-    flex-direction: column; /* يرتب العناصر الداخلية بشكل عمودي */
-    align-items: center; /* يوسط العناصر أفقيًا */
-    margin-bottom: 1px; /* يضيف هامشاً أسفله */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 33vh;
+    background-color: #000;
+    z-index: 10001;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
   }
-
-  /* الحاوية التي تغلف نافذة الكاميرا مباشرة */
   #reader-wrapper {
-    position: relative; /* ضروري لتحديد موضع الأزرار الداخلية بالنسبة له */
-    width: 100%; /* العرض يملأ عرض الحاوية الرئيسية */
-    height: 50vw; /* الارتفاع يساوي نصف عرض الشاشة للحفاظ على نسبة 2:1 */
-    max-height: 25vh; /* أقصى ارتفاع مسموح به هو ثلث ارتفاع الشاشة */
-    background-color: #000; /* لون الخلفية أسود */
+    position: relative;
+    width: 100%;
+    flex-grow: 1; /* Take available space */
+    display: flex;
   }
-
-  /* العنصر الذي يتم عرض فيديو الكاميرا بداخله */
   #reader {
-    width: 100%; /* يملأ عرض الحاوية المغلفة له */
-    height: 75%; /* يملأ ارتفاع الحاوية المغلفة له */
-    background: #000; /* لون الخلفية أسود */
-    position: relative; /* تحديد الموضع */
+    width: 100%;
+    height: 100%;
+    background: #000;
+    position: relative;
   }
-
-  /* حاوية أزرار التحكم (التقريب، الفلاش) */
   #scanner-controls {
-    display: flex; /* يستخدم Flexbox لترتيب الأزرار */
-    justify-content: center; /* يوسط الأزرار أفقيًا */
-    align-items: center; /* يوسط الأزرار رأسيًا */
-    gap: 10px; /* يضيف مسافة 15 بكسل بين الأزرار */
-    z-index: 25; /* يجعله يظهر فوق فيديو الكاميرا */
-    width: 100%; /* يملأ العرض المتاح */
-    background-color: #000; /* لون الخلفية أسود */
-    padding: 10px 0; /* يضيف هامشاً داخلياً أعلى وأسفل الأزرار */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    z-index: 100;
+    width: 100%;
+    background-color: #000;
+    padding: 10px 0;
   }
-
-  /* تصميم زر إغلاق الماسح الضوئي */
   #closeScannerBtn {
-    position: absolute; /* يتم تحديد موضعه بالنسبة للحاوية المغلفة له (#reader-wrapper) */
-    top: 15px; /* يبعد 15 بكسل عن الحافة العلوية */
-    right: 15px; /* يبعد 15 بكسل عن الحافة اليمنى */
-    background: rgba(0, 0, 0, 0.6); /* خلفية سوداء شبه شفافة */
-    color: white; /* لون الأيقونة أبيض */
-    border: 1px solid rgba(255, 255, 255, 0.7); /* إطار أبيض شبه شفاف */
-    border-radius: 50%; /* يجعله دائري الشكل */
-    width: 40px; /* العرض 40 بكسل */
-    height: 40px; /* الارتفاع 40 بكسل */
-    font-size: 24px; /* حجم أيقونة الإغلاق */
-    line-height: 38px; /* يضبط ارتفاع السطر لتوسيط الأيقونة رأسيًا */
-    text-align: center; /* يوسط الأيقونة أفقيًا */
-    cursor: pointer; /* يغير شكل المؤشر عند المرور فوقه */
-    z-index: 10; /* يضمن ظهوره فوق العناصر الأخرى في نفس الحاوية */
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+    line-height: 38px;
+    text-align: center;
+    cursor: pointer;
+    z-index: 10;
   }
-
-  /* التصميم العام لأزرار التحكم (الفلاش والتقريب) */
   .control-btn {
-    background-color: rgba(0,0,0,0.5); /* خلفية سوداء شبه شفافة */
-    color: white; /* لون الأيقونة أبيض */
-    border: 1px solid #666; /* إطار رمادي داكن */
-    border-radius: 23px; /* يجعل الحواف دائرية */
-    padding: 10px; /* هامش داخلي */
-    height: 25px; /* ارتفاع الزر */
-    font-size: 20px; /* حجم الأيقونة */
-    cursor: pointer; /* يغير شكل المؤشر */
-    display: flex; /* يستخدم Flexbox لترتيب محتوى الزر */
-    justify-content: center; /* يوسط المحتوى أفقيًا */
-    align-items: center; /* يوسط المحتوى رأسيًا */
-  }
+    background-color: rgba(0,0,0,0.5);
+    color: white;
+    border: 1px solid #666;
+    border-radius: 25px;
+    padding: 10px;
+    height: 50px;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   .control-btn.active { color: yellow; border-color: yellow; }
 
@@ -313,6 +304,18 @@
     </section>
     
     <section id="sales" class="active" style="position: relative;">
+      <h2><i class="fas fa-cash-register"></i> عملية بيع</h2>
+      <div id="sales-header">
+        <div class="form-group">
+          <div class="search-group"><input type="text" id="searchItem" placeholder="بحث بالاسم أو الباركود" autocomplete="off" /><button id="startScannerBtn" title="فتح ماسح الكاميرا"><i class="fas fa-barcode"></i></button></div>
+          <div id="searchResults"></div>
+        </div>
+        <div class="form-group">
+          <input type="text" id="customerName" placeholder="اسم العميل (اختياري)" autocomplete="off" />
+          <div id="customerSuggestions"></div>
+        </div>
+        <div class="form-group"><input type="tel" id="customerPhone" placeholder="رقم هاتف العميل" /></div>
+      </div>
       <div id="scanner-container">
           <div id="reader-wrapper">
             <div id="reader"></div>
@@ -326,18 +329,6 @@
               </div>
               <button id="toggleFlashlightBtn" class="control-btn" style="width: 50px; border-radius: 50%; display:none;"><i class="fas fa-bolt"></i></button>
           </div>
-      </div>
-      <h2><i class="fas fa-cash-register"></i> عملية بيع</h2>
-      <div id="sales-header">
-        <div class="form-group">
-          <div class="search-group"><input type="text" id="searchItem" placeholder="بحث بالاسم أو الباركود" autocomplete="off" /><button id="startScannerBtn" title="فتح ماسح الكاميرا"><i class="fas fa-barcode"></i></button></div>
-          <div id="searchResults"></div>
-        </div>
-        <div class="form-group">
-          <input type="text" id="customerName" placeholder="اسم العميل (اختياري)" autocomplete="off" />
-          <div id="customerSuggestions"></div>
-        </div>
-        <div class="form-group"><input type="tel" id="customerPhone" placeholder="رقم هاتف العميل" /></div>
       </div>
       <button id="toggleItemsGridBtn" class="btn-warning" style="width: 100%; margin-bottom: 15px;"><i class="fas fa-th-large"></i> عرض الأصناف حسب الفئة</button>
       <div id="categoryScrollerContainer"><div id="salesCategoryFilters"></div></div>
@@ -1691,11 +1682,7 @@ const App = {
         // Scanner Event Listeners
         DOM.startScannerBtn.addEventListener("click", ScannerController.start);
         DOM.closeScannerBtn.addEventListener('click', ScannerController.stop);
-        DOM.scannerContainer.addEventListener('click', (e) => { 
-            if (e.target === DOM.scannerContainer) {
-                ScannerController.stop();
-            }
-        });
+        
         DOM.toggleFlashlightBtn.addEventListener('click', ScannerController.toggleFlashlight);
         DOM.zoomSlider.addEventListener('input', ScannerController.handleZoomChange);
         
