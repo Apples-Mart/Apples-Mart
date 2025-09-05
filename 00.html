@@ -73,83 +73,65 @@
   #salesCategoryFilters button.active { background-color: var(--success-color); color: white; }
   #itemGrid { display: none; grid-auto-flow: column; grid-template-rows: repeat(3, auto); gap: 10px; overflow-x: auto; padding: 10px; background: #e9ecef; border-radius: 6px; }
   
-/* --- تصميم الماسح الضوئي --- */
-
-/* الحاوية الرئيسية للماسح التي تظهر عند طلبه */
-#scanner-container {
-  position: fixed; /* يثبّت الماسح في مكانه أعلى الشاشة حتى مع تمرير الصفحة */
-  top: 0;          /* يجعله ملتصقًا بالحافة العلوية للشاشة */
-  left: 0;         /* يجعله ملتصقًا بالحافة اليسرى للشاشة */
-  width: 100%;     /* يجعله يأخذ عرض الشاشة بالكامل */
-  height: 33vh;    /* يحدد ارتفاع الماسح بثلث ارتفاع الشاشة (vh = viewport height) */
-  background-color: #000; /* لون الخلفية أسود */
-  z-index: 10001;  /* يضمن ظهور الماسح فوق كل عناصر الصفحة الأخرى */
-  display: none;   /* يكون مخفياً بشكل افتراضي حتى يتم طلبه */
-  flex-direction: column; /* يرتب العناصر بداخله (نافذة الكاميرا والأزرار) بشكل عمودي */
-  align-items: center;    /* يوسط العناصر أفقيًا */
-  justify-content: center; /* يوسط العناصر رأسيًا */
-}
-
-/* الغلاف الخاص بنافذة الكاميرا فقط */
-#reader-wrapper {
-  position: relative; /* ضروري لتحديد موضع زر الإغلاق بداخله */
-  width: 100%;        /* يأخذ العرض الكامل للحاوية الرئيسية */
-  flex-grow: 1;       /* يسمح له بالتمدد ليملأ المساحة الرأسية المتاحة */
-  display: flex;      /* يستخدم لتنسيق محتواه الداخلي */
-}
-
-/* العنصر الذي يتم فيه عرض بث الفيديو من الكاميرا */
-#reader {
-  width: 100%;     /* يملأ عرض الغلاف الخاص به */
-  height: 100%;    /* يملأ ارتفاع الغلاف الخاص به */
-  background: #000; /* خلفية سوداء احتياطية */
-  position: relative; /* تحديد الموضع */
-}
-
-/* الحاوية الخاصة بأزرار التحكم (التقريب والفلاش) */
-#scanner-controls {
-  display: flex;           /* يستخدم لتنسيق الأزرار بجانب بعضها */
-  justify-content: center; /* يوسط الأزرار أفقيًا */
-  align-items: center;     /* يوسط الأزرار رأسيًا */
-  gap: 15px;               /* يضيف مسافة 15 بكسل بين الأزرار */
-  z-index: 100;            /* يضمن ظهورها فوق فيديو الكاميرا */
-  width: 100%;             /* تأخذ العرض الكامل */
-  background-color: #000;  /* خلفية سوداء */
-  padding: 10px 0;         /* هامش داخلي أعلى وأسفل الأزرار */
-}
-
-/* تصميم زر إغلاق الماسح (علامة ×) */
-#closeScannerBtn {
-  position: absolute; /* موضعه يتم تحديده نسبةً إلى #reader-wrapper */
-  top: 15px;          /* 15 بكسل من الأعلى */
-  right: 15px;        /* 15 بكسل من اليمين */
-  background: rgba(0, 0, 0, 0.6); /* خلفية سوداء شبه شفافة */
-  color: white;       /* لون الأيقونة أبيض */
-  border: 1px solid rgba(255, 255, 255, 0.7); /* إطار أبيض شبه شفاف */
-  border-radius: 50%; /* يجعله دائري الشكل تمامًا */
-  width: 40px;        /* العرض */
-  height: 40px;       /* الارتفاع */
-  font-size: 24px;    /* حجم علامة × */
-  line-height: 38px;  /* لتوسيط علامة × رأسيًا داخل الدائرة */
-  text-align: center; /* لتوسيط علامة × أفقيًا */
-  cursor: pointer;    /* يغير شكل المؤشر عند المرور فوقه */
-  z-index: 10;        /* يضمن ظهوره فوق كل شيء داخل نافذة الكاميرا */
-}
-
-/* التصميم الموحد لأزرار التحكم (التقريب والفلاش) */
-.control-btn {
-  background-color: rgba(0,0,0,0.5); /* خلفية سوداء شبه شفافة */
-  color: white;                      /* لون الأيقونات أبيض */
-  border: 1px solid #666;            /* إطار رمادي */
-  border-radius: 25px;               /* حواف دائرية */
-  padding: 10px;                     /* هامش داخلي */
-  height: 50px;                      /* ارتفاع الزر */
-  font-size: 20px;                   /* حجم الأيقونة */
-  cursor: pointer;                   /* شكل المؤشر */
-  display: flex;                     /* يستخدم لتوسيط الأيقونة بداخل الزر */
-  justify-content: center;           /* توسيط أفقي للأيقونة */
-  align-items: center;               /* توسيط رأسي للأيقونة */
-}
+  /* --- تصميم الماسح الضوئي --- */
+  #scanner-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 33vh; /* الماسح يأخذ الثلث العلوي من الشاشة */
+    background-color: #000;
+    z-index: 10001;
+    display: none; /* يظهر عند الطلب فقط */
+  }
+  #reader {
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+  #scanner-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between; /* يدفع زر الإغلاق لليسار وباقي الأزرار لليمين */
+    align-items: center;
+    padding: 15px;
+    z-index: 100;
+    background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%); /* تدرج شفاف لتظهر الأزرار فوق الفيديو */
+  }
+  .scanner-actions-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  #closeScannerBtn {
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .control-btn {
+    background-color: rgba(0,0,0,0.5);
+    color: white;
+    border: 1px solid #666;
+    border-radius: 25px;
+    padding: 10px;
+    height: 50px;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
   .control-btn.active { color: yellow; border-color: yellow; }
 
   .qty-controls { display: flex; align-items: center; justify-content: space-evenly; }
@@ -328,20 +310,6 @@
         </div>
         <div class="form-group"><input type="tel" id="customerPhone" placeholder="رقم هاتف العميل" /></div>
       </div>
-      <div id="scanner-container">
-          <div id="reader-wrapper">
-            <div id="reader"></div>
-             <button id="closeScannerBtn">&times;</button>
-          </div>
-          <div id="scanner-controls">
-              <div id="zoomSliderContainer" class="control-btn" style="display:none;">
-                <i class="fas fa-search-minus"></i>
-                <input type="range" id="zoomSlider" min="1" max="10" step="0.1" style="width:100px; direction:ltr; margin: 0 10px;">
-                <i class="fas fa-search-plus"></i>
-              </div>
-              <button id="toggleFlashlightBtn" class="control-btn" style="width: 50px; border-radius: 50%; display:none;"><i class="fas fa-bolt"></i></button>
-          </div>
-      </div>
       <button id="toggleItemsGridBtn" class="btn-warning" style="width: 100%; margin-bottom: 15px;"><i class="fas fa-th-large"></i> عرض الأصناف حسب الفئة</button>
       <div id="categoryScrollerContainer"><div id="salesCategoryFilters"></div></div>
       <div id="itemGrid"></div>
@@ -452,6 +420,21 @@
       <div class="form-group"><input type="password" id="passwordInput" placeholder="كلمة المرور" required /></div>
       <button type="submit" id="loginBtn"><i class="fas fa-sign-in-alt"></i> دخول</button>
     </form>
+</div>
+
+<div id="scanner-container">
+    <div id="reader"></div>
+    <div id="scanner-controls">
+        <button id="closeScannerBtn" class="control-btn"><i class="fas fa-times"></i></button>
+        <div class="scanner-actions-right">
+            <button id="toggleFlashlightBtn" class="control-btn" style="display:none;"><i class="fas fa-bolt"></i></button>
+            <div id="zoomSliderContainer" class="control-btn" style="display:none;">
+                <i class="fas fa-search-minus"></i>
+                <input type="range" id="zoomSlider" min="1" max="10" step="0.1" style="width:100px; direction:ltr; margin: 0 10px;">
+                <i class="fas fa-search-plus"></i>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div id="advanceModal" class="modal">
@@ -879,7 +862,6 @@ const ScannerController = {
             { 
                 fps: 10, 
                 qrbox: (viewfinderWidth, viewfinderHeight) => {
-                    // This creates a wide, short scanning area, ideal for barcodes.
                     return {
                         width: viewfinderWidth * 0.9,
                         height: viewfinderHeight * 0.3 
@@ -1809,3 +1791,4 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
