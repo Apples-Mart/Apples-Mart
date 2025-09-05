@@ -73,170 +73,6 @@
   #salesCategoryFilters button.active { background-color: var(--success-color); color: white; }
   #itemGrid { display: none; grid-auto-flow: column; grid-template-rows: repeat(3, auto); gap: 10px; overflow-x: auto; padding: 10px; background: #e9ecef; border-radius: 6px; }
   
-/* --- Modified Scanner Styles --- */
-
-/* الحاوية الرئيسية للماسح الضوئي.
-  تم تعديلها لتكون شفافة وبدون هوامش أو إطار، وتحديد عرض أقصى لها.
-*/
-#scanner-container {
-  display: flex; /* عرض العناصر بشكل مرن */
-  flex-direction: column; /* ترتيب العناصر بشكل عمودي (الكاميرا فوق أزرار التحكم) */
-  align-items: center; /* توسيط المحتوى أفقيًا */
-  
-  /* --- التعديلات الرئيسية --- */
-  background-color: transparent; /* جعل الخلفية شفافة لإزالة أي لون إضافي */
-  padding: 0; /* إزالة الحشوة الداخلية */
-  border: none; /* إزالة الإطار الخارجي */
-  margin: 15px auto; /* إضافة هامش علوي وسفلي مع التوسيط الأفقي */
-  width: 90vw; /* جعل عرض الحاوية 90% من عرض الشاشة */
-  max-width: 600px; /* تحديد عرض أقصى للحاوية على الشاشات الكبيرة */
-  
-  position: relative; /* ضروري لتحديد موضع العناصر الداخلية مثل زر الإغلاق */
-}
-
-/* الغلاف الذي يحيط بنافذة الكاميرا.
-  هنا تم تحديد الأبعاد المستطيلة المطلوبة.
-*/
-#reader-wrapper {
-  position: relative; /* لتحديد موضع الخط الأحمر المتحرك (الليزر) */
-  width: 100%; /* يأخذ عرض الحاوية الأب بالكامل */
-  overflow: hidden; /* إخفاء أي أجزاء من الفيديو تخرج عن الإطار */
-  border-radius: 8px; /* حواف دائرية لنافذة الكاميرا */
-  
-  /* --- التعديل الرئيسي --- */
-  /* تم استخدام aspect-ratio لجعل النافذة مستطيلة بنسبة عرض إلى ارتفاع 16/9 (شكل أفقي) */
-  aspect-ratio: 16 / 9; 
-  height: auto !important; /* السماح للارتفاع بأن يتحدد تلقائيًا بناءً على نسبة الأبعاد */
-  max-height: none !important; /* إلغاء أي تحديد أقصى للارتفاع */
-}
-
-/* عنصر الفيديو نفسه (الكاميرا).
-  تم تعديله ليملأ الغلاف المستطيل بالكامل.
-*/
-#reader {
-  background: #000; /* خلفية سوداء تظهر قبل تحميل الفيديو */
-
-  /* --- التعديلات الرئيسية --- */
-  /* تم تعديل هذه الخصائص لجعل الفيديو يملأ الحاوية الجديدة بشكل كامل */
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100% !important; /* يملأ الارتفاع بالكامل */
-  object-fit: cover; /* يضمن تغطية الفيديو للمساحة كلها بدون تشويه الأبعاد */
-  max-height: none !important; /* إلغاء أي تحديد أقصى للارتفاع */
-}
-
-/* الخط الأحمر الوهمي (الليزر) في منتصف الشاشة.
-  لم يتم تعديله لأنه يعمل بشكل جيد مع التصميم الجديد.
-*/
-#reader::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 10%;
-  right: 10%;
-  height: 2px;
-  background: #ff4747;
-  box-shadow: 0 0 8px #ff4747;
-  transform: translateY(-50%);
-  border-radius: 2px;
-}
-
-/* زر إغلاق الماسح الضوئي */
-#closeScannerBtn {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background: rgba(0, 0, 0, 0.6);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.7);
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  font-size: 20px;
-  line-height: 28px;
-  padding: 0;
-  text-align: center;
-  cursor: pointer;
-  z-index: 10; /* لضمان ظهوره فوق الفيديو */
-}
-
-/* حاوية أزرار التحكم (فلاش، كاميرا، تقريب) */
-#scanner-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  margin-top: 10px;
-  padding: 0 5px;
-}
-
-/* زر تشغيل/إيقاف الفلاش */
-#toggleFlashlightBtn {
-  background-color: #444;
-  color: white;
-  border: 1px solid #666;
-  border-radius: 50%;
-  width: 45px;
-  height: 45px;
-  font-size: 18px;
-  cursor: pointer;
-  display: none; /* يتم إظهاره عبر الجافاسكربت إذا كان الفلاش متاحًا */
-}
-
-/* تنسيق زر الفلاش عند تفعيله */
-#toggleFlashlightBtn.active {
-  color: yellow;
-  background-color: #554;
-  border-color: yellow;
-}
-
-/* حاوية أزرار اختيار الكاميرا */
-#cameraSelection {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
-/* نص "الكاميرا" */
-#cameraSelection span {
-  display: inline-block;
-  color: #ccc; /* لون النص لتمييزه */
-}
-
-/* إخفاء أزرار الراديو الافتراضية */
-#cameraSelection input[type="radio"] {
-  display: none;
-}
-
-/* تنسيق الأزرار المخصصة لاختيار الكاميرا */
-#cameraSelection label {
-  font-size: 12px;
-  padding: 8px 10px;
-  background-color: #444;
-  border: 1px solid #666;
-  border-radius: 6px;
-  cursor: pointer;
-  color: white;
-  transition: all 0.2s;
-}
-
-/* تنسيق الزر عند اختياره */
-#cameraSelection input[type="radio"]:checked + label {
-  background-color: var(--primary-color, #007bff); /* استخدام متغير للون الأساسي أو لون افتراضي */
-  border-color: var(--primary-color, #007bff);
-  color: white;
-}
-
-/* شريط التمرير للتحكم في التقريب (Zoom) */
-#zoomSlider {
-  flex-grow: 1; /* يأخذ المساحة المتبقية */
-  margin: 0 15px; /* هوامش لترتيبه بشكل أفضل */
-  direction: ltr; /* مهم لضمان عمل شريط التمرير بشكل صحيح في اللغات من اليمين لليسار */
-}
-
-/* --- End of Modified Scanner Styles --- */
   .qty-controls { display: flex; align-items: center; justify-content: space-evenly; }
   .qty-controls span { font-weight: bold; margin: 0 8px; min-width: 20px; text-align: center; }
   .qty-controls button { width: 40px; height: 30px; padding: 0; font-size: 16px; }
@@ -403,21 +239,9 @@
     <section id="sales" class="active" style="position: relative;">
       <h2><i class="fas fa-cash-register"></i> عملية بيع</h2>
       
-      <div id="scanner-container">
-        <div id="reader-wrapper">
-          <div id="reader"></div>
-          <button id="closeScannerBtn">&times;</button>
-        </div>
-        <div id="scanner-controls">
-          <div id="cameraSelection"></div>
-         <input type="range" id="zoomSlider" min="1" max="10" step="1" value="5" />
-          <button id="toggleFlashlightBtn"><i class="fas fa-bolt"></i></button>
-        </div>
-      </div>
-      
       <div id="sales-header">
         <div class="form-group">
-          <div class="search-group"><input type="text" id="searchItem" placeholder="بحث بالاسم أو الباركود" autocomplete="off" /><button id="startScannerBtn" title="فتح ماسح الكاميرا (SKU)"><i class="fas fa-barcode"></i></button></div>
+          <div class="search-group"><input type="text" id="searchItem" placeholder="بحث بالاسم أو الباركود" autocomplete="off" /></div>
           <div id="searchResults"></div>
         </div>
         <div class="form-group">
@@ -528,7 +352,6 @@
     </form>
 </div>
 
-<!-- This div is moved inside the sales section, but a placeholder is kept for the JS DOM object -->
 <div id="scanner-placeholder"></div>
 
 <div id="notification-container"></div>
@@ -636,6 +459,7 @@ window.getDocument = async (collectionName, docId) => { const d = await getDoc(d
 // #endregion
 
 // #region Global Variables and DOM Elements
+// --- تم تعديل هذا الجزء لحذف عناصر الماسح الضوئي ---
 const DOM = {
     appContainer: document.getElementById("app-container"), loginContainer: document.getElementById("login-container"), loginForm: document.getElementById("login-form"), usernameInput: document.getElementById("usernameInput"), passwordInput: document.getElementById("passwordInput"),
     navButtons: document.querySelectorAll("nav button"), sections: document.querySelectorAll("main section"), logoutBtn: document.getElementById("logoutBtn"),
@@ -649,13 +473,7 @@ const DOM = {
     resetInvoicesBtn: document.getElementById("resetInvoicesBtn"), backupBtn: document.getElementById("backupBtn"), restoreBtn: document.getElementById("restoreBtn"), restoreInput: document.getElementById("restoreInput"),
     newUsernameInput: document.getElementById("newUsernameInput"), newUserPasswordInput: document.getElementById("newUserPasswordInput"), newUserRoleSelect: document.getElementById("newUserRoleSelect"), saveUserBtn: document.getElementById("saveUserBtn"), usersList: document.getElementById("usersList"),
     changePinBtn: document.getElementById("changePinBtn"), oldPinInput: document.getElementById("oldPinInput"), newPinInput: document.getElementById("newPinInput"), fullResetBtn: document.getElementById("fullResetBtn"),
-    toggleItemsGridBtn: document.getElementById("toggleItemsGridBtn"), salesCategoryFilters: document.getElementById("salesCategoryFilters"), itemGrid: document.getElementById("itemGrid"), startScannerBtn: document.getElementById("startScannerBtn"), 
-    scannerContainer: document.getElementById("scanner-container"), 
-    readerDiv: document.getElementById("reader"), 
-    closeScannerBtn: document.getElementById("closeScannerBtn"), 
-    toggleFlashlightBtn: document.getElementById("toggleFlashlightBtn"), 
-    cameraSelection: document.getElementById("cameraSelection"),
-    zoomSlider: document.getElementById("zoomSlider"),
+    toggleItemsGridBtn: document.getElementById("toggleItemsGridBtn"), salesCategoryFilters: document.getElementById("salesCategoryFilters"), itemGrid: document.getElementById("itemGrid"),
     deliveryFeeValue: document.getElementById("deliveryFeeValue"), increaseDeliveryBtn: document.getElementById("increaseDeliveryBtn"), decreaseDeliveryBtn: document.getElementById("decreaseDeliveryBtn"),
     notificationContainer: document.getElementById("notification-container"),
     categoryScrollerContainer: document.getElementById("categoryScrollerContainer"),
@@ -668,8 +486,7 @@ let appState = {
   items: [], invoices: [], customers: [], users: [], workers: [], advances: [], vacations: [], settlements: [],
   adminPIN: "790707071", currentUser: null, currentInvoice: [], deliveryFee: 30,
   editingItemId: null, editingCustomerId: null, editingUserId: null, editingWorkerId: null,
-  html5QrCode: null, unsubscribe: {}, selectedWorkerId: null, selectedInvoiceId: null,
-  scannerMode: 'sales', cameraTrack: null, isFlashOn: false
+  unsubscribe: {}, selectedWorkerId: null, selectedInvoiceId: null,
 };
 // #endregion
 
@@ -913,124 +730,7 @@ const SalesController = {
 };
 // #endregion
 
-// #region Scanner Controller
-const ScannerController = {
-    onScanSuccess: (decodedText, decodedResult) => {
-        const product = appState.items.find(p => p.sku === decodedText || p.barcode1 === decodedText || p.barcode2 === decodedText);
-        if (product) {
-            SalesController.addToInvoice(product);
-            Helpers.showNotification(`تمت إضافة: ${product.name}`);
-        } else {
-            Helpers.showNotification("الصنف غير موجود بهذا الباركود.");
-        }
-    },
-
-    toggleFlashlight: () => {
-        if (appState.cameraTrack && appState.cameraTrack.getCapabilities().torch) {
-            const isFlashOn = !appState.isFlashOn;
-            appState.cameraTrack.applyConstraints({
-                advanced: [{ torch: isFlashOn }]
-            }).then(() => {
-                appState.isFlashOn = isFlashOn;
-                DOM.toggleFlashlightBtn.classList.toggle('active', isFlashOn);
-            }).catch(e => {
-                console.error("Failed to toggle flashlight", e);
-                Helpers.showNotification("فشل تشغيل الكشاف.");
-            });
-        }
-    },
-
-    startScanning: async (cameraId) => {
-        try {
-            await appState.html5QrCode.start(
-                cameraId,
-                {
-                    fps: 10,
-                    qrbox: { width: 250, height: 250 }
-                },
-                ScannerController.onScanSuccess,
-                () => {} // Ignore scan failure
-            );
-            
-            // Try to get camera track for flashlight control
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { deviceId: cameraId }
-                });
-                appState.cameraTrack = stream.getVideoTracks()[0];
-                
-                // Show flashlight button if available
-                if (appState.cameraTrack && appState.cameraTrack.getCapabilities().torch) {
-                    DOM.toggleFlashlightBtn.style.display = 'block';
-                } else {
-                    DOM.toggleFlashlightBtn.style.display = 'none';
-                }
-            } catch (e) {
-                console.error("Cannot access camera for flashlight:", e);
-                DOM.toggleFlashlightBtn.style.display = 'none';
-            }
-        } catch (err) {
-            console.error("Failed to start scanning:", err);
-            Helpers.showNotification("فشل تشغيل الماسح الضوئي.");
-        }
-    },
-
-    start: async () => {
-        if (!appState.html5QrCode) {
-            appState.html5QrCode = new Html5Qrcode("reader");
-        }
-        DOM.cameraSelection.innerHTML = '';
-
-        try {
-            const cameras = await Html5Qrcode.getCameras();
-            const backCameras = cameras.filter(camera => camera.label.toLowerCase().includes('back'));
-
-            // جميع الكاميرات الخلفية تظهر للمستخدم مع تمييز (ماكرو)
-            if (backCameras.length > 0) {
-                DOM.cameraSelection.innerHTML = backCameras.map((camera, index) => {
-                    const radioId = `cam_${index}`;
-                    let name = `كاميرا ${index + 1}`;
-                    if (camera.label.toLowerCase().includes('macro')) name += ' (ماكرو)';
-                    return `
-                        <span>
-                            <input type="radio" name="camera-select" id="${radioId}" value="${camera.id}" ${index === 0 ? 'checked' : ''}>
-                            <label for="${radioId}">${name}</label>
-                        </span>
-                    `;
-                }).join('');
-
-                DOM.cameraSelection.querySelectorAll('input[name="camera-select"]').forEach(radio => {
-                    radio.addEventListener('change', (event) => {
-                        if (event.target.checked) {
-                            ScannerController.startScanning(event.target.value);
-                        }
-                    });
-                });
-
-                ScannerController.startScanning(backCameras[0].id);
-            } else {
-                ScannerController.startScanning({ facingMode: "environment" });
-            }
-        } catch (err) {
-            console.error("Error getting cameras, falling back to default:", err);
-            ScannerController.startScanning({ facingMode: "environment" });
-        }
-    },
-
-    stop: async () => {
-        if (appState.html5QrCode && appState.html5QrCode.isScanning) {
-            try {
-                await appState.html5QrCode.stop();
-                DOM.toggleFlashlightBtn.style.display = 'none';
-                appState.isFlashOn = false;
-                DOM.toggleFlashlightBtn.classList.remove('active');
-            } catch (err) {
-                console.error("Failed to stop scanner:", err);
-            }
-        }
-    }
-};
-// #endregion
+// --- تم حذف كائن ScannerController هنا ---
 
 // #region Workers Controller
 const WorkersController = {
@@ -1757,15 +1457,7 @@ const App = {
         DOM.restoreBtn.addEventListener("click", () => DOM.restoreInput.click());
         DOM.restoreInput.addEventListener("change", (e) => ReportsController.restore(e.target.files[0]));
         
-        DOM.startScannerBtn.addEventListener("click", () => {
-            DOM.scannerContainer.style.display = 'flex';
-            ScannerController.start();
-        });
-        DOM.closeScannerBtn.addEventListener("click", () => {
-            DOM.scannerContainer.style.display = 'none';
-            ScannerController.stop();
-        });
-        DOM.toggleFlashlightBtn.addEventListener("click", ScannerController.toggleFlashlight);
+        // --- تم حذف أحداث الماسح الضوئي من هنا ---
         
         DOM.saveWorkerBtn.addEventListener('click', WorkersController.save);
         DOM.workersList.addEventListener('click', (e) => {
@@ -1852,59 +1544,9 @@ const UsersController = {
   }
 };
 App.init();
-// =========================================================
-// ▼▼▼ أضف هذا الكود في نهاية ملف الجافاسكريبت داخل الوسم ▼▼▼
-// =========================================================
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js')
-      .then(registration => {
-        console.log('Service Worker registered successfully:', registration);
-      })
-      .catch(error => {
-        console.log('Service Worker registration failed:', error);
-      });
-  });
+// --- تم حذف كود Service Worker و Zoom Slider من هنا ---
 
-// انتظر حتى يتم تحميل الصفحة بالكامل
-document.addEventListener('DOMContentLoaded', (event) => {
-
-  const zoomSlider = document.getElementById('zoomSlider');
-
-  // هذه الدالة تفترض أن لديك متغير 'html5QrCode' من المكتبة
-  // وأن الماسح قد بدأ بالعمل بالفعل
-  function applyZoom() {
-    // افترض أن تيار الفيديو يعمل وأننا يمكننا الوصول إلى مسار الفيديو (track)
-    // غالبًا ما يتم الحصول عليه بعد بدء تشغيل الكاميرا
-    const videoElement = document.getElementById('reader').querySelector('video');
-    if (!videoElement || !videoElement.srcObject) {
-      console.log("الكاميرا ليست جاهزة بعد.");
-      return;
-    }
-
-    const track = videoElement.srcObject.getVideoTracks()[0];
-    const capabilities = track.getCapabilities();
-
-    // تحقق مما إذا كانت الكاميرا تدعم التقريب
-    if (capabilities.zoom) {
-      track.applyConstraints({
-        advanced: [{
-          zoom: zoomSlider.value
-        }]
-      }).catch(e => console.error("فشل تطبيق التقريب:", e));
-    } else {
-      // إذا كانت الكاميرا لا تدعم التقريب، يمكنك إخفاء السلايدر
-      console.log("هذه الكاميرا لا تدعم التقريب.");
-      zoomSlider.style.display = 'none';
-    }
-  }
-
-  // أضف مستمع الأحداث للسلايدر
-  zoomSlider.addEventListener('input', applyZoom);
-});
-  
-}
 </script>
 </body>
 </html>
