@@ -73,71 +73,83 @@
   #salesCategoryFilters button.active { background-color: var(--success-color); color: white; }
   #itemGrid { display: none; grid-auto-flow: column; grid-template-rows: repeat(3, auto); gap: 10px; overflow-x: auto; padding: 10px; background: #e9ecef; border-radius: 6px; }
   
-  /* --- تصميم الماسح الضوئي --- */
-  #scanner-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 33vh;
-    background-color: #000;
-    z-index: 10001;
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-  #reader-wrapper {
-    position: relative;
-    width: 100%;
-    flex-grow: 1; /* Take available space */
-    display: flex;
-  }
-  #reader {
-    width: 100%;
-    height: 100%;
-    background: #000;
-    position: relative;
-  }
-  #scanner-controls {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    z-index: 100;
-    width: 100%;
-    background-color: #000;
-    padding: 10px 0;
-  }
-  #closeScannerBtn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: rgba(0, 0, 0, 0.6);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.7);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    font-size: 24px;
-    line-height: 38px;
-    text-align: center;
-    cursor: pointer;
-    z-index: 10;
-  }
-  .control-btn {
-    background-color: rgba(0,0,0,0.5);
-    color: white;
-    border: 1px solid #666;
-    border-radius: 25px;
-    padding: 10px;
-    height: 50px;
-    font-size: 20px;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+/* --- تصميم الماسح الضوئي --- */
+
+/* الحاوية الرئيسية للماسح التي تظهر عند طلبه */
+#scanner-container {
+  position: fixed; /* يثبّت الماسح في مكانه أعلى الشاشة حتى مع تمرير الصفحة */
+  top: 10p;          /* يجعله ملتصقًا بالحافة العلوية للشاشة */
+  left: 0;         /* يجعله ملتصقًا بالحافة اليسرى للشاشة */
+  width: 100%;     /* يجعله يأخذ عرض الشاشة بالكامل */
+  height: 33vh;    /* يحدد ارتفاع الماسح بثلث ارتفاع الشاشة (vh = viewport height) */
+  background-color: #000; /* لون الخلفية أسود */
+  z-index: 100;  /* يضمن ظهور الماسح فوق كل عناصر الصفحة الأخرى */
+  display: none;   /* يكون مخفياً بشكل افتراضي حتى يتم طلبه */
+  flex-direction: column; /* يرتب العناصر بداخله (نافذة الكاميرا والأزرار) بشكل عمودي */
+  align-items: center;    /* يوسط العناصر أفقيًا */
+  justify-content: center; /* يوسط العناصر رأسيًا */
+}
+
+/* الغلاف الخاص بنافذة الكاميرا فقط */
+#reader-wrapper {
+  position: relative; /* ضروري لتحديد موضع زر الإغلاق بداخله */
+  width: 100%;        /* يأخذ العرض الكامل للحاوية الرئيسية */
+  flex-grow: 0;       /* يسمح له بالتمدد ليملأ المساحة الرأسية المتاحة */
+  display: flex;      /* يستخدم لتنسيق محتواه الداخلي */
+}
+
+/* العنصر الذي يتم فيه عرض بث الفيديو من الكاميرا */
+#reader {
+  width: 100%;     /* يملأ عرض الغلاف الخاص به */
+  height: 100%;    /* يملأ ارتفاع الغلاف الخاص به */
+  background: #000; /* خلفية سوداء احتياطية */
+  position: relative; /* تحديد الموضع */
+}
+
+/* الحاوية الخاصة بأزرار التحكم (التقريب والفلاش) */
+#scanner-controls {
+  display: flex;           /* يستخدم لتنسيق الأزرار بجانب بعضها */
+  justify-content: center; /* يوسط الأزرار أفقيًا */
+  align-items: center;     /* يوسط الأزرار رأسيًا */
+  gap: 15px;               /* يضيف مسافة 15 بكسل بين الأزرار */
+  z-index: 100;            /* يضمن ظهورها فوق فيديو الكاميرا */
+  width: 100%;             /* تأخذ العرض الكامل */
+  background-color: #000;  /* خلفية سوداء */
+  padding: 10px 0;         /* هامش داخلي أعلى وأسفل الأزرار */
+}
+
+/* تصميم زر إغلاق الماسح (علامة ×) */
+#closeScannerBtn {
+  position: absolute; /* موضعه يتم تحديده نسبةً إلى #reader-wrapper */
+  top: 150px;          /* 15 بكسل من الأعلى */
+  right: 15px;        /* 15 بكسل من اليمين */
+  background: rgba(0, 0, 0, 0.6); /* خلفية سوداء شبه شفافة */
+  color: white;       /* لون الأيقونة أبيض */
+  border: 1px solid rgba(255, 255, 255, 0.7); /* إطار أبيض شبه شفاف */
+  border-radius: 50%; /* يجعله دائري الشكل تمامًا */
+  width: 40px;        /* العرض */
+  height: 40px;       /* الارتفاع */
+  font-size: 24px;    /* حجم علامة × */
+  line-height: 38px;  /* لتوسيط علامة × رأسيًا داخل الدائرة */
+  text-align: center; /* لتوسيط علامة × أفقيًا */
+  cursor: pointer;    /* يغير شكل المؤشر عند المرور فوقه */
+  z-index: 10;        /* يضمن ظهوره فوق كل شيء داخل نافذة الكاميرا */
+}
+
+/* التصميم الموحد لأزرار التحكم (التقريب والفلاش) */
+.control-btn {
+  background-color: rgba(0,0,0,0.5); /* خلفية سوداء شبه شفافة */
+  color: white;                      /* لون الأيقونات أبيض */
+  border: 1px solid #666;            /* إطار رمادي */
+  border-radius: 25px;               /* حواف دائرية */
+  padding: 10px;                     /* هامش داخلي */
+  height: 50px;                      /* ارتفاع الزر */
+  font-size: 20px;                   /* حجم الأيقونة */
+  cursor: pointer;                   /* شكل المؤشر */
+  display: flex;                     /* يستخدم لتوسيط الأيقونة بداخل الزر */
+  justify-content: center;           /* توسيط أفقي للأيقونة */
+  align-items: center;               /* توسيط رأسي للأيقونة */
+}
   .control-btn.active { color: yellow; border-color: yellow; }
 
   .qty-controls { display: flex; align-items: center; justify-content: space-evenly; }
