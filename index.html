@@ -69,13 +69,14 @@
   #searchResults div:hover, #customerSuggestions div:hover { background: var(--primary-color); color: var(--white); }
   #login-container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background-color: #e9ecef; }
   #login-form { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); width: 350px; text-align: center; }
-  .item-card { border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--white); box-shadow: var(--shadow-light); flex-shrink: 0; width: 120px; }
+  .item-card { border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--white); box-shadow: var(--shadow-light); flex-shrink: 0; width: 140px; height: 80px; display: flex; flex-direction: column; justify-content: center; }
   .item-card:hover { transform: translateY(-3px); box-shadow: 0 4px 10px rgba(0,0,0,0.1); border-color: var(--primary-color); }
-  .item-card h5 { margin: 5px 0; font-size: 14px; height: 40px; overflow: hidden; }
+  .item-card h5 { margin: 5px 0; font-size: 13px; height: 3em; line-height: 1.5em; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;}
   .item-card p { margin: 5px 0; font-size: 12px; color: var(--success-color); font-weight: bold; }
   #categoryScrollerContainer { display: none; margin-bottom: 15px; width: 100%; }
-  #salesCategoryFilters { display: grid; grid-auto-flow: column; grid-template-rows: repeat(4, auto); gap: 8px; overflow-x: auto; padding: 10px; background: #e9ecef; border-radius: 6px; }
-  #itemGrid { display: none; grid-auto-flow: column; grid-template-rows: repeat(3, auto); gap: 10px; overflow-x: auto; padding: 10px; background: #e9ecef; border-radius: 6px; }
+  #salesCategoryFilters { display: flex; flex-wrap: nowrap; gap: 8px; overflow-x: auto; padding: 10px; background: #e9ecef; border-radius: 6px; scrollbar-width: thin; }
+  #salesCategoryFilters button { white-space: nowrap; flex-shrink: 0; }
+  #itemGrid { display: none; grid-auto-flow: column; grid-template-rows: repeat(2, auto); gap: 10px; overflow-x: auto; padding: 10px; background: #e9ecef; border-radius: 6px; }
   #sales-header { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 5px; }
   .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 10000; justify-content: center; align-items: center; }
   .modal-content { background-color: white; padding: 20px; border-radius: 8px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
@@ -85,18 +86,21 @@
 
   /* --- تصميم الماسح الضوئي --- */
   #scanner-container {
-    position: relative;
-    width: 100%; /* تعديل ليتناسب مع الحاوية */
-    height: 40vh;
-    background-color: #000;
-    overflow: hidden;
-    margin: 15px 0; /* إضافة هوامش */
-    padding: 0;
-    border: none;
-    border-radius: 8px;
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 10001; /* Above everything else */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
-  #reader-wrapper { position: relative; width: 100%; height: 100%; }
-  #reader { width: 100%; height: 100%; background: #000; position: relative; }
+  #reader-wrapper { position: relative; width: 90%; max-width: 600px; height: 50vh; }
+  #reader { width: 100%; height: 100%; background: #000; position: relative; border-radius: 12px; overflow: hidden; }
   #reader::after {
     content: '';
     position: absolute;
@@ -106,7 +110,7 @@
     width: 85%;
     height: 50%;
     border: 5px solid rgba(255, 71, 71, 0.7);
-    box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.7);
+    box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.5);
     border-radius: 12px;
     pointer-events: none;
   }
@@ -221,6 +225,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 15px;
+    margin-bottom: 15px;
   }
   
   .visibility-controls label {
@@ -239,6 +244,23 @@
 </style>
 </head>
 <body>
+
+<div id="scanner-container" style="display: none;">
+  <div id="reader-wrapper">
+      <div id="reader"></div>
+      <button id="closeScannerBtn">&times;</button>
+  </div>
+  <div id="scanner-controls">
+      <div id="zoomSliderContainer" class="control-btn" style="display:none;">
+          <i class="fas fa-search-minus"></i>
+          <input type="range" id="zoomSlider" min="1" max="10" step="0.1" style="width:100px; direction:ltr; margin: 0 10px;">
+          <i class="fas fa-search-plus"></i>
+      </div>
+      <button id="toggleFlashlightBtn" class="control-btn" style="width: 50px; border-radius: 50%; display:none;">
+          <i class="fas fa-bolt"></i>
+      </button>
+  </div>
+</div>
 
 <div id="app-container">
   <header>
@@ -305,23 +327,6 @@
     
     <section id="sales" class="active" style="position: relative;">
       <h2><i class="fas fa-cash-register"></i> عملية بيع</h2>
-      
-      <div id="scanner-container" style="display: none;">
-          <div id="reader-wrapper">
-              <div id="reader"></div>
-              <button id="closeScannerBtn">&times;</button>
-          </div>
-          <div id="scanner-controls">
-              <div id="zoomSliderContainer" class="control-btn" style="display:none;">
-                  <i class="fas fa-search-minus"></i>
-                  <input type="range" id="zoomSlider" min="1" max="10" step="0.1" style="width:100px; direction:ltr; margin: 0 10px;">
-                  <i class="fas fa-search-plus"></i>
-              </div>
-              <button id="toggleFlashlightBtn" class="control-btn" style="width: 50px; border-radius: 50%; display:none;">
-                  <i class="fas fa-bolt"></i>
-              </button>
-          </div>
-      </div>
       
       <div id="sales-header">
         <div class="form-group" style="flex-grow: 2;">
@@ -401,7 +406,7 @@
       <div class="admin-buttons">
         <button id="backupBtn" class="btn-success"><i class="fas fa-download"></i> نسخة احتياطية</button>
         <button id="restoreBtn" class="btn-warning"><i class="fas fa-upload"></i> استعادة نسخة</button>
-        <button id="resetInvoicesBtn" class="btn-danger"><i class="fas fa-trash-alt"></i> حذف جميع الفواتير</button>
+        <button id="resetInvoicesBtn" class="btn-danger hidden"><i class="fas fa-trash-alt"></i> حذف جميع الفواتير</button>
         <input type="file" id="restoreInput" accept=".json" style="display: none;" />
       </div>
     </section>
@@ -435,6 +440,7 @@
           <label><input type="checkbox" id="showItemsTab" checked> تبويب الأصناف</label>
           <label><input type="checkbox" id="showReportsTab" checked> تبويب التقارير</label>
         </div>
+        <button id="saveTabVisibilityBtn" class="btn-success" style="width: 100%;"><i class="fas fa-save"></i> حفظ الإعدادات</button>
       </div>
       
       <div id="changePinSection">
@@ -472,7 +478,7 @@
     </div>
     <div class="form-group">
       <label for="advanceNotes">ملاحظات:</label>
-      <textarea id="advanceNotes" placeholder="ملاحظات حول السلفة" rows="3"></textarea>
+      <textarea id="advanceNotes" placeholder="ملاحظات حول السلفة" rows="3" style="width:100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"></textarea>
     </div>
     <div class="flex-container flex-end">
       <button id="saveAdvanceBtn" class="btn-success"><i class="fas fa-save"></i> حفظ</button>
@@ -494,7 +500,7 @@
     </div>
     <div class="form-group">
       <label for="vacationNotes">ملاحظات:</label>
-      <textarea id="vacationNotes" placeholder="ملاحظات حول الإجازة" rows="3"></textarea>
+      <textarea id="vacationNotes" placeholder="ملاحظات حول الإجازة" rows="3" style="width:100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"></textarea>
     </div>
     <div class="flex-container flex-end">
       <button id="saveVacationBtn" class="btn-success"><i class="fas fa-save"></i> حفظ</button>
@@ -519,7 +525,7 @@
     </div>
     <div class="form-group">
       <label for="settlementNotes">ملاحظات:</label>
-      <textarea id="settlementNotes" placeholder="ملاحظات حول الدفع" rows="3"></textarea>
+      <textarea id="settlementNotes" placeholder="ملاحظات حول الدفع" rows="3" style="width:100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"></textarea>
     </div>
     <div class="flex-container flex-end">
       <button id="saveSettlementBtn" class="btn-success"><i class="fas fa-save"></i> حفظ</button>
@@ -553,11 +559,28 @@
   </div>
 </div>
 
+<!-- نموذج إدخال كلمة المرور للمستخدم العادي -->
+<div id="userPasswordModal" class="modal">
+    <div class="modal-content">
+        <h3><i class="fas fa-key"></i> تأكيد الهوية</h3>
+        <p>يرجى إدخال كلمة المرور الخاصة بك للمتابعة.</p>
+        <div class="form-group">
+            <label for="userPasswordInput">كلمة المرور:</label>
+            <input type="password" id="userPasswordInput" placeholder="أدخل كلمة المرور" />
+        </div>
+        <div class="flex-container flex-end">
+            <button id="confirmUserPasswordBtn" class="btn-success"><i class="fas fa-check"></i> تأكيد</button>
+            <button id="cancelUserPasswordBtn" class="btn-danger"><i class="fas fa-times"></i> إلغاء</button>
+        </div>
+    </div>
+</div>
+
+
 <script type="module">
 // #region Firebase Initialization and Offline Persistence
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { getFirestore, collection, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc, getDoc, writeBatch, getDocs, where, increment, initializeFirestore, persistentLocalCache, addDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, deleteDoc, getDoc, writeBatch, getDocs, where, increment, initializeFirestore, persistentLocalCache, addDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCfOzC8gkqkVSNZ3frtnnCMxbeq-v7yaTY",
@@ -611,9 +634,14 @@ const DOM = {
     adminPasswordInput: document.getElementById('adminPasswordInput'),
     confirmAdminPasswordBtn: document.getElementById('confirmAdminPasswordBtn'),
     cancelAdminPasswordBtn: document.getElementById('cancelAdminPasswordBtn'),
+    userPasswordModal: document.getElementById('userPasswordModal'),
+    userPasswordInput: document.getElementById('userPasswordInput'),
+    confirmUserPasswordBtn: document.getElementById('confirmUserPasswordBtn'),
+    cancelUserPasswordBtn: document.getElementById('cancelUserPasswordBtn'),
     tabVisibilitySection: document.getElementById('tabVisibilitySection'),
     showItemsTab: document.getElementById('showItemsTab'),
-    showReportsTab: document.getElementById('showReportsTab')
+    showReportsTab: document.getElementById('showReportsTab'),
+    saveTabVisibilityBtn: document.getElementById('saveTabVisibilityBtn'),
 };
 
 let appState = {
@@ -622,6 +650,7 @@ let appState = {
   editingItemId: null, editingCustomerId: null, editingUserId: null, editingWorkerId: null,
   unsubscribe: {}, selectedWorkerId: null, selectedInvoiceId: null,
   pendingAction: null, // لتخزين الإجراء المعلق عند طلب كلمة المرور
+  tabVisibility: { showItems: true, showReports: true },
 };
 // #endregion
 
@@ -660,14 +689,21 @@ const Auth = {
         DOM.loginContainer.style.display = "none";
         DOM.appContainer.style.display = "block";
         const isAdmin = role === 'admin';
-        DOM.navButtons.forEach(b => b.dataset.tab === 'users' ? b.classList.toggle("hidden", !isAdmin) : null);
-        if (DOM.adminWorkersSection) {
-            DOM.adminWorkersSection.classList.toggle('hidden', !isAdmin);
-        }
-        if (DOM.tabVisibilitySection) {
-            DOM.tabVisibilitySection.classList.toggle('hidden', !isAdmin);
-        }
+        document.querySelector('[data-tab="users"]').classList.toggle("hidden", !isAdmin);
+        document.querySelector('#resetInvoicesBtn').classList.toggle("hidden", !isAdmin);
+        DOM.adminWorkersSection?.classList.toggle('hidden', !isAdmin);
+        DOM.tabVisibilitySection?.classList.toggle('hidden', !isAdmin);
+        App.applyTabVisibility();
         document.querySelector('[data-tab="sales"]').click();
+    },
+    verifyUserPassword: (callback) => {
+        if (appState.currentUser && appState.currentUser.role !== 'admin') {
+            Helpers.openModal(DOM.userPasswordModal);
+            DOM.userPasswordInput.value = '';
+            appState.pendingAction = callback;
+        } else {
+            Helpers.showNotification("هذا الإجراء غير متاح.");
+        }
     }
 };
 // #endregion
@@ -934,11 +970,12 @@ const ScannerController = {
                         DOM.zoomSlider.min = capabilities.zoom.min;
                         DOM.zoomSlider.max = capabilities.zoom.max;
                         DOM.zoomSlider.step = capabilities.zoom.step || 0.1;
-                        DOM.zoomSlider.value = capabilities.zoom.min;
+                        const midZoom = (parseFloat(DOM.zoomSlider.min) + parseFloat(DOM.zoomSlider.max)) / 2;
+                        DOM.zoomSlider.value = midZoom;
                         DOM.zoomSliderContainer.style.display = 'flex';
+                        ScannerController.handleZoomChange(); // Apply default zoom
                     }
                 }).catch(err => {
-                    // قد تفشل هذه الخطوة إذا كانت الكاميرا مستخدمة بالفعل، لا مشكلة
                     console.log("Could not get stream for capabilities check, but scanner is running.");
                 });
         }).catch(err => {
@@ -948,7 +985,7 @@ const ScannerController = {
     },
 
     init: () => {
-        DOM.scannerContainer.style.display = 'block';
+        DOM.scannerContainer.style.display = 'flex';
         if (!ScannerController.html5QrCode) {
             ScannerController.html5QrCode = new Html5Qrcode("reader");
         }
@@ -1111,7 +1148,7 @@ const WorkersController = {
             </ul>
             <h4>سجل السلف</h4>
             <ul>
-                ${workerAdvances.length > 0 ? workerAdvances.map(a => `<li>${a.amount.toFixed(2)} ج.م في ${Helpers.formatDate(a.date.toDate())} - ${a.notes || ''}</li>`).join('') : '<li>لا يوجد</li>'}
+                ${workerAdvances.length > 0 ? workerAdvances.map(a => `<li>${a.amount.toFixed(2)} ج.م في ${a.date ? Helpers.formatDate(a.date.toDate()) : 'غير معروف'} - ${a.notes || ''}</li>`).join('') : '<li>لا يوجد</li>'}
             </ul>
         `;
         Helpers.openModal(DOM.workerReportModal);
@@ -1481,19 +1518,16 @@ const ReportsController = {
             try {
                 const data = JSON.parse(e.target.result);
                 
-                // التحقق من صحة بيانات النسخة الاحتياطية
                 if (!data.items || !data.customers || !data.invoices) {
                     throw new Error("ملف النسخة الاحتياطية غير صالح.");
                 }
                 
-                // تأكيد عملية الاستعادة
                 if (!confirm("هل أنت متأكد من استعادة النسخة الاحتياطية؟ سيتم استبدال جميع البيانات الحالية.")) {
                     return;
                 }
                 
-                // حذف جميع البيانات الحالية أولاً
                 const collectionsToDelete = ["customers", "invoices", "users", "workers", "advances", "vacations", "settlements"];
-                const batch = writeBatch(db);
+                let batch = writeBatch(db);
                 
                 for (const collectionName of collectionsToDelete) {
                     const snapshot = await getDocs(collection(db, collectionName));
@@ -1501,63 +1535,44 @@ const ReportsController = {
                 }
                 await batch.commit();
                 
-                // استعادة البيانات من النسخة الاحتياطية
-                const restoreBatch = writeBatch(db);
+                // Firestore batches have a 500 operation limit. We need to split if data is large.
+                let restoreBatch = writeBatch(db);
+                let opCount = 0;
+                const commitIfNeeded = async () => {
+                    if (opCount >= 499) {
+                        await restoreBatch.commit();
+                        restoreBatch = writeBatch(db);
+                        opCount = 0;
+                    }
+                };
                 
-                // استعادة الأصناف
-                for (const item of data.items) {
+                for (const item of data.items || []) {
                     const docRef = doc(db, "items", item.id);
                     restoreBatch.set(docRef, item);
+                    opCount++; await commitIfNeeded();
                 }
-                
-                // استعادة العملاء
-                for (const customer of data.customers) {
+                for (const customer of data.customers || []) {
                     const docRef = doc(db, "customers", customer.id);
                     restoreBatch.set(docRef, customer);
+                    opCount++; await commitIfNeeded();
                 }
-                
-                // استعادة الفواتير
-                for (const invoice of data.invoices) {
+                for (const invoice of data.invoices || []) {
                     const docRef = doc(collection(db, "invoices"));
                     restoreBatch.set(docRef, {...invoice, createdAt: serverTimestamp()});
+                    opCount++; await commitIfNeeded();
                 }
-                
-                // استعادة المستخدمين
                 for (const user of data.users || []) {
                     const docRef = doc(db, "users", user.username);
                     restoreBatch.set(docRef, user);
+                    opCount++; await commitIfNeeded();
                 }
                 
-                // استعادة العمال
-                for (const worker of data.workers || []) {
-                    const docRef = doc(db, "workers", worker.id);
-                    restoreBatch.set(docRef, worker);
-                }
-                
-                // استعادة السلف
-                for (const advance of data.advances || []) {
-                    const docRef = doc(collection(db, "advances"));
-                    restoreBatch.set(docRef, {...advance, date: serverTimestamp()});
-                }
-                
-                // استعادة الإجازات
-                for (const vacation of data.vacations || []) {
-                    const docRef = doc(collection(db, "vacations"));
-                    restoreBatch.set(docRef, {...vacation, createdAt: serverTimestamp()});
-                }
-                
-                // استعادة التسويات
-                for (const settlement of data.settlements || []) {
-                    const docRef = doc(collection(db, "settlements"));
-                    restoreBatch.set(docRef, {...settlement, date: serverTimestamp()});
-                }
-                
-                await restoreBatch.commit();
+                await restoreBatch.commit(); // Commit any remaining operations
                 Helpers.showNotification("تم استعادة النسخة الاحتياطية بنجاح.");
                 window.location.reload();
             } catch (error) {
                 console.error("Error restoring backup:", error);
-                Helpers.showNotification("حدث خطأ أثناء استعادة النسخة الاحتياطية.");
+                Helpers.showNotification("حدث خطأ أثناء استعادة النسخة الاحتياطية: " + error.message);
             }
         };
         reader.readAsText(file);
@@ -1630,9 +1645,29 @@ const App = {
         appState.unsubscribe.vacations = window.readCollection("vacations", (data) => { appState.vacations = data; }, "startDate", "desc");
         appState.unsubscribe.settlements = window.readCollection("settlements", (data) => { appState.settlements = data; if (document.querySelector('nav button.active')?.dataset.tab === 'invoices') InvoicesController.render(); if (document.getElementById('customers').classList.contains('active')) CustomersController.render(); }, "date", "desc");
         
+        appState.unsubscribe.tabVisibility = onSnapshot(doc(db, "config", "tabVisibility"), (docSnap) => {
+            if (docSnap.exists()) {
+                const settings = docSnap.data();
+                appState.tabVisibility = settings;
+                DOM.showItemsTab.checked = settings.showItems;
+                DOM.showReportsTab.checked = settings.showReports;
+                App.applyTabVisibility();
+            }
+        });
+
         window.getDocument("config", "admin").then(doc => { if (doc?.pin) appState.adminPIN = doc.pin; });
     },
-    
+
+    applyTabVisibility: () => {
+        if (!appState.tabVisibility || appState.currentUser?.role === 'admin') {
+             document.querySelector('[data-tab="items"]').classList.remove('hidden');
+             document.querySelector('[data-tab="summary"]').classList.remove('hidden');
+             return;
+        }
+        document.querySelector('[data-tab="items"]').classList.toggle('hidden', !appState.tabVisibility.showItems);
+        document.querySelector('[data-tab="summary"]').classList.toggle('hidden', !appState.tabVisibility.showReports);
+    },
+
     onTabSwitch: (tabId) => {
         switch (tabId) {
             case 'items': ItemsController.render(); break;
@@ -1775,10 +1810,24 @@ const App = {
         DOM.summaryGroupSelect.addEventListener("change", ReportsController.renderSalesSummary);
         DOM.fullResetBtn.addEventListener("click", () => Helpers.verifyAdminPassword(ReportsController.fullReset));
         DOM.resetInvoicesBtn.addEventListener("click", () => Helpers.verifyAdminPassword(ReportsController.resetInvoices));
-        DOM.backupBtn.addEventListener("click", () => Helpers.verifyAdminPassword(ReportsController.backup));
-        DOM.restoreBtn.addEventListener("click", () => Helpers.verifyAdminPassword(() => DOM.restoreInput.click()));
-        DOM.restoreInput.addEventListener("change", (e) => Helpers.verifyAdminPassword(() => ReportsController.restore(e.target.files[0])));
         
+        DOM.backupBtn.addEventListener("click", () => {
+            const action = ReportsController.backup;
+            if (appState.currentUser.role === 'admin') Helpers.verifyAdminPassword(action);
+            else Auth.verifyUserPassword(action);
+        });
+        DOM.restoreBtn.addEventListener("click", () => {
+            const action = () => DOM.restoreInput.click();
+            if (appState.currentUser.role === 'admin') Helpers.verifyAdminPassword(action);
+            else Auth.verifyUserPassword(action);
+        });
+        DOM.restoreInput.addEventListener("change", (e) => {
+            if (e.target.files.length > 0) {
+                ReportsController.restore(e.target.files[0]);
+                e.target.value = ''; // Reset file input
+            }
+        });
+
         DOM.startScannerBtn.addEventListener('click', ScannerController.init);
         DOM.closeScannerBtn.addEventListener('click', ScannerController.stop);
         DOM.toggleFlashlightBtn.addEventListener('click', ScannerController.toggleFlashlight);
@@ -1809,13 +1858,12 @@ const App = {
         DOM.cancelSettlementBtn.addEventListener('click', () => Helpers.closeModal(DOM.settlementModal));
         DOM.closeReportBtn.addEventListener('click', () => Helpers.closeModal(DOM.workerReportModal));
         
-        [DOM.advanceModal, DOM.vacationModal, DOM.settlementModal, DOM.workerReportModal].forEach(modal => {
+        [DOM.advanceModal, DOM.vacationModal, DOM.settlementModal, DOM.workerReportModal, DOM.adminPasswordModal, DOM.userPasswordModal].forEach(modal => {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) Helpers.closeModal(modal);
             });
         });
         
-        // التحقق من كلمة مرور المدير
         DOM.confirmAdminPasswordBtn.addEventListener('click', () => {
             if (DOM.adminPasswordInput.value === appState.adminPIN) {
                 Helpers.closeModal(DOM.adminPasswordModal);
@@ -1827,28 +1875,28 @@ const App = {
                 Helpers.showNotification("كلمة المرور غير صحيحة.");
             }
         });
-        
         DOM.cancelAdminPasswordBtn.addEventListener('click', () => {
             Helpers.closeModal(DOM.adminPasswordModal);
             appState.pendingAction = null;
         });
+
+        DOM.confirmUserPasswordBtn.addEventListener('click', () => {
+            if (DOM.userPasswordInput.value === appState.currentUser.password) {
+                Helpers.closeModal(DOM.userPasswordModal);
+                if (appState.pendingAction) {
+                    appState.pendingAction();
+                    appState.pendingAction = null;
+                }
+            } else {
+                Helpers.showNotification("كلمة المرور غير صحيحة.");
+            }
+        });
+        DOM.cancelUserPasswordBtn.addEventListener('click', () => {
+            Helpers.closeModal(DOM.userPasswordModal);
+            appState.pendingAction = null;
+        });
         
-        // التحكم في إظهار/إخفاء التبويبات
-        if (DOM.showItemsTab && DOM.showReportsTab) {
-            DOM.showItemsTab.addEventListener('change', (e) => {
-                const itemsTab = document.querySelector('[data-tab="items"]');
-                if (itemsTab) {
-                    itemsTab.classList.toggle('hidden', !e.target.checked);
-                }
-            });
-            
-            DOM.showReportsTab.addEventListener('change', (e) => {
-                const reportsTab = document.querySelector('[data-tab="summary"]');
-                if (reportsTab) {
-                    reportsTab.classList.toggle('hidden', !e.target.checked);
-                }
-            });
-        }
+        DOM.saveTabVisibilityBtn.addEventListener('click', UsersController.saveTabVisibility);
     }
 };
 // #endregion
@@ -1902,6 +1950,19 @@ const UsersController = {
           DOM.newPinInput.value = "";
       } catch (e) {
           Helpers.showNotification("فشل تغيير كلمة المرور.");
+      }
+  },
+  saveTabVisibility: async () => {
+      const settings = {
+          showItems: DOM.showItemsTab.checked,
+          showReports: DOM.showReportsTab.checked
+      };
+      try {
+          await setDoc(doc(db, "config", "tabVisibility"), settings);
+          Helpers.showNotification("تم حفظ إعدادات العرض بنجاح.");
+      } catch (e) {
+          console.error("Error saving tab visibility:", e);
+          Helpers.showNotification("فشل حفظ الإعدادات.");
       }
   }
 };
