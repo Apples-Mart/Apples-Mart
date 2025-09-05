@@ -14,6 +14,34 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
 <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
 <style>
+/* أضف هذه الأنماط في قسم الستايل */
+#scanner-container {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 33vh !important; /* ثلث ارتفاع الشاشة */
+    z-index: 10001 !important;
+    background: transparent !important;
+    display: none;
+}
+
+#reader {
+    width: 100% !important;
+    height: 100% !important;
+    position: relative !important;
+}
+
+#reader > video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 0 !important;
+}
+
+.html5-qrcode-element {
+    display: none !important;
+}
    #interactive.viewport {
     position: relative;
     width: 100% !important;
@@ -483,18 +511,10 @@
       <button type="submit" id="loginBtn"><i class="fas fa-sign-in-alt"></i> دخول</button>
     </form>
 </div>
-
-<div id="scanner-container" style="position: sticky; top: 0; z-index: 1000; background: transparent; padding: 0; margin: 0;">
-    <div id="reader" style="width: 100%; height: 0; padding-bottom: 50%; position: relative; background: transparent; overflow: hidden;">
-        <!-- سيتم إضافة الفيديو والكانفاس هنا تلقائياً بواسطة المكتبة -->
-    </div>
-    <!-- بداية الاستبدال -->
-<div class="scanner-container" style="position: sticky; top: 0; z-index: 1000; background: transparent;">
-    <div id="interactive" class="viewport" style="width: 100%; height: 0; padding-bottom: 50%; background: transparent; position: relative;">
-        <canvas class="drawingBuffer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none;"></canvas>
-    </div>
+<!-- اإعدادات ماسح الباركود الأولى -->
+<div id="scanner-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 33vh; z-index: 10001; background: transparent; display: none;">
+    <div id="reader" style="width: 100%; height: 100%; position: relative;"></div>
 </div>
-<!-- نهاية الاستبدال -->
 
 <div id="advanceModal" class="modal">
   <div class="modal-content">
@@ -899,7 +919,13 @@ const ScannerController = {
     },
 
     start: () => {
-        DOM.scannerContainer.style.display = 'block';
+    DOM.scannerContainer.style.display = 'block';
+    DOM.scannerContainer.style.position = 'fixed';
+    DOM.scannerContainer.style.top = '0';
+    DOM.scannerContainer.style.left = '0';
+    DOM.scannerContainer.style.width = '100%';
+    DOM.scannerContainer.style.height = '33vh'; // ثلث ارتفاع الشاشة
+    DOM.scannerContainer.style.zIndex = '10001';
         if (!appState.html5QrCode) {
             appState.html5QrCode = new Html5Qrcode("reader");
         }
