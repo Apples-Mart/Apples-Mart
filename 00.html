@@ -86,12 +86,13 @@
     flex-direction: column;
     justify-content: flex-start; /* Aligns to top */
     align-items: center;
+    padding-top: 5vh; /* Push the scanner down a bit */
   }
   #reader-wrapper {
     position: relative;
     width: 100vw; /* Full width */
     height: 50vw; /* Width is double the height */
-    max-height: 45vh;
+    max-height: 33vh; /* Top third of the screen */
     background-color: #000;
   }
   #reader {
@@ -101,15 +102,14 @@
     position: relative;
   }
   #scanner-controls {
-    position: absolute;
-    bottom: 15px;
-    left: 50%;
-    transform: translateX(-50%);
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 15px;
     z-index: 100;
+    width: 100%;
+    background-color: #000;
+    padding: 10px 0;
   }
   #closeScannerBtn {
     position: absolute;
@@ -432,15 +432,15 @@
 <div id="scanner-container">
     <div id="reader-wrapper">
       <div id="reader"></div>
-      <div id="scanner-controls">
+       <button id="closeScannerBtn">&times;</button>
+    </div>
+    <div id="scanner-controls">
         <div id="zoomSliderContainer" class="control-btn" style="display:none;">
           <i class="fas fa-search-minus"></i>
           <input type="range" id="zoomSlider" min="1" max="10" step="0.1" style="width:100px; direction:ltr; margin: 0 10px;">
           <i class="fas fa-search-plus"></i>
         </div>
         <button id="toggleFlashlightBtn" class="control-btn" style="width: 50px; border-radius: 50%; display:none;"><i class="fas fa-bolt"></i></button>
-      </div>
-       <button id="closeScannerBtn">&times;</button>
     </div>
 </div>
 <div id="notification-container"></div>
@@ -1676,6 +1676,11 @@ const App = {
         // Scanner Event Listeners
         DOM.startScannerBtn.addEventListener("click", ScannerController.start);
         DOM.closeScannerBtn.addEventListener('click', ScannerController.stop);
+        DOM.scannerContainer.addEventListener('click', (e) => { // Added this listener
+            if (e.target === DOM.scannerContainer) {
+                ScannerController.stop();
+            }
+        });
         DOM.toggleFlashlightBtn.addEventListener('click', ScannerController.toggleFlashlight);
         DOM.zoomSlider.addEventListener('input', ScannerController.handleZoomChange);
         
@@ -1790,4 +1795,5 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
 
