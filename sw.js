@@ -3,7 +3,6 @@ const urlsToCache = [
   './',
   './index.html',
   './manifest.json',
-  './p.json', // مهم لتخزين ملف الأصناف الأساسي
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
   'https://unpkg.com/html5-qrcode',
   'https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js',
