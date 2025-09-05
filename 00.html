@@ -840,7 +840,7 @@ const ScannerController = {
     },
 
     start: () => {
-        DOM.scannerContainer.style.display = 'flex';
+        DOM.scannerContainer.style.display = 'block';
         if (!appState.html5QrCode) {
             appState.html5QrCode = new Html5Qrcode("reader");
         }
@@ -1791,4 +1791,3 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
-
