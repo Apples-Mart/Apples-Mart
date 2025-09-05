@@ -410,7 +410,7 @@
         </div>
         <div id="scanner-controls">
           <div id="cameraSelection"></div>
-          <input type="range" id="zoomSlider" style="display: none;">
+         <input type="range" id="zoomSlider" min="1" max="10" step="1" value="5" />
           <button id="toggleFlashlightBtn"><i class="fas fa-bolt"></i></button>
         </div>
       </div>
@@ -1866,6 +1866,44 @@ if ('serviceWorker' in navigator) {
         console.log('Service Worker registration failed:', error);
       });
   });
+
+// انتظر حتى يتم تحميل الصفحة بالكامل
+document.addEventListener('DOMContentLoaded', (event) => {
+
+  const zoomSlider = document.getElementById('zoomSlider');
+
+  // هذه الدالة تفترض أن لديك متغير 'html5QrCode' من المكتبة
+  // وأن الماسح قد بدأ بالعمل بالفعل
+  function applyZoom() {
+    // افترض أن تيار الفيديو يعمل وأننا يمكننا الوصول إلى مسار الفيديو (track)
+    // غالبًا ما يتم الحصول عليه بعد بدء تشغيل الكاميرا
+    const videoElement = document.getElementById('reader').querySelector('video');
+    if (!videoElement || !videoElement.srcObject) {
+      console.log("الكاميرا ليست جاهزة بعد.");
+      return;
+    }
+
+    const track = videoElement.srcObject.getVideoTracks()[0];
+    const capabilities = track.getCapabilities();
+
+    // تحقق مما إذا كانت الكاميرا تدعم التقريب
+    if (capabilities.zoom) {
+      track.applyConstraints({
+        advanced: [{
+          zoom: zoomSlider.value
+        }]
+      }).catch(e => console.error("فشل تطبيق التقريب:", e));
+    } else {
+      // إذا كانت الكاميرا لا تدعم التقريب، يمكنك إخفاء السلايدر
+      console.log("هذه الكاميرا لا تدعم التقريب.");
+      zoomSlider.style.display = 'none';
+    }
+  }
+
+  // أضف مستمع الأحداث للسلايدر
+  zoomSlider.addEventListener('input', applyZoom);
+});
+  
 }
 </script>
 </body>
