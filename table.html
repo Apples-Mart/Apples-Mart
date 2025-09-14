@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>مصمم الجداول المدرسية المتكامل</title>
+    <style>
+        :root {
+            --primary-color: #0056b3;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            --warning-color: #ffc107;
+            --purple-color: #6f42c1;
+            --light-gray: #f8f9fa;
+            --border-color: #dee2e6;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+            width: 100vw;
+            box-sizing: border-box;
+        }
+        h1 {
+            color: var(--primary-color);
+        }
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+        }
+        .controls, .management-buttons {
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            align-items: center;
+        }
+        .controls label, .management-buttons label {
+            font-weight: bold;
+        }
+        .controls select, .controls button, .management-buttons button {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+        .management-buttons button { background-color: #6c757d; color: white; }
+        .management-buttons button:hover { background-color: #5a6268; }
+        .gemini-button { background-color: #8A2BE2; color: white; }
+        .gemini-button:hover { background-color: #7B1FA2; }
+        #export-button { background-color: var(--success-color); color: white; }
+        #export-button:hover { background-color: #218838; }
+        #print-button { background-color: var(--primary-color); color: white; }
+        #print-button:hover { background-color: #004494; }
+        #preview-button { background-color: var(--purple-color); color: white; }
+        #preview-button:hover { background-color: #593699; }
+        
+        .canvas-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+        canvas {
+            background-color: #fff;
+            cursor: pointer;
+        }
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: auto;
+            padding: 25px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        #preview-modal .modal-content {
+            max-width: 90vw;
+            height: 90vh;
+        }
+        #constraints-modal .modal-content {
+            max-width: 90vw;
+        }
+        #preview-content {
+            height: calc(100% - 80px); 
+            overflow: auto;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        #alert-message {
+            white-space: pre-wrap; /* To respect newlines in messages */
+            text-align: right;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .modal-header h2 { margin: 0; }
+        .close-button {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .modal-body ul { list-style-type: none; padding: 0; max-height: 200px; overflow-y: auto; }
+        .modal-body li {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px; border-bottom: 1px solid #eee;
+        }
+        .modal-body li:last-child { border-bottom: none; }
+        .modal-body .form-group { margin-bottom: 15px; }
+        .modal-body .form-group .gemini-suggestion-btn { margin-top: 5px; width: 100%; }
+        .modal-body input, .modal-body select {
+            width: 100%; padding: 8px; box-sizing: border-box;
+            border: 1px solid #ccc; border-radius: 4px;
+        }
+        .slider-group { display: flex; align-items: center; gap: 10px; }
+        .slider-group input[type="range"] { flex-grow: 1; }
+        .slider-group span { min-width: 30px; text-align: center; }
+        .modal-body .btn-danger { background-color: var(--danger-color); color: white; border: none; }
+        .modal-body .btn-primary { background-color: var(--primary-color); color: white; border: none; }
+        #constraints-grid { display: grid; gap: 5px; text-align: center; font-size: 12px;}
+        #constraints-grid div { display: flex; justify-content: center; align-items: center; }
+        #constraints-grid label { display: block; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+    <div class="main-container">
+        <h1>مصمم الجداول المدرسية المتكامل</h1>
+
+        <div class="management-buttons">
+            <button onclick="openModal('settings-modal')">إعدادات الجدول</button>
+            <button onclick="openModal('display-settings-modal')">إعدادات العرض</button>
+            <button onclick="openModal('teachers-modal')">إدارة المعلمين</button>
+            <button onclick="openModal('classes-modal')">إدارة الفصول</button>
+            <button onclick="openModal('subjects-modal')">إدارة المواد</button>
+            <button onclick="openModal('assignments-modal')">إدارة الأنصبة</button>
+            <button onclick="distributeRandomly()" style="background-color: var(--info-color);">توزيع عشوائي</button>
+            <button onclick="clearSchedule()" style="background-color: var(--warning-color);">مسح الجدول</button>
+            <button id="gemini-summary-btn" onclick="generateSmartSummary()" class="gemini-button">✨ إنشاء ملخص ذكي</button>
+        </div>
+
+        <div class="controls">
+            <label for="exportType">عرض/تصدير/طباعة:</label>
+            <select id="exportType">
+                <option value="school">المدرسة بالكامل</option>
+                <option value="class">فصل محدد</option>
+                <option value="teacher">معلم محدد</option>
+                <option value="all_teachers">جميع المعلمين</option>
+            </select>
+            <select id="exportItem" disabled></select>
+            <button id="preview-button" onclick="previewTable()">معاينة</button>
+            <button id="export-button">تصدير PDF</button>
+            <button id="print-button" onclick="printTable()">طباعة</button>
+        </div>
+
+        <div class="canvas-wrapper">
+             <canvas id="timetableCanvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Modals Area -->
+    <!-- Display Settings Modal -->
+    <div id="display-settings-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>إعدادات عرض الجدول</h2>
+                <span class="close-button" onclick="closeModal('display-settings-modal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="cell-width-slider">عرض الحصة (العمود)</label>
+                    <div class="slider-group">
+                        <input type="range" id="cell-width-slider" min="50" max="200" step="5">
+                        <span id="cell-width-value"></span>
+                    </div>
+                </div>
+                 <div class="form-group">
+                    <label for="cell-height-slider">ارتفاع الصف</label>
+                    <div class="slider-group">
+                        <input type="range" id="cell-height-slider" min="50" max="150" step="5">
+                        <span id="cell-height-value"></span>
+                    </div>
+                </div>
+                 <div class="form-group">
+                    <label for="font-size-slider">حجم الخط الرئيسي</label>
+                    <div class="slider-group">
+                        <input type="range" id="font-size-slider" min="8" max="20" step="1">
+                        <span id="font-size-value"></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="line-width-slider">سمك الخطوط</label>
+                    <div class="slider-group">
+                        <input type="range" id="line-width-slider" min="1" max="5" step="1">
+                        <span id="line-width-value"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>إعدادات الجدول</h2>
+                <span class="close-button" onclick="closeModal('settings-modal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="school-name-input">اسم المدرسة:</label>
+                    <input type="text" id="school-name-input" placeholder="اسم المدرسة الرسمي">
+                </div>
+                <div class="form-group">
+                    <label for="designer-name-input">مصمم الجدول:</label>
+                    <input type="text" id="designer-name-input" placeholder="اسمك أو اسم القسم">
+                </div>
+                <hr>
+                <div class="form-group">
+                    <label for="days-input">أيام الدراسة (مفصولة بفاصلة ,):</label>
+                    <input type="text" id="days-input">
+                </div>
+                <div class="form-group">
+                    <label for="periods-input">عدد الحصص اليومية:</label>
+                    <input type="number" id="periods-input" min="1" max="12">
+                </div>
+                <button class="btn-primary" onclick="saveSettings()">حفظ الإعدادات</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teachers Modal -->
+    <div id="teachers-modal" class="modal">
+        <div class="modal-content">
+             <div class="modal-header">
+                <h2>إدارة المعلمين</h2>
+                <span class="close-button" onclick="closeModal('teachers-modal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <ul id="teachers-list"></ul>
+                <hr>
+                <div class="form-group">
+                    <label>إضافة/تعديل معلم:</label>
+                    <input type="text" id="teacher-name-input" placeholder="اسم المعلم">
+                    <input type="hidden" id="teacher-id-input">
+                </div>
+                <button class="btn-primary" onclick="saveTeacher()">حفظ المعلم</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Teacher Constraints Modal -->
+    <div id="constraints-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="constraints-teacher-name"></h2>
+                <span class="close-button" onclick="closeModal('constraints-modal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>حدد الأوقات التي يكون فيها المعلم <strong>غير متاح</strong>.</p>
+                <div id="constraints-grid"></div>
+                <hr>
+                <button class="btn-primary" onclick="saveConstraints()">حفظ القيود</button>
+                <input type="hidden" id="constraints-teacher-id">
+            </div>
+        </div>
+    </div>
+    
+    <!-- Classes Modal -->
+     <div id="classes-modal" class="modal">
+        <div class="modal-content">
+             <div class="modal-header">
+                <h2>إدارة الفصول</h2>
+                <span class="close-button" onclick="closeModal('classes-modal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <ul id="classes-list"></ul>
+                <hr>
+                <div class="form-group">
+                     <label>إضافة/تعديل فصل:</label>
+                    <input type="text" id="class-name-input" placeholder="اسم الفصل">
+                    <input type="hidden" id="class-id-input">
+                </div>
+                <button class="btn-primary" onclick="saveClass()">حفظ الفصل</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subjects Modal -->
+    <div id="subjects-modal" class="modal">
+        <div class="modal-content">
+             <div class="modal-header">
+                <h2>إدارة المواد</h2>
+                <span class="close-button" onclick="closeModal('subjects-modal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <ul id="subjects-list"></ul>
+                <hr>
+                <div class="form-group">
+                    <label>إضافة/تعديل مادة:</label>
+                    <input type="text" id="subject-name-input" placeholder="اسم المادة">
+                    <input type="color" id="subject-color-input" value="#d1e7dd">
+                    <input type="hidden" id="subject-id-input">
+                </div>
+                <button class="btn-primary" onclick="saveSubject()">حفظ المادة</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assignments Modal -->
+    <div id="assignments-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>إدارة الأنصبة</h2>
+                <span class="close-button" onclick="closeModal('assignments-modal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <ul id="assignments-list"></ul>
+                <hr>
+                <div class="form-group">
+                    <label>إضافة نصاب جديد:</label>
+                    <select id="assignment-class-select"></select>
+                    <select id="assignment-subject-select"></select>
+                    <select id="assignment-teacher-select"></select>
+                    <button id="gemini-teacher-btn" class="gemini-button gemini-suggestion-btn" onclick="suggestTeacher()">✨ اقترح معلمًا</button>
+                    <input type="number" id="assignment-count-input" placeholder="عدد الحصص الأسبوعية" min="1" style="margin-top: 10px;">
+                </div>
+                <button class="btn-primary" onclick="addAssignment()">إضافة نصاب</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Alert/Confirm Modal -->
+    <div id="alert-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 id="alert-title">تنبيه</h2>
+                <span class="close-button" onclick="closeAlert()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="alert-message" style="font-size: 16px;"></p>
+                <div style="display: flex; justify-content: center; gap: 15px; margin-top: 20px;">
+                    <button id="alert-confirm-btn" class="btn-primary">موافق</button>
+                    <button id="alert-cancel-btn" class="btn-danger" onclick="closeAlert()">إلغاء</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Preview Modal -->
+    <div id="preview-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="preview-title">معاينة الجدول</h2>
+                <span class="close-button" onclick="closeModal('preview-modal')">&times;</span>
+            </div>
+            <div class="modal-body" id="preview-content">
+                <!-- Preview table will be injected here -->
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // ===================================================
+        // 0. تهيئة التطبيق
+        // ===================================================
+        const canvas = document.getElementById('timetableCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let settings = {};
+        let displaySettings = {};
+        let teachers = [];
+        let classes = [];
+        let subjects = [];
+        let assignments = [];
+        let schedule = [];
+        let selectedAssignment = null;
+        let onConfirmCallback = null;
+        let heldSession = null; // For manual drag-drop from grid
+
+        // ===================================================
+        // 1. إدارة البيانات و LocalStorage
+        // ===================================================
+        function saveData() {
+            localStorage.setItem('timetable_settings', JSON.stringify(settings));
+            localStorage.setItem('timetable_displaySettings', JSON.stringify(displaySettings));
+            localStorage.setItem('timetable_teachers', JSON.stringify(teachers));
+            localStorage.setItem('timetable_classes', JSON.stringify(classes));
+            localStorage.setItem('timetable_subjects', JSON.stringify(subjects));
+            localStorage.setItem('timetable_assignments', JSON.stringify(assignments));
+            localStorage.setItem('timetable_schedule', JSON.stringify(schedule));
+        }
+
+        function loadData() {
+            settings = JSON.parse(localStorage.getItem('timetable_settings')) || {
+                days: ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس"],
+                periods: 7,
+                schoolName: "اسم المدرسة",
+                designerName: "اسم المصمم"
+            };
+             displaySettings = JSON.parse(localStorage.getItem('timetable_displaySettings')) || {
+                cellWidth: 80,
+                cellHeight: 60,
+                mainFontSize: 13,
+                lineWidth: 1
+            };
+            teachers = JSON.parse(localStorage.getItem('timetable_teachers')) || [];
+            classes = JSON.parse(localStorage.getItem('timetable_classes')) || [];
+            subjects = JSON.parse(localStorage.getItem('timetable_subjects')) || [];
+            assignments = JSON.parse(localStorage.getItem('timetable_assignments')) || [];
+            schedule = JSON.parse(localStorage.getItem('timetable_schedule')) || [];
+            
+            schedule = schedule.filter(s => assignments.some(a => a.id === s.assignmentId));
+            saveData();
+        }
+
+        // ===================================================
+        // 2. إعداد ورسم الواجهة الرئيسية (Canvas) - تصميم جديد
+        // ===================================================
+        let SIDEBAR_WIDTH, ROW_HEADER_WIDTH, COL_HEADER_HEIGHT, CELL_WIDTH, CELL_HEIGHT;
+
+        function updateCanvasDimensions() {
+            SIDEBAR_WIDTH = 250;
+            ROW_HEADER_WIDTH = 100;
+            COL_HEADER_HEIGHT = 60;
+            
+            CELL_HEIGHT = displaySettings.cellHeight;
+            CELL_WIDTH = displaySettings.cellWidth;
+
+            const totalPeriods = settings.days.length * settings.periods;
+            canvas.width = SIDEBAR_WIDTH + ROW_HEADER_WIDTH + (totalPeriods * CELL_WIDTH);
+            canvas.height = COL_HEADER_HEIGHT + (classes.length * CELL_HEIGHT);
+            
+            draw();
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if(!settings.days || settings.days.length === 0 || !classes || classes.length === 0) {
+                 ctx.font = 'bold 24px "Segoe UI"';
+                 ctx.textAlign = 'center';
+                 ctx.fillStyle = '#6c757d';
+                 ctx.fillText('الرجاء إضافة الفصول وتحديد إعدادات الجدول أولاً', canvas.width/2, canvas.height/2);
+                 return;
+            }
+            // RTL starts from the right edge
+            drawSidebar(canvas.width - SIDEBAR_WIDTH);
+            drawGridAndHeaders(canvas.width - SIDEBAR_WIDTH);
+            drawSchedule(canvas.width - SIDEBAR_WIDTH);
+        }
+        
+        function getAssignmentInfo(assignmentId) {
+            const assignment = assignments.find(a => a.id === assignmentId);
+            if (!assignment) return {};
+            
+            // Handle multiple teachers and classes
+            const teacherNames = assignment.teacherIds.map(tid => teachers.find(t => t.id === tid)?.name || '').join(' و ');
+            const classNames = assignment.classIds.map(cid => classes.find(c => c.id === cid)?.name || '').join(' و ');
+            
+            const subject = subjects.find(s => s.id === assignment.subjectId);
+            return { assignment, teacherNames, classNames, subject };
+        }
+
+        function drawSidebar(startX) {
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(startX, 0, SIDEBAR_WIDTH, canvas.height);
+            ctx.strokeStyle = '#dee2e6';
+            ctx.strokeRect(startX, 0, SIDEBAR_WIDTH, canvas.height);
+
+            ctx.fillStyle = '#212529';
+            ctx.font = 'bold 20px "Segoe UI"';
+            ctx.textAlign = 'center';
+            ctx.fillText('الحصص المتبقية', startX + SIDEBAR_WIDTH / 2, 35);
+            
+            let yPos = 75;
+            assignments.forEach((assignment) => {
+                const { classNames, subject } = getAssignmentInfo(assignment.id);
+                 if (!classNames || !subject) return;
+
+                const scheduledCount = schedule.filter(s => s.assignmentId === assignment.id).length;
+                const remaining = assignment.weeklyCount - scheduledCount;
+                if (remaining <= 0) return;
+
+                const text = `${subject.name} - ${classNames}`;
+                const remainingText = `(متبقي: ${remaining})`;
+                
+                if ((selectedAssignment && selectedAssignment.id === assignment.id) || (heldSession && heldSession.assignmentId === assignment.id)) {
+                    ctx.fillStyle = subject.color;
+                    ctx.globalAlpha = 0.5;
+                    ctx.fillRect(startX + 10, yPos - 25, SIDEBAR_WIDTH - 20, 50);
+                    ctx.globalAlpha = 1.0;
+                }
+                
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 14px "Segoe UI"';
+                 drawFittingText(text, startX + SIDEBAR_WIDTH / 2, yPos, SIDEBAR_WIDTH - 20, 14, 10);
+                ctx.font = '12px "Segoe UI"';
+                ctx.fillStyle = '#6c757d';
+                ctx.fillText(remainingText, startX + SIDEBAR_WIDTH / 2, yPos + 20);
+                yPos += 55;
+            });
+        }
+
+        function drawGridAndHeaders(gridStartX) {
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#e9ecef';
+            ctx.strokeStyle = '#ccc';
+            ctx.lineWidth = displaySettings.lineWidth;
+            
+            const headerX = gridStartX - ROW_HEADER_WIDTH;
+            // Draw Corner Box
+            ctx.fillRect(headerX, 0, ROW_HEADER_WIDTH, COL_HEADER_HEIGHT);
+            ctx.strokeRect(headerX, 0, ROW_HEADER_WIDTH, COL_HEADER_HEIGHT);
+
+            // Draw Row Headers (Classes)
+            classes.forEach((aClass, i) => {
+                const y = COL_HEADER_HEIGHT + i * CELL_HEIGHT;
+                ctx.fillStyle = '#e9ecef';
+                ctx.fillRect(headerX, y, ROW_HEADER_WIDTH, CELL_HEIGHT);
+                ctx.strokeRect(headerX, y, ROW_HEADER_WIDTH, CELL_HEIGHT);
+                ctx.fillStyle = '#000';
+                ctx.font = 'bold 15px "Segoe UI"';
+                ctx.fillText(aClass.name, headerX + ROW_HEADER_WIDTH / 2, y + CELL_HEIGHT / 2);
+            });
+
+            // Draw Column Headers (Days and Periods) - RTL
+            settings.days.forEach((day, dayIndex) => {
+                const dayX = headerX - ((dayIndex + 1) * settings.periods * CELL_WIDTH);
+                const dayWidth = settings.periods * CELL_WIDTH;
+                // Day Header
+                ctx.fillStyle = '#e0e0e0';
+                ctx.fillRect(dayX, 0, dayWidth, COL_HEADER_HEIGHT / 2);
+                ctx.strokeRect(dayX, 0, dayWidth, COL_HEADER_HEIGHT / 2);
+                ctx.fillStyle = '#000';
+                ctx.font = 'bold 15px "Segoe UI"';
+                ctx.fillText(day, dayX + dayWidth / 2, COL_HEADER_HEIGHT / 4);
+
+                // Period Headers for that day
+                for (let periodIndex = 0; periodIndex < settings.periods; periodIndex++) {
+                    const periodX = dayX + periodIndex * CELL_WIDTH;
+                    ctx.fillStyle = '#f1f1f1';
+                    ctx.fillRect(periodX, COL_HEADER_HEIGHT / 2, CELL_WIDTH, COL_HEADER_HEIGHT / 2);
+                    ctx.strokeRect(periodX, COL_HEADER_HEIGHT / 2, CELL_WIDTH, COL_HEADER_HEIGHT / 2);
+                    ctx.fillStyle = '#333';
+                    ctx.font = '13px "Segoe UI"';
+                    ctx.fillText(`ح ${periodIndex + 1}`, periodX + CELL_WIDTH / 2, COL_HEADER_HEIGHT * 0.75);
+                }
+                
+                // Add thick border around the day
+                ctx.strokeStyle = '#555'; // Darker color for separation
+                ctx.lineWidth = displaySettings.lineWidth * 2;
+                ctx.strokeRect(dayX, 0, dayWidth, canvas.height); // Draw border around the entire day column
+                ctx.lineWidth = displaySettings.lineWidth; // Reset for other lines
+                ctx.strokeStyle = '#ccc'; // Reset to default color
+            });
+            
+            // Draw Grid Lines & Constraints
+            const assignmentToCheck = selectedAssignment || (heldSession ? assignments.find(a => a.id === heldSession.assignmentId) : null);
+
+            for (let classIdx = 0; classIdx < classes.length; classIdx++) {
+                for (let dayIdx = 0; dayIdx < settings.days.length; dayIdx++) {
+                    for (let periodIdx = 0; periodIdx < settings.periods; periodIdx++) {
+                        const x = headerX - (dayIdx * settings.periods + periodIdx) * CELL_WIDTH - CELL_WIDTH;
+                        const y = COL_HEADER_HEIGHT + classIdx * CELL_HEIGHT;
+                        ctx.strokeRect(x, y, CELL_WIDTH, CELL_HEIGHT);
+                        
+                        // Show constraints
+                        if(assignmentToCheck && assignmentToCheck.classIds.includes(classes[classIdx].id)) {
+                             assignmentToCheck.teacherIds.forEach(teacherId => {
+                                if(!isTeacherAvailable(teacherId, dayIdx, periodIdx)) {
+                                    ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
+                                    ctx.fillRect(x, y, CELL_WIDTH, CELL_HEIGHT);
+                                }
+                             });
+                        }
+                    }
+                }
+            }
+        }
+        
+        function drawFittingText(text, x, y, maxWidth, initialFontSize, minFontSize = 8) {
+            let fontSize = initialFontSize;
+            ctx.font = `bold ${fontSize}px "Segoe UI"`;
+            while (ctx.measureText(text).width > maxWidth && fontSize > minFontSize) {
+                fontSize--;
+                ctx.font = `bold ${fontSize}px "Segoe UI"`;
+            }
+            ctx.fillText(text, x, y);
+        }
+
+        function drawSchedule(gridStartX) {
+            schedule.forEach(entry => {
+                const { teacherNames, subject, assignment } = getAssignmentInfo(entry.assignmentId);
+                if (!teacherNames || !subject || !assignment) return;
+                
+                assignment.classIds.forEach(classId => {
+                    const classIndex = classes.findIndex(c => c.id === classId);
+                    if (classIndex === -1) return;
+                    
+                    const headerX = gridStartX - ROW_HEADER_WIDTH;
+                    const x = headerX - (entry.dayIndex * settings.periods + entry.periodIndex) * CELL_WIDTH - CELL_WIDTH;
+                    const y = COL_HEADER_HEIGHT + classIndex * CELL_HEIGHT;
+                    
+                    ctx.fillStyle = subject.color;
+                    ctx.fillRect(x + 2, y + 2, CELL_WIDTH - 4, CELL_HEIGHT - 4);
+                    
+                    ctx.fillStyle = '#000';
+                    drawFittingText(subject.name, x + CELL_WIDTH / 2, y + (CELL_HEIGHT/2) - 10, CELL_WIDTH - 10, displaySettings.mainFontSize);
+                    
+                    ctx.fillStyle = '#333';
+                    drawFittingText(teacherNames, x + CELL_WIDTH / 2, y + (CELL_HEIGHT/2) + 10, CELL_WIDTH - 10, displaySettings.mainFontSize - 2);
+                });
+            });
+        }
+        
+        // ===================================================
+        // 3. التحكم في النوافذ المنبثقة (Modals)
+        // ===================================================
+        function openModal(modalId) {
+            if (modalId === 'settings-modal') renderSettingsModal();
+            if (modalId === 'display-settings-modal') renderDisplaySettingsModal();
+            if (modalId === 'teachers-modal') renderTeachersModal();
+            if (modalId === 'classes-modal') renderClassesModal();
+            if (modalId === 'subjects-modal') renderSubjectsModal();
+            if (modalId === 'assignments-modal') renderAssignmentsModal();
+            document.getElementById(modalId).style.display = 'flex';
+        }
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            if(modalId === 'display-settings-modal' || modalId === 'constraints-modal') {
+                saveData(); // Save display settings when closing
+            }
+            updateCanvasDimensions();
+            updateExportOptions();
+        }
+
+        // ===================================================
+        // 4. منطق إدارة البيانات (CRUD)
+        // ===================================================
+        
+        function renderSettingsModal() {
+            document.getElementById('school-name-input').value = settings.schoolName || '';
+            document.getElementById('designer-name-input').value = settings.designerName || '';
+            document.getElementById('days-input').value = settings.days.join(',');
+            document.getElementById('periods-input').value = settings.periods;
+        }
+        function saveSettings() {
+            settings.schoolName = document.getElementById('school-name-input').value.trim();
+            settings.designerName = document.getElementById('designer-name-input').value.trim();
+            const daysStr = document.getElementById('days-input').value;
+            settings.days = daysStr.split(',').map(d => d.trim()).filter(d => d);
+            settings.periods = parseInt(document.getElementById('periods-input').value) || 7;
+            saveData();
+            closeModal('settings-modal');
+        }
+        
+        function renderDisplaySettingsModal() {
+            const sliders = [
+                { id: 'cell-width', key: 'cellWidth' },
+                { id: 'cell-height', key: 'cellHeight' },
+                { id: 'font-size', key: 'mainFontSize' },
+                { id: 'line-width', key: 'lineWidth' }
+            ];
+            sliders.forEach(s => {
+                const slider = document.getElementById(`${s.id}-slider`);
+                const valueSpan = document.getElementById(`${s.id}-value`);
+                slider.value = displaySettings[s.key];
+                valueSpan.textContent = slider.value;
+                slider.oninput = () => {
+                    valueSpan.textContent = slider.value;
+                    displaySettings[s.key] = parseInt(slider.value);
+                    updateCanvasDimensions();
+                };
+            });
+        }
+
+        function renderTeachersModal() {
+            const list = document.getElementById('teachers-list');
+            list.innerHTML = '';
+            teachers.forEach(teacher => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${teacher.name}</span>
+                                <div>
+                                    <button onclick="openConstraintsModal(${teacher.id})">قيود</button>
+                                    <button onclick="editTeacher(${teacher.id})">تعديل</button>
+                                    <button class="btn-danger" onclick="deleteTeacher(${teacher.id})">حذف</button>
+                                </div>`;
+                list.appendChild(li);
+            });
+            document.getElementById('teacher-name-input').value = '';
+            document.getElementById('teacher-id-input').value = '';
+        }
+        function saveTeacher() {
+            const name = document.getElementById('teacher-name-input').value.trim();
+            const id = document.getElementById('teacher-id-input').value;
+            if (!name) return;
+            if (id) {
+                const teacher = teachers.find(t => t.id == id);
+                if(teacher) teacher.name = name;
+            } else {
+                teachers.push({ id: Date.now(), name, constraints: {} });
+            }
+            saveData();
+            renderTeachersModal();
+        }
+        function editTeacher(id) {
+            const teacher = teachers.find(t => t.id === id);
+            if(teacher){
+                document.getElementById('teacher-name-input').value = teacher.name;
+                document.getElementById('teacher-id-input').value = teacher.id;
+            }
+        }
+        function deleteTeacher(id) {
+            showConfirm('هل أنت متأكد من حذف هذا المعلم؟ سيتم حذف كل الأنصبة المرتبطة به.', () => {
+                teachers = teachers.filter(t => t.id !== id);
+                assignments = assignments.filter(a => a.teacherIds.includes(id));
+                saveData();
+                renderTeachersModal();
+            });
+        }
+        
+        function openConstraintsModal(teacherId) {
+            const teacher = teachers.find(t => t.id === teacherId);
+            if(!teacher) return;
+            
+            document.getElementById('constraints-teacher-name').textContent = `قيود المعلم: ${teacher.name}`;
+            document.getElementById('constraints-teacher-id').value = teacherId;
+            
+            const grid = document.getElementById('constraints-grid');
+            grid.style.gridTemplateColumns = `auto repeat(${settings.periods}, 1fr)`;
+            grid.innerHTML = '<div></div>'; // Empty top-left cell
+            
+            for(let p = 1; p <= settings.periods; p++) {
+                grid.innerHTML += `<div><strong>ح ${p}</strong></div>`;
+            }
+
+            for(let d = 0; d < settings.days.length; d++) {
+                grid.innerHTML += `<div><strong>${settings.days[d]}</strong></div>`;
+                for(let p = 0; p < settings.periods; p++) {
+                    const isUnavailable = teacher.constraints && teacher.constraints[d] && teacher.constraints[d][p] === false;
+                    grid.innerHTML += `<div>
+                        <input type="checkbox" id="constraint-${d}-${p}" ${isUnavailable ? 'checked' : ''}>
+                    </div>`;
+                }
+            }
+            openModal('constraints-modal');
+        }
+
+        function saveConstraints() {
+            const teacherId = parseInt(document.getElementById('constraints-teacher-id').value);
+            const teacher = teachers.find(t => t.id === teacherId);
+            if(!teacher) return;
+
+            teacher.constraints = {};
+            for(let d = 0; d < settings.days.length; d++) {
+                teacher.constraints[d] = [];
+                for(let p = 0; p < settings.periods; p++) {
+                    const isChecked = document.getElementById(`constraint-${d}-${p}`).checked;
+                    teacher.constraints[d][p] = !isChecked; // True if available, false if unavailable
+                }
+            }
+            saveData();
+            closeModal('constraints-modal');
+        }
+
+        function renderClassesModal() {
+            const list = document.getElementById('classes-list');
+            list.innerHTML = '';
+            classes.forEach(c => {
+                list.innerHTML += `<li><span>${c.name}</span>
+                                   <div>
+                                     <button onclick="editClass(${c.id})">تعديل</button>
+                                     <button class="btn-danger" onclick="deleteClass(${c.id})">حذف</button>
+                                   </div></li>`;
+            });
+             document.getElementById('class-name-input').value = '';
+             document.getElementById('class-id-input').value = '';
+        }
+        function saveClass() {
+            const name = document.getElementById('class-name-input').value.trim();
+            const id = document.getElementById('class-id-input').value;
+            if (!name) return;
+            if (id) {
+                const aClass = classes.find(c => c.id == id);
+                if(aClass) aClass.name = name;
+            } else {
+                classes.push({ id: Date.now(), name });
+            }
+            saveData();
+            renderClassesModal();
+        }
+        function editClass(id) {
+            const aClass = classes.find(c => c.id === id);
+            if(aClass){
+              document.getElementById('class-name-input').value = aClass.name;
+              document.getElementById('class-id-input').value = aClass.id;
+            }
+        }
+        function deleteClass(id) {
+            showConfirm('هل أنت متأكد من حذف هذا الفصل؟ سيتم حذف كل الأنصبة المرتبطة به.', () => {
+                classes = classes.filter(c => c.id !== id);
+                assignments = assignments.filter(a => a.classIds.includes(id));
+                saveData();
+                renderClassesModal();
+            });
+        }
+        
+        function renderSubjectsModal() {
+            const list = document.getElementById('subjects-list');
+            list.innerHTML = '';
+            subjects.forEach(s => {
+                list.innerHTML += `<li><span style="border-right: 10px solid ${s.color}; padding-right: 10px;">${s.name}</span>
+                                   <div>
+                                     <button onclick="editSubject(${s.id})">تعديل</button>
+                                     <button class="btn-danger" onclick="deleteSubject(${s.id})">حذف</button>
+                                   </div></li>`;
+            });
+             document.getElementById('subject-name-input').value = '';
+             document.getElementById('subject-id-input').value = '';
+             document.getElementById('subject-color-input').value = '#d1e7dd';
+        }
+        function saveSubject() {
+            const name = document.getElementById('subject-name-input').value.trim();
+            const color = document.getElementById('subject-color-input').value;
+            const id = document.getElementById('subject-id-input').value;
+            if (!name) return;
+            if (id) {
+                const subject = subjects.find(s => s.id == id);
+                if(subject){ subject.name = name; subject.color = color; }
+            } else {
+                subjects.push({ id: Date.now(), name, color });
+            }
+            saveData();
+            renderSubjectsModal();
+        }
+        function editSubject(id) {
+            const subject = subjects.find(s => s.id === id);
+            if(subject){
+              document.getElementById('subject-name-input').value = subject.name;
+              document.getElementById('subject-color-input').value = subject.color;
+              document.getElementById('subject-id-input').value = subject.id;
+            }
+        }
+        function deleteSubject(id) {
+            showConfirm('هل أنت متأكد من حذف هذه المادة؟ سيتم حذف كل الأنصبة المرتبطة بها.', () => {
+                subjects = subjects.filter(s => s.id !== id);
+                assignments = assignments.filter(a => a.subjectId !== id);
+                saveData();
+                renderSubjectsModal();
+            });
+        }
+
+        function renderAssignmentsModal() {
+            const list = document.getElementById('assignments-list');
+            list.innerHTML = '';
+            assignments.forEach(a => {
+                const { teacherNames, classNames, subject } = getAssignmentInfo(a.id);
+                 if (!teacherNames || !classNames || !subject) return;
+                list.innerHTML += `<li>
+                                    <span>${subject.name} - ${classNames} - ${teacherNames} (${a.weeklyCount} حصص)</span>
+                                    <button class="btn-danger" onclick="deleteAssignment(${a.id})">حذف</button>
+                                   </li>`;
+            });
+
+            // Revert to single select for simpler UI
+            const classSelect = document.getElementById(`assignment-class-select`);
+            classSelect.innerHTML = '<option value="">اختر الفصل</option>';
+            classes.forEach(item => classSelect.innerHTML += `<option value="${item.id}">${item.name}</option>`);
+
+            const subjectSelect = document.getElementById(`assignment-subject-select`);
+            subjectSelect.innerHTML = '<option value="">اختر المادة</option>';
+            subjects.forEach(item => subjectSelect.innerHTML += `<option value="${item.id}">${item.name}</option>`);
+
+            const teacherSelect = document.getElementById(`assignment-teacher-select`);
+            teacherSelect.innerHTML = '<option value="">اختر المعلم</option>';
+            teachers.forEach(item => teacherSelect.innerHTML += `<option value="${item.id}">${item.name}</option>`);
+
+             document.getElementById('assignment-count-input').value = '';
+        }
+
+        function addAssignment() {
+            const classId = parseInt(document.getElementById('assignment-class-select').value);
+            const subjectId = parseInt(document.getElementById('assignment-subject-select').value);
+            const teacherId = parseInt(document.getElementById('assignment-teacher-select').value);
+            const weeklyCount = parseInt(document.getElementById('assignment-count-input').value);
+
+            if (!classId || !subjectId || !teacherId || !weeklyCount) {
+                showAlert('الرجاء تعبئة كل الحقول.'); return;
+            }
+
+            const className = classes.find(c => c.id === classId).name;
+            const teacherName = teachers.find(t => t.id === teacherId).name;
+
+            // Check for merging classes
+            const potentialClassMerge = assignments.find(a => a.subjectId === subjectId && JSON.stringify(a.teacherIds) === JSON.stringify([teacherId]));
+            if (potentialClassMerge && !potentialClassMerge.classIds.includes(classId)) {
+                const existingClassNames = potentialClassMerge.classIds.map(cid => classes.find(c => c.id === cid)?.name).join(', ');
+                showConfirm(
+                    `المعلم '${teacherName}' يدرس نفس المادة بالفعل للفصل/للفصول '${existingClassNames}'. هل تريد دمج الفصل '${className}' معهم في حصة مشتركة؟`,
+                    () => { // On Confirm Merge
+                        potentialClassMerge.classIds.push(classId);
+                        saveData();
+                        renderAssignmentsModal();
+                    },
+                    () => { // On Cancel (create new)
+                        createNewAssignment();
+                    }
+                );
+                return;
+            }
+
+            // Check for merging teachers
+            const potentialTeacherMerge = assignments.find(a => a.subjectId === subjectId && JSON.stringify(a.classIds) === JSON.stringify([classId]));
+            if(potentialTeacherMerge && !potentialTeacherMerge.teacherIds.includes(teacherId)) {
+                 const existingTeacherNames = potentialTeacherMerge.teacherIds.map(tid => teachers.find(t => t.id === tid)?.name).join(', ');
+                 showConfirm(
+                    `الفصل '${className}' يدرس نفس المادة بالفعل مع المعلم/المعلمين '${existingTeacherNames}'. هل تريد إضافة المعلم '${teacherName}' معهم لتقسيم الحصة؟`,
+                    () => { // On Confirm Merge
+                        potentialTeacherMerge.teacherIds.push(teacherId);
+                        saveData();
+                        renderAssignmentsModal();
+                    },
+                    () => { // On Cancel (create new)
+                        createNewAssignment();
+                    }
+                );
+                return;
+            }
+            
+            // If no merge possibilities, create a new assignment
+            createNewAssignment();
+
+            function createNewAssignment() {
+                 assignments.push({ id: Date.now(), classIds: [classId], subjectId, teacherIds: [teacherId], weeklyCount });
+                 saveData();
+                 renderAssignmentsModal();
+            }
+        }
+
+        function deleteAssignment(id) {
+            assignments = assignments.filter(a => a.id !== id);
+            saveData();
+            renderAssignmentsModal();
+        }
+
+        // ===================================================
+        // 5. منطق التفاعل مع Canvas - RTL
+        // ===================================================
+        function isTeacherAvailable(teacherId, dayIndex, periodIndex) {
+            const teacher = teachers.find(t => t.id === teacherId);
+            if (!teacher || !teacher.constraints || !teacher.constraints[dayIndex]) {
+                return true; // Default to available if no constraints are set
+            }
+            return teacher.constraints[dayIndex][periodIndex] !== false;
+        }
+
+        canvas.addEventListener('click', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            // Click on sidebar (right side)
+            if (x > canvas.width - SIDEBAR_WIDTH) {
+                heldSession = null; // Cancel any held session from grid
+                let yPos = 75;
+                let clickedAssignment = null;
+                for (const assignment of assignments) {
+                    const scheduledCount = schedule.filter(s => s.assignmentId === assignment.id).length;
+                    if (assignment.weeklyCount - scheduledCount <= 0) continue;
+                    if (y >= yPos - 25 && y <= yPos + 25) {
+                        clickedAssignment = assignment;
+                        break;
+                    }
+                    yPos += 55;
+                }
+                selectedAssignment = clickedAssignment;
+            } else if (x < canvas.width - SIDEBAR_WIDTH - ROW_HEADER_WIDTH && y > COL_HEADER_HEIGHT) { // Click on grid
+                const gridX = x;
+                const gridY = y - COL_HEADER_HEIGHT;
+                const classIndex = Math.floor(gridY / CELL_HEIGHT);
+                const totalColIndexRTL = Math.floor((canvas.width - SIDEBAR_WIDTH - ROW_HEADER_WIDTH - gridX) / CELL_WIDTH);
+                const dayIndex = Math.floor(totalColIndexRTL / settings.periods);
+                const periodIndex = totalColIndexRTL % settings.periods;
+
+                if (dayIndex >= settings.days.length || classIndex >= classes.length) return;
+                
+                // Check if clicking on an existing session to pick it up
+                const sessionIndex = schedule.findIndex(s => {
+                    const { assignment } = getAssignmentInfo(s.assignmentId);
+                    const sessionClassIndexes = assignment.classIds.map(cid => classes.findIndex(c => c.id === cid));
+                    return s.dayIndex === dayIndex && s.periodIndex === periodIndex && sessionClassIndexes.includes(classIndex);
+                });
+
+                if (sessionIndex > -1) { // Clicked on existing session
+                    selectedAssignment = null; // Clear sidebar selection
+                    heldSession = schedule.splice(sessionIndex, 1)[0];
+                } else if (selectedAssignment || heldSession) { // Clicked on empty cell with something selected
+                    placeSession(dayIndex, periodIndex, classIndex);
+                }
+            }
+            draw();
+        });
+        
+         canvas.addEventListener('dblclick', (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            if (x < canvas.width - SIDEBAR_WIDTH - ROW_HEADER_WIDTH && y > COL_HEADER_HEIGHT) {
+                const gridX = x;
+                const gridY = y - COL_HEADER_HEIGHT;
+                const classIndex = Math.floor(gridY / CELL_HEIGHT);
+                const totalColIndexRTL = Math.floor((canvas.width - SIDEBAR_WIDTH - ROW_HEADER_WIDTH - gridX) / CELL_WIDTH);
+                const dayIndex = Math.floor(totalColIndexRTL / settings.periods);
+                const periodIndex = totalColIndexRTL % settings.periods;
+
+                const sessionIndex = schedule.findIndex(s => {
+                    const { assignment } = getAssignmentInfo(s.assignmentId);
+                    const sessionClassIndexes = assignment.classIds.map(cid => classes.findIndex(c => c.id === cid));
+                    return s.dayIndex === dayIndex && s.periodIndex === periodIndex && sessionClassIndexes.includes(classIndex);
+                });
+
+                if (sessionIndex > -1) {
+                    schedule.splice(sessionIndex, 1);
+                    saveData();
+                    draw();
+                }
+            }
+        });
+
+
+        function placeSession(dayIndex, periodIndex, classIndex) {
+            const sessionToPlace = heldSession || { assignmentId: selectedAssignment.id };
+            const { assignment } = getAssignmentInfo(sessionToPlace.assignmentId);
+            const clickedClassId = classes[classIndex]?.id;
+
+            if (!clickedClassId || !assignment.classIds.includes(clickedClassId)) {
+                showAlert('لا يمكن وضع الحصة إلا في صف أحد الفصول الخاصة بها.');
+                if (heldSession) schedule.push(heldSession);
+                return;
+            }
+
+            for(const teacherId of assignment.teacherIds) {
+                 if (!isTeacherAvailable(teacherId, dayIndex, periodIndex)) {
+                    showAlert(`أحد المعلمين (${teachers.find(t=>t.id === teacherId).name}) غير متاح في هذا التوقيت.`);
+                    if (heldSession) schedule.push(heldSession);
+                    return;
+                }
+            }
+            
+             for(const classId of assignment.classIds) {
+                for(const teacherId of assignment.teacherIds) {
+                    if (isConflict(dayIndex, periodIndex, classId, teacherId)) {
+                        showAlert('تعارض! أحد المعلمين أو الفصول مشغول في هذا التوقيت.');
+                        if (heldSession) schedule.push(heldSession);
+                        return;
+                    }
+                }
+            }
+
+            schedule.push({ dayIndex, periodIndex, assignmentId: sessionToPlace.assignmentId });
+            heldSession = null;
+            selectedAssignment = null;
+            saveData();
+        }
+
+        function isConflict(dayIndex, periodIndex, classId, teacherId) {
+            return schedule.some(entry => {
+                if (entry.dayIndex !== dayIndex || entry.periodIndex !== periodIndex) return false;
+                const { assignment: scheduledAssignment } = getAssignmentInfo(entry.assignmentId);
+                const teacherIsBusy = scheduledAssignment.teacherIds.includes(teacherId);
+                const classIsBusy = scheduledAssignment.classIds.includes(classId);
+                return teacherIsBusy || classIsBusy;
+            });
+        }
+        
+        // ===================================================
+        // 5.5. التوزيع العشوائي ومسح الجدول
+        // ===================================================
+        function distributeRandomly() {
+            if (!assignments.length) {
+                showAlert('الرجاء إضافة الأنصبة أولاً.');
+                return;
+            }
+            schedule = [];
+            const allSessionsToPlace = [];
+            assignments.forEach(assignment => {
+                for (let i = 0; i < assignment.weeklyCount; i++) {
+                    allSessionsToPlace.push({ assignmentId: assignment.id });
+                }
+            });
+
+            for (let i = allSessionsToPlace.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [allSessionsToPlace[i], allSessionsToPlace[j]] = [allSessionsToPlace[j], allSessionsToPlace[i]];
+            }
+            
+            const unplacedSessions = [];
+
+            allSessionsToPlace.forEach(session => {
+                let placed = false;
+                const { assignment } = getAssignmentInfo(session.assignmentId);
+                if (!assignment) return;
+                
+                const availableSlots = [];
+                for (let dayIndex = 0; dayIndex < settings.days.length; dayIndex++) {
+                    for (let periodIndex = 0; periodIndex < settings.periods; periodIndex++) {
+                        let canPlace = true;
+                        for(const teacherId of assignment.teacherIds) {
+                            if(!isTeacherAvailable(teacherId, dayIndex, periodIndex)) {
+                                canPlace = false; break;
+                            }
+                        }
+                        if(canPlace) {
+                            availableSlots.push({ dayIndex, periodIndex });
+                        }
+                    }
+                }
+                for (let i = availableSlots.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [availableSlots[i], availableSlots[j]] = [availableSlots[j], availableSlots[i]];
+                }
+                
+                for (const slot of availableSlots) {
+                    let conflictFound = false;
+                     for(const classId of assignment.classIds) {
+                        for(const teacherId of assignment.teacherIds) {
+                            if (isConflict(slot.dayIndex, slot.periodIndex, classId, teacherId)) {
+                                conflictFound = true; break;
+                            }
+                        }
+                        if(conflictFound) break;
+                    }
+
+                    if (!conflictFound) {
+                        schedule.push({ dayIndex: slot.dayIndex, periodIndex: slot.periodIndex, assignmentId: session.assignmentId });
+                        placed = true;
+                        break;
+                    }
+                }
+
+                if (!placed) {
+                    unplacedSessions.push(session);
+                }
+            });
+
+            saveData();
+            draw();
+
+            if (unplacedSessions.length > 0) {
+                const unplacedDetails = unplacedSessions.map(s => {
+                    const {classNames, subject} = getAssignmentInfo(s.assignmentId);
+                    return `${subject.name} - ${classNames}`;
+                }).filter((value, index, self) => self.indexOf(value) === index).join('\n');
+                showAlert(`تم التوزيع. لم يتمكن النظام من توزيع ${unplacedSessions.length} حصة بسبب التعارضات.\nالحصص غير الموزعة:\n${unplacedDetails}`);
+            } else {
+                showAlert('تم توزيع جميع الحصص بنجاح!');
+            }
+        }
+
+        function clearSchedule() {
+            showConfirm('هل أنت متأكد من مسح جميع الحصص من الجدول؟', () => {
+                schedule = [];
+                saveData();
+                draw();
+            });
+        }
+
+        // ===================================================
+        // Gemini API Integration
+        // ===================================================
+        const apiKey = ""; // Leave this empty
+
+        async function callGeminiAPI(prompt) {
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    console.error("Gemini API Error:", error);
+                    return `خطأ في الاتصال بالـ API: ${error.error.message}`;
+                }
+
+                const result = await response.json();
+                return result.candidates?.[0]?.content?.parts?.[0]?.text || "لم يتم العثور على إجابة.";
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                return "حدث خطأ أثناء محاولة الاتصال.";
+            }
+        }
+
+        async function generateSmartSummary() {
+            if (schedule.length === 0) {
+                showAlert("الجدول فارغ. الرجاء توزيع بعض الحصص أولاً.");
+                return;
+            }
+
+            const btn = document.getElementById('gemini-summary-btn');
+            const originalText = btn.textContent;
+            btn.textContent = 'جاري التحليل...';
+            btn.disabled = true;
+
+            const stats = {
+                teachers: teachers.length,
+                classes: classes.length,
+                subjects: subjects.length,
+                totalSessions: schedule.length,
+                sessionsPerDay: settings.days.map(day => schedule.filter((s, i) => s.dayIndex === settings.days.indexOf(day)).length),
+            };
+            const busiestDayIndex = stats.sessionsPerDay.indexOf(Math.max(...stats.sessionsPerDay));
+            const busiestDay = settings.days[busiestDayIndex];
+
+            const prompt = `
+                أنت مساعد مدير مدرسة وخبير في تحليل الجداول الدراسية. قم بكتابة ملخص احترافي وموجز للخطة الدراسية الأسبوعية، مع تقديم ملاحظة أو اقتراح واحد ذكي لتحسينها بناءً على البيانات التالية:
+                - إجمالي عدد المعلمين: ${stats.teachers}
+                - إجمالي عدد الفصول: ${stats.classes}
+                - إجمالي عدد المواد: ${stats.subjects}
+                - إجمالي الحصص الموزعة في الجدول: ${stats.totalSessions} حصة
+                - اليوم الأكثر ازدحاماً هو يوم '${busiestDay}' بعدد ${stats.sessionsPerDay[busiestDayIndex]} حصة.
+                
+                ابدأ الملخص بـ "ملخص الخطة الدراسية:" ثم اذكر النقاط الأساسية.
+                بعد ذلك، أضف فقرة بعنوان "ملاحظات واقتراحات:" وقدم اقتراحاً واحداً بناءً على أن يوم ${busiestDay} هو الأكثر ازدحاماً.
+                اجعل اللغة احترافية ومناسبة للإدارة.
+            `;
+            
+            const summary = await callGeminiAPI(prompt);
+            showAlert(summary, "ملخص الخطة الذكي");
+
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
+
+        async function suggestTeacher() {
+            const classId = parseInt(document.getElementById('assignment-class-select').value);
+            const subjectId = parseInt(document.getElementById('assignment-subject-select').value);
+
+            if (!classId || !subjectId) {
+                showAlert("الرجاء اختيار فصل ومادة على الأقل أولاً.");
+                return;
+            }
+
+            if (teachers.length === 0) {
+                 showAlert("الرجاء إضافة المعلمين أولاً.");
+                return;
+            }
+
+            const btn = document.getElementById('gemini-teacher-btn');
+            const originalText = btn.textContent;
+            btn.textContent = 'جاري التفكير...';
+            btn.disabled = true;
+
+            const className = classes.find(c => c.id === classId).name
+            const subjectName = subjects.find(s => s.id === subjectId).name;
+            const teacherNames = teachers.map(t => t.name).join(', ');
+            const assignmentsContext = assignments.map(a => {
+                const { teacherNames, classNames, subject } = getAssignmentInfo(a.id);
+                return `- المعلم '${teacherNames}' يدرس '${subject.name}' للصف '${classNames}'`;
+            }).join('\n');
+
+            const prompt = `
+                أنا أخطط جدولاً دراسياً وأحتاج لاقتراح أفضل معلم لمهمة محددة.
+                
+                المهمة: تدريس مادة "${subjectName}" للصف "${className}".
+                
+                قائمة المعلمين المتاحة: ${teacherNames}.
+                
+                وهذه هي الأنصبة المسندة بالفعل:
+                ${assignmentsContext.length > 0 ? assignmentsContext : "لا توجد أنصبة مسندة بعد."}
+                
+                بناءً على التخصصات المحتملة للمعلمين من الأنصبة الأخرى (إن وجدت)، من هو المعلم الأنسب لهذه المهمة؟
+                أجب باسم المعلم فقط بدون أي مقدمات أو كلمات إضافية.
+            `;
+
+            const suggestedName = await callGeminiAPI(prompt);
+            const suggestedTeacher = teachers.find(t => suggestedName.includes(t.name));
+            const teacherSelect = document.getElementById('assignment-teacher-select');
+
+            if (suggestedTeacher) {
+                teacherSelect.value = suggestedTeacher.id;
+            } else {
+                showAlert(`لم يتمكن الذكاء الاصطناعي من العثور على معلم مناسب. قد تكون الإجابة غير دقيقة: "${suggestedName}"`);
+            }
+
+            btn.textContent = originalText;
+            btn.disabled = false;
+        }
+
+        // ===================================================
+        // 6. وظيفة التصدير المتقدم والطباعة
+        // ===================================================
+        const exportTypeSelect = document.getElementById('exportType');
+        const exportItemSelect = document.getElementById('exportItem');
+
+        function updateExportOptions() {
+            const type = exportTypeSelect.value;
+            exportItemSelect.innerHTML = '';
+            exportItemSelect.disabled = true;
+            let data = [];
+
+            if (type === 'class') data = classes;
+            else if (type === 'teacher') data = teachers;
+
+            if (data.length > 0) {
+                 exportItemSelect.disabled = false;
+                 data.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.id;
+                    option.textContent = item.name;
+                    exportItemSelect.appendChild(option);
+                });
+            } else if (type === 'all_teachers' || type === 'school') {
+                exportItemSelect.disabled = true;
+            }
+        }
+        exportTypeSelect.addEventListener('change', updateExportOptions);
+        
+        function getTableData() {
+            const type = exportTypeSelect.value;
+            const itemId = parseInt(exportItemSelect.value);
+            let title = "الجدول المدرسي";
+            let head = [];
+            let body = [];
+
+            if ((type === 'class' || type === 'teacher') && !itemId) {
+                showAlert('الرجاء اختيار عنصر من القائمة أولاً.');
+                return null;
+            }
+             if (type === 'class') {
+                const aClass = classes.find(c => c.id === itemId);
+                title = `جدول ${aClass.name}`;
+                head.push(['اليوم', ...Array.from({ length: settings.periods }, (_, i) => `الحصة ${i + 1}`)]);
+                settings.days.forEach((day, dayIndex) => {
+                    const row = [day];
+                    for (let periodIndex = 0; periodIndex < settings.periods; periodIndex++) {
+                        const entry = schedule.find(s => getAssignmentInfo(s.assignmentId).assignment?.classIds.includes(aClass.id) && s.dayIndex === dayIndex && s.periodIndex === periodIndex);
+                        row.push(entry ? `${getAssignmentInfo(entry.assignmentId).subject.name}\n${getAssignmentInfo(entry.assignmentId).teacherNames}` : '');
+                    }
+                    body.push(row);
+                });
+
+            } else if (type === 'teacher') {
+                const teacher = teachers.find(t => t.id === itemId);
+                title = `جدول ${teacher.name}`;
+                head.push(['اليوم', ...Array.from({ length: settings.periods }, (_, i) => `الحصة ${i + 1}`)]);
+                 settings.days.forEach((day, dayIndex) => {
+                    const row = [day];
+                    for (let periodIndex = 0; periodIndex < settings.periods; periodIndex++) {
+                        const entry = schedule.find(s => getAssignmentInfo(s.assignmentId).assignment?.teacherIds.includes(teacher.id) && s.dayIndex === dayIndex && s.periodIndex === periodIndex);
+                        row.push(entry ? `${getAssignmentInfo(entry.assignmentId).subject.name}\n${getAssignmentInfo(entry.assignmentId).classNames}` : '');
+                    }
+                    body.push(row);
+                });
+
+            } else if (type === 'school' || type === 'all_teachers') {
+                const masterType = type === 'school' ? 'class' : 'teacher';
+                const masterList = masterType === 'class' ? classes : teachers;
+                title = masterType === 'class' ? `الجدول المدرسي العام` : `جدول جميع المعلمين`;
+                
+                const reversedDays = [...settings.days].reverse();
+                const headerRow1 = [{ content: '' }];
+                const headerRow2 = [`${masterType === 'class' ? 'الفصل' : 'المعلم'}`];
+                reversedDays.forEach(day => {
+                    headerRow1.push({ content: day, colSpan: settings.periods });
+                    for (let i = 1; i <= settings.periods; i++) headerRow2.push(`ح${i}`);
+                });
+                head = [headerRow1, headerRow2];
+                
+                masterList.forEach(item => {
+                    const row = [item.name];
+                    for (let dayIndexRTL = 0; dayIndexRTL < settings.days.length; dayIndexRTL++) {
+                        const dayIndex = settings.days.length - 1 - dayIndexRTL;
+                        for (let periodIndex = 0; periodIndex < settings.periods; periodIndex++) {
+                            const entry = schedule.find(s => {
+                                const { assignment } = getAssignmentInfo(s.assignmentId);
+                                if (!assignment) return false;
+                                const key = masterType === 'class' ? 'classIds' : 'teacherIds';
+                                return assignment[key].includes(item.id) && s.dayIndex === dayIndex && s.periodIndex === periodIndex;
+                            });
+                             const cellContent = entry ? `${getAssignmentInfo(entry.assignmentId).subject.name}\n${masterType === 'class' ? getAssignmentInfo(entry.assignmentId).teacherNames : getAssignmentInfo(entry.assignmentId).classNames}` : '';
+                            row.push(cellContent);
+                        }
+                    }
+                    body.push(row);
+                });
+            }
+            return { title, head, body };
+        }
+
+        document.getElementById('export-button').addEventListener('click', () => {
+            const data = getTableData();
+            if (!data) return;
+
+            const { title, head, body } = data;
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'landscape' });
+            
+            doc.addFont('https://cdnjs.cloudflare.com/ajax/libs/amiri-font/0.1.0/amiri-regular.ttf', 'Amiri', 'normal');
+            doc.setFont('Amiri');
+
+            doc.setFontSize(10);
+            doc.text(settings.schoolName || 'اسم المدرسة', doc.internal.pageSize.getWidth() - 15, 10, { align: 'right' });
+            doc.setFontSize(18);
+            doc.text(title, doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
+            
+            const type = exportTypeSelect.value;
+            let startY = (type === 'school' || type === 'all_teachers') ? 25 : 20;
+            
+            doc.autoTable({
+                head: head, body: body, startY: startY, theme: 'grid',
+                styles: { font: 'Amiri', halign: 'center', valign: 'middle', fontSize: (type === 'school' || type === 'all_teachers') ? 8 : 10 },
+                headStyles: { fillColor: (type === 'school' || type === 'all_teachers') ? '#e9ecef' : [22, 160, 133], textColor: (type === 'school' || type === 'all_teachers') ? 0 : 255 }
+            });
+
+            doc.text(`مصمم الجدول: ${settings.designerName || ''}`, 15, doc.internal.pageSize.getHeight() - 10);
+            doc.save(`${title}.pdf`);
+        });
+        
+        // ===================================================
+        // 7. وظيفة الطباعة والمعاينة الجديدة
+        // ===================================================
+        function generatePrintableHTML(title, head, body) {
+            const printableDisplaySettings = { ...displaySettings }; // Use current display settings
+            return `
+                <!DOCTYPE html>
+                <html lang="ar" dir="rtl">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>${title}</title>
+                    <style>
+                        body { font-family: 'Segoe UI', Tahoma, sans-serif; direction: rtl; }
+                        table { width: 100%; border-collapse: collapse; font-size: ${printableDisplaySettings.mainFontSize - 2}px; }
+                        th, td { border: ${printableDisplaySettings.lineWidth}px solid #ccc; padding: 4px; text-align: center; vertical-align: middle; height: ${printableDisplaySettings.cellHeight - 10}px; }
+                        th { background-color: #f2f2f2; }
+                        h1, h3 { text-align: center; margin: 5px 0; }
+                        .header { text-align: right; font-size: 12px;}
+                        .footer { font-size: 9px; margin-top: 15px; }
+                        @media print {
+                            body { -webkit-print-color-adjust: exact; margin: 0; }
+                            .no-print { display: none; }
+                            .printable-area { margin: 1cm; }
+                             .footer { position: fixed; bottom: 10px; left: 10px; }
+                             .header { position: fixed; top: 10px; right: 10px; }
+                             @page { size: A4 landscape; margin: 1cm; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="printable-area">
+                        <div class="header"><h3>${settings.schoolName || ''}</h3></div>
+                        <h1>${title}</h1>
+                        <table>
+                           <thead>${head.map(hRow => `<tr>${hRow.map(h => `<th colspan="${h.colSpan || 1}">${h.content || h}</th>`).join('')}</tr>`).join('')}</thead>
+                            <tbody>${body.map(row => `<tr>${row.map(cell => `<td>${cell.replace(/\n/g, '<br>')}</td>`).join('')}</tr>`).join('')}</tbody>
+                        </table>
+                        <div class="footer">مصمم الجدول: ${settings.designerName || ''}</div>
+                    </div>
+                </body>
+                </html>
+            `;
+        }
+
+        function previewTable() {
+            const data = getTableData();
+            if (!data) return;
+
+            const { title, head, body } = data;
+            document.getElementById('preview-title').innerText = `معاينة: ${title}`;
+            
+            const previewHTML = generatePrintableHTML(title, head, body);
+            const iframe = document.createElement('iframe');
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            
+            const previewContent = document.getElementById('preview-content');
+            previewContent.innerHTML = '';
+            previewContent.appendChild(iframe);
+            
+            iframe.contentWindow.document.open();
+            iframe.contentWindow.document.write(previewHTML);
+            iframe.contentWindow.document.close();
+            
+            openModal('preview-modal');
+        }
+
+        function printTable() {
+            const data = getTableData();
+            if (!data) return;
+
+            const { title, head, body } = data;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(generatePrintableHTML(title, head, body));
+            printWindow.document.close();
+            printWindow.focus();
+            setTimeout(() => { 
+               printWindow.print();
+               printWindow.close();
+            }, 250);
+        }
+
+        // ===================================================
+        // 8. بدء تشغيل التطبيق
+        // ===================================================
+         // Custom Alert/Confirm Logic
+        function showAlert(message, title = 'تنبيه') {
+            document.getElementById('alert-title').innerText = title;
+            document.getElementById('alert-message').innerText = message;
+            document.getElementById('alert-cancel-btn').style.display = 'none';
+            document.getElementById('alert-confirm-btn').onclick = closeAlert;
+            document.getElementById('alert-modal').style.display = 'flex';
+        }
+
+        function showConfirm(message, onConfirm, onCancel) {
+            document.getElementById('alert-title').innerText = 'تأكيد';
+            document.getElementById('alert-message').innerText = message;
+            document.getElementById('alert-cancel-btn').style.display = 'inline-block';
+            
+            document.getElementById('alert-confirm-btn').onclick = () => {
+                if (onConfirm) onConfirm();
+                closeAlert();
+            };
+             document.getElementById('alert-cancel-btn').onclick = () => {
+                if (onCancel) onCancel();
+                closeAlert();
+            };
+            
+            document.getElementById('alert-modal').style.display = 'flex';
+        }
+
+        function closeAlert() {
+            document.getElementById('alert-modal').style.display = 'none';
+        }
+
+        window.onload = () => {
+            loadData();
+            updateCanvasDimensions();
+            updateExportOptions();
+            window.addEventListener('resize', () => {
+                // We no longer resize based on window, but keep this for potential future use
+            });
+        };
+
+    </script>
+</body>
+</html>
