@@ -147,6 +147,8 @@
             width: 100%; padding: 8px; box-sizing: border-box;
             border: 1px solid #ccc; border-radius: 4px;
         }
+        .modal-body select[multiple] { height: 100px; }
+        .modal-body .small-text { font-size: 12px; color: #6c757d; margin-top: -10px; margin-bottom: 10px; }
         .slider-group { display: flex; align-items: center; gap: 10px; }
         .slider-group input[type="range"] { flex-grow: 1; }
         .slider-group span { min-width: 30px; text-align: center; }
@@ -167,9 +169,9 @@
         <div class="management-buttons">
             <button onclick="openModal('settings-modal')">إعدادات الجدول</button>
             <button onclick="openModal('display-settings-modal')">إعدادات العرض</button>
-            <button onclick="openModal('teachers-modal')">إدارة المعلمين</button>
             <button onclick="openModal('classes-modal')">إدارة الفصول</button>
             <button onclick="openModal('subjects-modal')">إدارة المواد</button>
+            <button onclick="openModal('teachers-modal')">إدارة المعلمين</button>
             <button onclick="openModal('assignments-modal')">إدارة الأنصبة</button>
             <button onclick="distributeRandomly()" style="background-color: var(--info-color);">توزيع عشوائي</button>
             <button onclick="clearSchedule()" style="background-color: var(--warning-color);">مسح الجدول</button>
@@ -356,10 +358,11 @@
                 <hr>
                 <div class="form-group">
                     <label>إضافة نصاب جديد:</label>
-                    <select id="assignment-class-select"></select>
+                    <select id="assignment-classes-select" multiple></select>
+                     <p class="small-text">لدمج الفصول، استخدم Ctrl+Click لاختيار متعدد.</p>
                     <select id="assignment-subject-select"></select>
-                    <select id="assignment-teacher-select"></select>
-                    <button id="gemini-teacher-btn" class="gemini-button gemini-suggestion-btn" onclick="suggestTeacher()">✨ اقترح معلمًا</button>
+                    <select id="assignment-teachers-select" multiple></select>
+                    <p class="small-text">لتقسيم الفصل، استخدم Ctrl+Click لاختيار متعدد.</p>
                     <input type="number" id="assignment-count-input" placeholder="عدد الحصص الأسبوعية" min="1" style="margin-top: 10px;">
                 </div>
                 <button class="btn-primary" onclick="addAssignment()">إضافة نصاب</button>
@@ -491,9 +494,8 @@
             const assignment = assignments.find(a => a.id === assignmentId);
             if (!assignment) return {};
             
-            // Handle multiple teachers and classes
-            const teacherNames = assignment.teacherIds.map(tid => teachers.find(t => t.id === tid)?.name || '').join(' و ');
-            const classNames = assignment.classIds.map(cid => classes.find(c => c.id === cid)?.name || '').join(' و ');
+            const teacherNames = (assignment.teacherIds || []).map(tid => teachers.find(t => t.id === tid)?.name || '').join(' و ');
+            const classNames = (assignment.classIds || []).map(cid => classes.find(c => c.id === cid)?.name || '').join(' و ');
             
             const subject = subjects.find(s => s.id === assignment.subjectId);
             return { assignment, teacherNames, classNames, subject };
@@ -576,7 +578,7 @@
 
                 // Period Headers for that day
                 for (let periodIndex = 0; periodIndex < settings.periods; periodIndex++) {
-                    const periodX = dayX + periodIndex * CELL_WIDTH;
+                    const periodX = dayX + (settings.periods - 1 - periodIndex) * CELL_WIDTH;
                     ctx.fillStyle = '#f1f1f1';
                     ctx.fillRect(periodX, COL_HEADER_HEIGHT / 2, CELL_WIDTH, COL_HEADER_HEIGHT / 2);
                     ctx.strokeRect(periodX, COL_HEADER_HEIGHT / 2, CELL_WIDTH, COL_HEADER_HEIGHT / 2);
@@ -902,80 +904,39 @@
             });
 
             // Revert to single select for simpler UI
-            const classSelect = document.getElementById(`assignment-class-select`);
-            classSelect.innerHTML = '<option value="">اختر الفصل</option>';
+            const classSelect = document.getElementById(`assignment-classes-select`);
+            classSelect.innerHTML = '';
             classes.forEach(item => classSelect.innerHTML += `<option value="${item.id}">${item.name}</option>`);
 
             const subjectSelect = document.getElementById(`assignment-subject-select`);
             subjectSelect.innerHTML = '<option value="">اختر المادة</option>';
             subjects.forEach(item => subjectSelect.innerHTML += `<option value="${item.id}">${item.name}</option>`);
 
-            const teacherSelect = document.getElementById(`assignment-teacher-select`);
-            teacherSelect.innerHTML = '<option value="">اختر المعلم</option>';
+            const teacherSelect = document.getElementById(`assignment-teachers-select`);
+            teacherSelect.innerHTML = '';
             teachers.forEach(item => teacherSelect.innerHTML += `<option value="${item.id}">${item.name}</option>`);
 
              document.getElementById('assignment-count-input').value = '';
         }
-
         function addAssignment() {
-            const classId = parseInt(document.getElementById('assignment-class-select').value);
+            const classIds = Array.from(document.getElementById('assignment-classes-select').selectedOptions).map(opt => parseInt(opt.value));
             const subjectId = parseInt(document.getElementById('assignment-subject-select').value);
-            const teacherId = parseInt(document.getElementById('assignment-teacher-select').value);
+            const teacherIds = Array.from(document.getElementById('assignment-teachers-select').selectedOptions).map(opt => parseInt(opt.value));
             const weeklyCount = parseInt(document.getElementById('assignment-count-input').value);
 
-            if (!classId || !subjectId || !teacherId || !weeklyCount) {
-                showAlert('الرجاء تعبئة كل الحقول.'); return;
-            }
-
-            const className = classes.find(c => c.id === classId).name;
-            const teacherName = teachers.find(t => t.id === teacherId).name;
-
-            // Check for merging classes
-            const potentialClassMerge = assignments.find(a => a.subjectId === subjectId && JSON.stringify(a.teacherIds) === JSON.stringify([teacherId]));
-            if (potentialClassMerge && !potentialClassMerge.classIds.includes(classId)) {
-                const existingClassNames = potentialClassMerge.classIds.map(cid => classes.find(c => c.id === cid)?.name).join(', ');
-                showConfirm(
-                    `المعلم '${teacherName}' يدرس نفس المادة بالفعل للفصل/للفصول '${existingClassNames}'. هل تريد دمج الفصل '${className}' معهم في حصة مشتركة؟`,
-                    () => { // On Confirm Merge
-                        potentialClassMerge.classIds.push(classId);
-                        saveData();
-                        renderAssignmentsModal();
-                    },
-                    () => { // On Cancel (create new)
-                        createNewAssignment();
-                    }
-                );
-                return;
-            }
-
-            // Check for merging teachers
-            const potentialTeacherMerge = assignments.find(a => a.subjectId === subjectId && JSON.stringify(a.classIds) === JSON.stringify([classId]));
-            if(potentialTeacherMerge && !potentialTeacherMerge.teacherIds.includes(teacherId)) {
-                 const existingTeacherNames = potentialTeacherMerge.teacherIds.map(tid => teachers.find(t => t.id === tid)?.name).join(', ');
-                 showConfirm(
-                    `الفصل '${className}' يدرس نفس المادة بالفعل مع المعلم/المعلمين '${existingTeacherNames}'. هل تريد إضافة المعلم '${teacherName}' معهم لتقسيم الحصة؟`,
-                    () => { // On Confirm Merge
-                        potentialTeacherMerge.teacherIds.push(teacherId);
-                        saveData();
-                        renderAssignmentsModal();
-                    },
-                    () => { // On Cancel (create new)
-                        createNewAssignment();
-                    }
-                );
-                return;
+            if (classIds.length === 0 || !subjectId || teacherIds.length === 0 || !weeklyCount) {
+                showAlert('الرجاء تعبئة كل الحقول واختيار فصل ومعلم على الأقل.'); return;
             }
             
-            // If no merge possibilities, create a new assignment
-            createNewAssignment();
-
-            function createNewAssignment() {
-                 assignments.push({ id: Date.now(), classIds: [classId], subjectId, teacherIds: [teacherId], weeklyCount });
-                 saveData();
-                 renderAssignmentsModal();
+            const exists = assignments.some(a => a.subjectId === subjectId && a.classIds.some(cid => classIds.includes(cid)));
+            if (exists) {
+                showAlert('هذه المادة مسندة بالفعل لأحد هذه الفصول المحددة.'); return;
             }
-        }
 
+            assignments.push({ id: Date.now(), classIds, subjectId, teacherIds, weeklyCount });
+            saveData();
+            renderAssignmentsModal();
+        }
         function deleteAssignment(id) {
             assignments = assignments.filter(a => a.id !== id);
             saveData();
@@ -1593,3 +1554,4 @@
     </script>
 </body>
 </html>
+
