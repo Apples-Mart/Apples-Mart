@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>برنامج الجدول المدرسي المتكامل</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary: #3498db;
+            --secondary: #2ecc71;
+            --accent: #e74c3c;
+            --warning: #f39c12;
+            --dark: #2c3e50;
+            --light: #ecf0f1;
+            --border: #bdc3c7;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 0;
+            direction: rtl;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: var(--dark);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .tab {
+            padding: 15px 20px;
+            cursor: pointer;
+            text-align: center;
+            flex: 1;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom: 3px solid var(--primary);
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-success {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+        
+        .btn-danger {
+            background-color: var(--accent);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background-color: #e67e22;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        th, td {
+            border: 1px solid var(--border);
+            padding: 12px;
+            text-align: center;
+        }
+        
+        th {
+            background-color: var(--primary);
+            color: white;
+            font-weight: bold;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        tr:hover {
+            background-color: #e9ecef;
+        }
+        
+        .timetable-container {
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+        
+        .timetable {
+            min-width: 100%;
+        }
+        
+        .timetable th {
+            padding: 15px;
+        }
+        
+        .time-header {
+            background-color: var(--secondary);
+            font-weight: bold;
+        }
+        
+        .break-cell {
+            background-color: #ffeeba;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .timetable-cell {
+            height: 80px;
+            vertical-align: top;
+            position: relative;
+            min-width: 120px;
+        }
+        
+        .timetable-cell.empty {
+            background-color: #f8f9fa;
+        }
+        
+        .assigned-session {
+            background-color: #e8f4fc;
+            border-radius: 5px;
+            padding: 8px;
+            margin: 2px;
+            font-size: 14px;
+            cursor: pointer;
+            border: 1px solid #b8d4f0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .assigned-session:hover {
+            background-color: #d1e7ff;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .view-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .view-btn {
+            padding: 8px 15px;
+            background: #e9ecef;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .view-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 15px 20px;
+            background: var(--primary);
+            color: white;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        .action-btn {
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .view-selector {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>برنامج الجدول المدرسي المتكامل</h1>
+            <p>نظام متكامل لإدارة الجداول المدرسية</p>
+        </header>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="teachers">إدارة المعلمين</div>
+            <div class="tab" data-tab="subjects">إدارة المواد</div>
+            <div class="tab" data-tab="classes">إدارة الفصول</div>
+            <div class="tab" data-tab="timetable">عرض الجدول</div>
+            <div class="tab" data-tab="settings">الإعدادات</div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn-primary" id="save-data"><i class="fas fa-save"></i> حفظ البيانات</button>
+            <button class="btn-success" id="load-data"><i class="fas fa-folder-open"></i> تحميل البيانات</button>
+            <button class="btn-warning" id="random-assign"><i class="fas fa-random"></i> توزيع عشوائي</button>
+            <button class="btn-primary" id="print-timetable"><i class="fas fa-print"></i> طباعة الجدول</button>
+        </div>
+        
+        <!-- إدارة المعلمين -->
+        <div class="tab-content active" id="teachers-tab">
+            <div class="card">
+                <div class="card-header">
+                    <span>قائمة المعلمين</span>
+                    <button class="btn-success" id="add-teacher"><i class="fas fa-plus"></i> إضافة معلم</button>
+                </div>
+                <div class="card-body">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>اسم المعلم</th>
+                                <th>المادة</th>
+                                <th>الفصول</th>
+                                <th>عدد الحصص</th>
+                                <th>أيام الندب</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teachers-list">
+                            <tr>
+                                <td>1</td>
+                                <td>أحمد محمد</td>
+                                <td>اللغة العربية</td>
+                                <td>الصف الأول/أ, الصف الأول/ب</td>
+                                <td>10</td>
+                                <td>الأحد, الإثنين</td>
+                                <td>
+                                    <button class="btn-warning action-btn"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-danger action-btn"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>فاطمة عبد الله</td>
+                                <td>الرياضيات</td>
+                                <td>الصف الأول/أ, الصف الثاني/أ</td>
+                                <td>8</td>
+                                <td>الخميس</td>
+                                <td>
+                                    <button class="btn-warning action-btn"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-danger action-btn"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- إدارة المواد -->
+        <div class="tab-content" id="subjects-tab">
+            <div class="card">
+                <div class="card-header">
+                    <span>قائمة المواد الدراسية</span>
+                    <button class="btn-success" id="add-subject"><i class="fas fa-plus"></i> إضافة مادة</button>
+                </div>
+                <div class="card-body">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>اسم المادة</th>
+                                <th>المعلمون</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subjects-list">
+                            <tr>
+                                <td>1</td>
+                                <td>اللغة العربية</td>
+                                <td>أحمد محمد, سارة عبد الرحمن</td>
+                                <td>
+                                    <button class="btn-warning action-btn"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-danger action-btn"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>الرياضيات</td>
+                                <td>فاطمة عبد الله, محمد خالد</td>
+                                <td>
+                                    <button class="btn-warning action-btn"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-danger action-btn"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- إدارة الفصول -->
+        <div class="tab-content" id="classes-tab">
+            <div class="card">
+                <div class="card-header">
+                    <span>قائمة الفصول الدراسية</span>
+                    <button class="btn-success" id="add-class"><i class="fas fa-plus"></i> إضافة فصل</button>
+                </div>
+                <div class="card-body">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>اسم الفصل</th>
+                                <th>عدد الطلاب</th>
+                                <th>الإجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="classes-list">
+                            <tr>
+                                <td>1</td>
+                                <td>الصف الأول/أ</td>
+                                <td>25</td>
+                                <td>
+                                    <button class="btn-warning action-btn"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-danger action-btn"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>الصف الأول/ب</td>
+                                <td>30</td>
+                                <td>
+                                    <button class="btn-warning action-btn"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-danger action-btn"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- عرض الجدول -->
+        <div class="tab-content" id="timetable-tab">
+            <div class="view-selector">
+                <button class="view-btn active" data-view="school">جدول المدرسة</button>
+                <button class="view-btn" data-view="class">جدول الفصل</button>
+                <button class="view-btn" data-view="teacher">جدول المعلم</button>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <span>الجدول المدرسي - عرض شامل</span>
+                    <select id="timetable-selector">
+                        <option value="all">جميع الفصول</option>
+                        <option value="1">الصف الأول/أ</option>
+                        <option value="2">الصف الأول/ب</option>
+                        <option value="3">الصف الثاني/أ</option>
+                    </select>
+                </div>
+                <div class="card-body">
+                    <div class="timetable-container">
+                        <table class="timetable">
+                            <thead>
+                                <tr>
+                                    <th>الحصة/اليوم</th>
+                                    <th>الأحد</th>
+                                    <th>الإثنين</th>
+                                    <th>الثلاثاء</th>
+                                    <th>الأربعاء</th>
+                                    <th>الخميس</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="time-header">الأولى<br>7:30 - 8:15</td>
+                                    <td class="timetable-cell"><div class="assigned-session">لغة عربية<br>أ. أحمد<br>الأول/أ</div></td>
+                                    <td class="timetable-cell"><div class="assigned-session">رياضيات<br>أ. فاطمة<br>الأول/أ</div></td>
+                                    <td class="timetable-cell"><div class="assigned-session">علوم<br>أ. يوسف<br>الأول/أ</div></td>
+                                    <td class="timetable-cell"><div class="assigned-session">لغة عربية<br>أ. أحمد<br>الأول/أ</div></td>
+                                    <td class="timetable-cell"><div class="assigned-session">تربية إسلامية<br>أ. خالد<br>الأول/أ</div></td>
+                                </tr>
+                                <tr>
+                                    <td class="time-header">الثانية<br>8:15 - 9:00</td>
+                                    <td class="timetable-cell"><div class="assigned-session">رياضيات<br>أ. فاطمة<br>الأول/ب</div></td>
+                                    <td class="timetable-cell"><div class="assigned-session">لغة إنجليزية<br>أ. سارة<br>الأول/ب</div></td>
+                                    <td class="timetable-cell"><div class="assigned-session">لغة عربية<br>أ. أحمد<br>الأول/ب</div></td>
+                                    <td class="timetable-cell"><div class="assigned-session">تربية بدنية<br>أ. محمد<br>الأول/ب</div></td>
+                                    <td class="timetable-cell"><div class="assigned-session">رياضيات<br>أ. فاطمة<br>الأول/ب</div></td>
+                                </tr>
+                                <tr>
+                                    <td class="time-header">الثالثة<br>9:00 - 9:45</td>
+                                    <td class="timetable-cell"><div class="assigned-session">علوم<br>أ. يوسف<br>الثاني/أ</div></td>
+                                    <td class="timetable-cell"><div class="assigned-session">تربية فنية<br>أ. منى<br>الثاني/أ</div></td>
+                                    <td class="timetable-cell"><div class="assigned-session">لغة إنجليزية<br>أ. سارة<br>الثاني/أ</div></td>
+                                    <td class="timetable-cell"><div class="assigned-session">علوم<br>أ. يوسف<br>الثاني/أ</div></td>
+                                    <td class="timetable-cell"><div class="assigned-session">حاسب آلي<br>أ. علي<br>الثاني/أ</div></td>
+                                </tr>
+                                <tr>
+                                    <td class="time-header">الراحة<br>9:45 - 10:15</td>
+                                    <td colspan="5" class="break-cell">فترة الراحة</td>
+                                </tr>
+                                <tr>
+                                    <td class="time-header">الرابعة<br>10:15 - 11:00</td>
+                                    <td class="timetable-cell"><div class="assigned-session">تربية إسلامية<br>أ. خالد<br>الأول/أ</div></td>
+                                    <td class="timetable-cell"><div class="assigned-session">علوم<br>أ. يوسف<br>الأول/ب</div></td>
+                                    <td class="timetable-cell"><div class="assigned-session">تربية وطنية<br>أ. حسن<br>الثاني/أ</div></td>
+                                    <td class="timetable-cell"><div class="assigned-session">لغة إنجليزية<br>أ. سارة<br>الأول/أ</div></td>
+                                    <td class="timetable-cell"><div class="assigned-session">لغة عربية<br>أ. أحمد<br>الثاني/أ</div></td>
+                                </tr>
+                                <tr>
+                                    <td class="time-header">الخامسة<br>11:00 - 11:45</td>
+                                    <td class="timetable-cell"><div class="assigned-session">حاسب آلي<br>أ. علي<br>الأول/ب</div></td>
+                                    <td class="timetable-cell"><div class="assigned-session">تربية إسلامية<br>أ. خالد<br>الثاني/أ</div></td>
+                                    <td class="timetable-cell"><div class="assigned-session">رياضيات<br>أ. فاطمة<br>الثاني/أ</div></td>
+                                    <td class="timetable-cell"><div class="assigned-session">تربية فنية<br>أ. منى<br>الأول/ب</div></td>
+                                    <td class="timetable-cell"><div class="assigned-session">علوم<br>أ. يوسف<br>الأول/أ</div></td>
+                                </tr>
+                                <tr>
+                                    <td class="time-header">السادسة<br>11:45 - 12:30</td>
+                                    <td class="timetable-cell empty"></td>
+                                    <td class="timetable-cell"><div class="assigned-session">نشاط<br>أ. أحمد<br>الأول/أ</div></td>
+                                    <td class="timetable-cell empty"></td>
+                                    <td class="timetable-cell"><div class="assigned-session">نشاط<br>أ. فاطمة<br>الأول/ب</div></td>
+                                    <td class="timetable-cell empty"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- الإعدادات -->
+        <div class="tab-content" id="settings-tab">
+            <div class="card">
+                <div class="card-header">
+                    <span>إعدادات الجدول المدرسي</span>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>أيام الدراسة:</label>
+                        <div>
+                            <label><input type="checkbox" checked> الأحد</label>
+                            <label><input type="checkbox" checked> الإثنين</label>
+                            <label><input type="checkbox" checked> الثلاثاء</label>
+                            <label><input type="checkbox" checked> الأربعاء</label>
+                            <label><input type="checkbox" checked> الخميس</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>عدد الحصص في اليوم:</label>
+                        <input type="number" min="1" max="10" value="6" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>مدة الحصة (بالدقائق):</label>
+                        <input type="number" min="30" max="120" value="45" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>وقت بداية اليوم الدراسي:</label>
+                        <input type="time" value="07:30" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>تفعيل فترات الراحة:</label>
+                        <label><input type="checkbox" checked> نعم</label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>موعد الراحة:</label>
+                        <input type="time" value="09:45" class="form-control">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>مدة الراحة (بالدقائق):</label>
+                        <input type="number" min="10" max="60" value="30" class="form-control">
+                    </div>
+                    
+                    <button class="btn-success">حفظ الإعدادات</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // تبديل التبويبات
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // إزالة النشاط من جميع التبويبات
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(tc => tc.classList.remove('active'));
+                    
+                    // إضافة النشاط للتبويب الحالي
+                    tab.classList.add('active');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+            
+            // تبديل طرق العرض
+            const viewButtons = document.querySelectorAll('.view-btn');
+            
+            viewButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    viewButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    // هنا يمكنك إضافة الكود لتغيير طريقة العرض
+                    alert(`تم تغيير طريقة العرض إلى: ${button.textContent}`);
+                });
+            });
+            
+            // التوزيع العشوائي
+            document.getElementById('random-assign').addEventListener('click', () => {
+                if (confirm('هل تريد حقاً إعادة توزيع الحصص عشوائياً؟')) {
+                    // محاكاة لعملية التوزيع العشوائي
+                    const sessions = document.querySelectorAll('.assigned-session');
+                    const subjects = ['لغة عربية', 'رياضيات', 'علوم', 'لغة إنجليزية', 'تربية إسلامية', 'تربية بدنية'];
+                    const teachers = ['أ. أحمد', 'أ. فاطمة', 'أ. يوسف', 'أ. سارة', 'أ. خالد', 'أ. محمد'];
+                    const classes = ['الأول/أ', 'الأول/ب', 'الثاني/أ'];
+                    
+                    sessions.forEach(session => {
+                        if (Math.random() > 0.2) { // 80% احتمال أن تحتوي على حصة
+                            const randomSubject = subjects[Math.floor(Math.random() * subjects.length)];
+                            const randomTeacher = teachers[Math.floor(Math.random() * teachers.length)];
+                            const randomClass = classes[Math.floor(Math.random() * classes.length)];
+                            
+                            session.innerHTML = `${randomSubject}<br>${randomTeacher}<br>${randomClass}`;
+                        } else {
+                            session.innerHTML = '';
+                            session.parentElement.classList.add('empty');
+                        }
+                    });
+                    
+                    alert('تم التوزيع العشوائي بنجاح!');
+                }
+            });
+            
+            // حفظ البيانات
+            document.getElementById('save-data').addEventListener('click', () => {
+                alert('تم حفظ البيانات بنجاح!');
+            });
+            
+            // تحميل البيانات
+            document.getElementById('load-data').addEventListener('click', () => {
+                alert('تم تحميل البيانات بنجاح!');
+            });
+            
+            // طباعة الجدول
+            document.getElementById('print-timetable').addEventListener('click', () => {
+                window.print();
+            });
+            
+            // إضافة معلم
+            document.getElementById('add-teacher').addEventListener('click', () => {
+                alert('سيتم فتح نموذج إضافة معلم جديد');
+            });
+            
+            // إضافة مادة
+            document.getElementById('add-subject').addEventListener('click', () => {
+                alert('سيتم فتح نموذج إضافة مادة جديدة');
+            });
+            
+            // إضافة فصل
+            document.getElementById('add-class').addEventListener('click', () => {
+                alert('سيتم فتح نموذج إضافة فصل جديد');
+            });
+        });
+    </script>
+</body>
+</html>
