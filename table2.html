@@ -231,7 +231,7 @@
             font-weight: bold;
         }
         
-        select, input {
+        select, input, textarea {
             width: 100%;
             padding: 10px;
             border: 1px solid var(--border);
@@ -287,6 +287,43 @@
             font-size: 14px;
         }
         
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 500px;
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .close {
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
         @media (max-width: 768px) {
             .tabs {
                 flex-direction: column;
@@ -329,7 +366,7 @@
             <div class="card">
                 <div class="card-header">
                     <span>قائمة المعلمين</span>
-                    <button class="btn-success" id="add-teacher"><i class="fas fa-plus"></i> إضافة معلم</button>
+                    <button class="btn-success" id="add-teacher-btn"><i class="fas fa-plus"></i> إضافة معلم</button>
                 </div>
                 <div class="card-body">
                     <table>
@@ -353,8 +390,8 @@
                                 <td>10</td>
                                 <td>الأحد, الإثنين</td>
                                 <td>
-                                    <button class="btn-warning action-btn"><i class="fas fa-edit"></i></button>
-                                    <button class="btn-danger action-btn"><i class="fas fa-trash"></i></button>
+                                    <button class="btn-warning action-btn edit-teacher" data-id="1"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-danger action-btn delete-teacher" data-id="1"><i class="fas fa-trash"></i></button>
                                 </td>
                             </tr>
                             <tr>
@@ -365,8 +402,8 @@
                                 <td>8</td>
                                 <td>الخميس</td>
                                 <td>
-                                    <button class="btn-warning action-btn"><i class="fas fa-edit"></i></button>
-                                    <button class="btn-danger action-btn"><i class="fas fa-trash"></i></button>
+                                    <button class="btn-warning action-btn edit-teacher" data-id="2"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-danger action-btn delete-teacher" data-id="2"><i class="fas fa-trash"></i></button>
                                 </td>
                             </tr>
                         </tbody>
@@ -380,7 +417,7 @@
             <div class="card">
                 <div class="card-header">
                     <span>قائمة المواد الدراسية</span>
-                    <button class="btn-success" id="add-subject"><i class="fas fa-plus"></i> إضافة مادة</button>
+                    <button class="btn-success" id="add-subject-btn"><i class="fas fa-plus"></i> إضافة مادة</button>
                 </div>
                 <div class="card-body">
                     <table>
@@ -398,8 +435,8 @@
                                 <td>اللغة العربية</td>
                                 <td>أحمد محمد, سارة عبد الرحمن</td>
                                 <td>
-                                    <button class="btn-warning action-btn"><i class="fas fa-edit"></i></button>
-                                    <button class="btn-danger action-btn"><i class="fas fa-trash"></i></button>
+                                    <button class="btn-warning action-btn edit-subject" data-id="1"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-danger action-btn delete-subject" data-id="1"><i class="fas fa-trash"></i></button>
                                 </td>
                             </tr>
                             <tr>
@@ -407,8 +444,8 @@
                                 <td>الرياضيات</td>
                                 <td>فاطمة عبد الله, محمد خالد</td>
                                 <td>
-                                    <button class="btn-warning action-btn"><i class="fas fa-edit"></i></button>
-                                    <button class="btn-danger action-btn"><i class="fas fa-trash"></i></button>
+                                    <button class="btn-warning action-btn edit-subject" data-id="2"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-danger action-btn delete-subject" data-id="2"><i class="fas fa-trash"></i></button>
                                 </td>
                             </tr>
                         </tbody>
@@ -422,7 +459,7 @@
             <div class="card">
                 <div class="card-header">
                     <span>قائمة الفصول الدراسية</span>
-                    <button class="btn-success" id="add-class"><i class="fas fa-plus"></i> إضافة فصل</button>
+                    <button class="btn-success" id="add-class-btn"><i class="fas fa-plus"></i> إضافة فصل</button>
                 </div>
                 <div class="card-body">
                     <table>
@@ -440,8 +477,8 @@
                                 <td>الصف الأول/أ</td>
                                 <td>25</td>
                                 <td>
-                                    <button class="btn-warning action-btn"><i class="fas fa-edit"></i></button>
-                                    <button class="btn-danger action-btn"><i class="fas fa-trash"></i></button>
+                                    <button class="btn-warning action-btn edit-class" data-id="1"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-danger action-btn delete-class" data-id="1"><i class="fas fa-trash"></i></button>
                                 </td>
                             </tr>
                             <tr>
@@ -449,8 +486,8 @@
                                 <td>الصف الأول/ب</td>
                                 <td>30</td>
                                 <td>
-                                    <button class="btn-warning action-btn"><i class="fas fa-edit"></i></button>
-                                    <button class="btn-danger action-btn"><i class="fas fa-trash"></i></button>
+                                    <button class="btn-warning action-btn edit-class" data-id="2"><i class="fas fa-edit"></i></button>
+                                    <button class="btn-danger action-btn delete-class" data-id="2"><i class="fas fa-trash"></i></button>
                                 </td>
                             </tr>
                         </tbody>
@@ -522,7 +559,7 @@
                                 <tr>
                                     <td class="time-header">الرابعة<br>10:15 - 11:00</td>
                                     <td class="timetable-cell"><div class="assigned-session">تربية إسلامية<br>أ. خالد<br>الأول/أ</div></td>
-                                    <td class="timetable-cell"><div class="assigned-session">علوم<br>أ. يوسف<br>الأول/ب</div></td>
+                                    <td class="timetable-cell"><div class="assigned-session">علوم<br>أ. يوسf<br>الأول/ب</div></td>
                                     <td class="timetable-cell"><div class="assigned-session">تربية وطنية<br>أ. حسن<br>الثاني/أ</div></td>
                                     <td class="timetable-cell"><div class="assigned-session">لغة إنجليزية<br>أ. سارة<br>الأول/أ</div></td>
                                     <td class="timetable-cell"><div class="assigned-session">لغة عربية<br>أ. أحمد<br>الثاني/أ</div></td>
@@ -560,45 +597,95 @@
                     <div class="form-group">
                         <label>أيام الدراسة:</label>
                         <div>
-                            <label><input type="checkbox" checked> الأحد</label>
-                            <label><input type="checkbox" checked> الإثنين</label>
-                            <label><input type="checkbox" checked> الثلاثاء</label>
-                            <label><input type="checkbox" checked> الأربعاء</label>
-                            <label><input type="checkbox" checked> الخميس</label>
+                            <label><input type="checkbox" name="study-days" value="الأحد" checked> الأحد</label>
+                            <label><input type="checkbox" name="study-days" value="الإثنين" checked> الإثنين</label>
+                            <label><input type="checkbox" name="study-days" value="الثلاثاء" checked> الثلاثاء</label>
+                            <label><input type="checkbox" name="study-days" value="الأربعاء" checked> الأربعاء</label>
+                            <label><input type="checkbox" name="study-days" value="الخميس" checked> الخميس</label>
                         </div>
                     </div>
                     
                     <div class="form-group">
                         <label>عدد الحصص في اليوم:</label>
-                        <input type="number" min="1" max="10" value="6" class="form-control">
+                        <input type="number" id="periods-per-day" min="1" max="10" value="6" class="form-control">
                     </div>
                     
                     <div class="form-group">
                         <label>مدة الحصة (بالدقائق):</label>
-                        <input type="number" min="30" max="120" value="45" class="form-control">
+                        <input type="number" id="period-duration" min="30" max="120" value="45" class="form-control">
                     </div>
                     
                     <div class="form-group">
                         <label>وقت بداية اليوم الدراسي:</label>
-                        <input type="time" value="07:30" class="form-control">
+                        <input type="time" id="start-time" value="07:30" class="form-control">
                     </div>
                     
                     <div class="form-group">
                         <label>تفعيل فترات الراحة:</label>
-                        <label><input type="checkbox" checked> نعم</label>
+                        <label><input type="checkbox" id="enable-break" checked> نعم</label>
                     </div>
                     
-                    <div class="form-group">
+                    <div class="form-group" id="break-settings">
                         <label>موعد الراحة:</label>
-                        <input type="time" value="09:45" class="form-control">
-                    </div>
+                        <input type="time" id="break-time" value="09:45" class="form-control">
                     
-                    <div class="form-group">
                         <label>مدة الراحة (بالدقائق):</label>
-                        <input type="number" min="10" max="60" value="30" class="form-control">
+                        <input type="number" id="break-duration" min="10" max="60" value="30" class="form-control">
                     </div>
                     
-                    <button class="btn-success">حفظ الإعدادات</button>
+                    <button class="btn-success" id="save-settings">حفظ الإعدادات</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نموذج إضافة معلم -->
+    <div class="modal" id="teacher-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>إضافة معلم جديد</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>اسم المعلم:</label>
+                    <input type="text" id="teacher-name" class="form-control" placeholder="أدخل اسم المعلم">
+                </div>
+                <div class="form-group">
+                    <label>المادة:</label>
+                    <select id="teacher-subject" class="form-control">
+                        <option value="">اختر المادة</option>
+                        <option value="اللغة العربية">اللغة العربية</option>
+                        <option value="الرياضيات">الرياضيات</option>
+                        <option value="العلوم">العلوم</option>
+                        <option value="اللغة الإنجليزية">اللغة الإنجليزية</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>الفصول:</label>
+                    <div>
+                        <label><input type="checkbox" name="teacher-class" value="الصف الأول/أ"> الصف الأول/أ</label>
+                        <label><input type="checkbox" name="teacher-class" value="الصف الأول/ب"> الصف الأول/ب</label>
+                        <label><input type="checkbox" name="teacher-class" value="الصف الثاني/أ"> الصف الثاني/أ</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>عدد الحصص الأسبوعية:</label>
+                    <input type="number" id="teacher-hours" min="1" max="30" value="10" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>أيام الندب (خارج المدرسة):</label>
+                    <div>
+                        <label><input type="checkbox" name="unavailable-days" value="الأحد"> الأحد</label>
+                        <label><input type="checkbox" name="unavailable-days" value="الإثنين"> الإثنين</label>
+                        <label><input type="checkbox" name="unavailable-days" value="الثلاثاء"> الثلاثاء</label>
+                        <label><input type="checkbox" name="unavailable-days" value="الأربعاء"> الأربعاء</label>
+                        <label><input type="checkbox" name="unavailable-days" value="الخميس"> الخميس</label>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button class="btn-danger" id="cancel-teacher">إلغاء</button>
+                    <button class="btn-success" id="save-teacher">حفظ</button>
                 </div>
             </div>
         </div>
@@ -606,10 +693,57 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // تبديل التبويبات
+            // بيانات التطبيق
+            const appData = {
+                teachers: [
+                    { 
+                        id: 1, 
+                        name: "أحمد محمد", 
+                        subject: "اللغة العربية", 
+                        classes: "الصف الأول/أ, الصف الأول/ب", 
+                        hours: 10,
+                        unavailableDays: "الأحد, الإثنين"
+                    },
+                    { 
+                        id: 2, 
+                        name: "فاطمة عبد الله", 
+                        subject: "الرياضيات", 
+                        classes: "الصف الأول/أ, الصف الثاني/أ", 
+                        hours: 8,
+                        unavailableDays: "الخميس"
+                    }
+                ],
+                subjects: [
+                    { id: 1, name: "اللغة العربية", teachers: "أحمد محمد, سارة عبد الرحمن" },
+                    { id: 2, name: "الرياضيات", teachers: "فاطمة عبد الله, محمد خالد" }
+                ],
+                classes: [
+                    { id: 1, name: "الصف الأول/أ", students: 25 },
+                    { id: 2, name: "الصف الأول/ب", students: 30 }
+                ],
+                settings: {
+                    days: ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'],
+                    periods: 6,
+                    periodDuration: 45,
+                    startTime: "07:30",
+                    hasBreak: true,
+                    breakTime: "09:45",
+                    breakDuration: 30
+                }
+            };
+
+            // عناصر DOM
             const tabs = document.querySelectorAll('.tab');
             const tabContents = document.querySelectorAll('.tab-content');
+            const viewButtons = document.querySelectorAll('.view-btn');
+            const teacherModal = document.getElementById('teacher-modal');
+            const closeModal = document.querySelector('.close');
+            const addTeacherBtn = document.getElementById('add-teacher-btn');
+            const saveTeacherBtn = document.getElementById('save-teacher');
+            const cancelTeacherBtn = document.getElementById('cancel-teacher');
+            const saveSettingsBtn = document.getElementById('save-settings');
             
+            // تبديل التبويبات
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
                     const tabId = tab.getAttribute('data-tab');
@@ -625,17 +759,122 @@
             });
             
             // تبديل طرق العرض
-            const viewButtons = document.querySelectorAll('.view-btn');
-            
             viewButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     viewButtons.forEach(btn => btn.classList.remove('active'));
                     button.classList.add('active');
                     
                     // هنا يمكنك إضافة الكود لتغيير طريقة العرض
-                    alert(`تم تغيير طريقة العرض إلى: ${button.textContent}`);
+                    const viewType = button.getAttribute('data-view');
+                    updateTimetableView(viewType);
                 });
             });
+            
+            // فتح نموذج إضافة معلم
+            addTeacherBtn.addEventListener('click', () => {
+                teacherModal.style.display = 'flex';
+            });
+            
+            // إغلاق النموذج
+            closeModal.addEventListener('click', () => {
+                teacherModal.style.display = 'none';
+            });
+            
+            cancelTeacherBtn.addEventListener('click', () => {
+                teacherModal.style.display = 'none';
+            });
+            
+            // حفظ المعلم
+            saveTeacherBtn.addEventListener('click', () => {
+                const name = document.getElementById('teacher-name').value;
+                const subject = document.getElementById('teacher-subject').value;
+                const hours = document.getElementById('teacher-hours').value;
+                
+                // جمع الفصول المختارة
+                const selectedClasses = [];
+                document.querySelectorAll('input[name="teacher-class"]:checked').forEach(checkbox => {
+                    selectedClasses.push(checkbox.value);
+                });
+                
+                // جمع أيام الندب
+                const unavailableDays = [];
+                document.querySelectorAll('input[name="unavailable-days"]:checked').forEach(checkbox => {
+                    unavailableDays.push(checkbox.value);
+                });
+                
+                if (name && subject && selectedClasses.length > 0) {
+                    const newTeacher = {
+                        id: appData.teachers.length + 1,
+                        name: name,
+                        subject: subject,
+                        classes: selectedClasses.join(', '),
+                        hours: hours,
+                        unavailableDays: unavailableDays.join(', ')
+                    };
+                    
+                    appData.teachers.push(newTeacher);
+                    updateTeachersList();
+                    
+                    // إخفاء النموذج ومسح الحقول
+                    teacherModal.style.display = 'none';
+                    document.getElementById('teacher-name').value = '';
+                    document.getElementById('teacher-subject').value = '';
+                    document.getElementById('teacher-hours').value = '10';
+                    document.querySelectorAll('input[name="teacher-class"]').forEach(checkbox => {
+                        checkbox.checked = false;
+                    });
+                    document.querySelectorAll('input[name="unavailable-days"]').forEach(checkbox => {
+                        checkbox.checked = false;
+                    });
+                    
+                    alert('تم إضافة المعلم بنجاح!');
+                } else {
+                    alert('يرجى ملء جميع الحقول المطلوبة!');
+                }
+            });
+            
+            // تحديث قائمة المعلمين
+            function updateTeachersList() {
+                const teachersList = document.getElementById('teachers-list');
+                teachersList.innerHTML = '';
+                
+                appData.teachers.forEach(teacher => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${teacher.id}</td>
+                        <td>${teacher.name}</td>
+                        <td>${teacher.subject}</td>
+                        <td>${teacher.classes}</td>
+                        <td>${teacher.hours}</td>
+                        <td>${teacher.unavailableDays}</td>
+                        <td>
+                            <button class="btn-warning action-btn edit-teacher" data-id="${teacher.id}"><i class="fas fa-edit"></i></button>
+                            <button class="btn-danger action-btn delete-teacher" data-id="${teacher.id}"><i class="fas fa-trash"></i></button>
+                        </td>
+                    `;
+                    teachersList.appendChild(row);
+                });
+                
+                // إضافة أحداث لأزرار الحذف
+                document.querySelectorAll('.delete-teacher').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const teacherId = this.getAttribute('data-id');
+                        deleteTeacher(teacherId);
+                    });
+                });
+            }
+            
+            // حذف معلم
+            function deleteTeacher(teacherId) {
+                if (confirm('هل أنت متأكد من أنك تريد حذف هذا المعلم؟')) {
+                    const index = appData.teachers.findIndex(teacher => teacher.id == teacherId);
+                    if (index !== -1) {
+                        appData.teachers.splice(index, 1);
+                        updateTeachersList();
+                        alert('تم حذف المعلم بنجاح!');
+                    }
+                }
+            }
             
             // التوزيع العشوائي
             document.getElementById('random-assign').addEventListener('click', () => {
@@ -643,34 +882,87 @@
                     // محاكاة لعملية التوزيع العشوائي
                     const sessions = document.querySelectorAll('.assigned-session');
                     const subjects = ['لغة عربية', 'رياضيات', 'علوم', 'لغة إنجليزية', 'تربية إسلامية', 'تربية بدنية'];
-                    const teachers = ['أ. أحمد', 'أ. فاطمة', 'أ. يوسف', 'أ. سارة', 'أ. خالد', 'أ. محمد'];
+                    const teachers = appData.teachers;
                     const classes = ['الأول/أ', 'الأول/ب', 'الثاني/أ'];
+                    const days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
                     
                     sessions.forEach(session => {
+                        const dayIndex = session.parentElement.cellIndex - 1;
+                        const dayName = days[dayIndex];
+                        
                         if (Math.random() > 0.2) { // 80% احتمال أن تحتوي على حصة
-                            const randomSubject = subjects[Math.floor(Math.random() * subjects.length)];
-                            const randomTeacher = teachers[Math.floor(Math.random() * teachers.length)];
-                            const randomClass = classes[Math.floor(Math.random() * classes.length)];
+                            // فلترة المعلمين المتاحين في هذا اليوم
+                            const availableTeachers = teachers.filter(teacher => {
+                                if (!teacher.unavailableDays) return true;
+                                return !teacher.unavailableDays.includes(dayName);
+                            });
                             
-                            session.innerHTML = `${randomSubject}<br>${randomTeacher}<br>${randomClass}`;
+                            if (availableTeachers.length > 0) {
+                                const randomTeacher = availableTeachers[Math.floor(Math.random() * availableTeachers.length)];
+                                const randomSubject = randomTeacher.subject;
+                                const randomClass = classes[Math.floor(Math.random() * classes.length)];
+                                
+                                session.innerHTML = `${randomSubject}<br>${randomTeacher.name}<br>${randomClass}`;
+                                session.parentElement.classList.remove('empty');
+                            } else {
+                                session.innerHTML = '';
+                                session.parentElement.classList.add('empty');
+                            }
                         } else {
                             session.innerHTML = '';
                             session.parentElement.classList.add('empty');
                         }
                     });
                     
-                    alert('تم التوزيع العشوائي بنجاح!');
+                    alert('تم التوزيع العشوائي بنجاح مع مراعاة أيام الندب!');
                 }
             });
             
             // حفظ البيانات
             document.getElementById('save-data').addEventListener('click', () => {
+                localStorage.setItem('timetableData', JSON.stringify(appData));
                 alert('تم حفظ البيانات بنجاح!');
             });
             
             // تحميل البيانات
             document.getElementById('load-data').addEventListener('click', () => {
-                alert('تم تحميل البيانات بنجاح!');
+                const savedData = localStorage.getItem('timetableData');
+                if (savedData) {
+                    const parsedData = JSON.parse(savedData);
+                    Object.assign(appData, parsedData);
+                    updateTeachersList();
+                    alert('تم تحميل البيانات بنجاح!');
+                } else {
+                    alert('لا توجد بيانات محفوظة!');
+                }
+            });
+            
+            // حفظ الإعدادات
+            saveSettingsBtn.addEventListener('click', () => {
+                const periodsPerDay = document.getElementById('periods-per-day').value;
+                const periodDuration = document.getElementById('period-duration').value;
+                const startTime = document.getElementById('start-time').value;
+                const enableBreak = document.getElementById('enable-break').checked;
+                const breakTime = document.getElementById('break-time').value;
+                const breakDuration = document.getElementById('break-duration').value;
+                
+                // جمع أيام الدراسة المختارة
+                const studyDays = [];
+                document.querySelectorAll('input[name="study-days"]:checked').forEach(checkbox => {
+                    studyDays.push(checkbox.value);
+                });
+                
+                appData.settings = {
+                    days: studyDays,
+                    periods: parseInt(periodsPerDay),
+                    periodDuration: parseInt(periodDuration),
+                    startTime: startTime,
+                    hasBreak: enableBreak,
+                    breakTime: breakTime,
+                    breakDuration: parseInt(breakDuration)
+                };
+                
+                alert('تم حفظ الإعدادات بنجاح!');
             });
             
             // طباعة الجدول
@@ -678,18 +970,75 @@
                 window.print();
             });
             
-            // إضافة معلم
-            document.getElementById('add-teacher').addEventListener('click', () => {
-                alert('سيتم فتح نموذج إضافة معلم جديد');
+            // تحديث طريقة عرض الجدول
+            function updateTimetableView(viewType) {
+                // هنا يمكنك إضافة الكود لتغيير طريقة العرض حسب النوع
+                const timetableTitle = document.querySelector('#timetable-tab .card-header span');
+                
+                if (viewType === 'school') {
+                    timetableTitle.textContent = 'الجدول المدرسي - عرض شامل';
+                } else if (viewType === 'class') {
+                    timetableTitle.textContent = 'جدول الفصل';
+                } else if (viewType === 'teacher') {
+                    timetableTitle.textContent = 'جدول المعلم';
+                }
+            }
+            
+            // إضافة أحداث لأزرار الحذف عند التحميل
+            document.querySelectorAll('.delete-teacher').forEach(button => {
+                button.addEventListener('click', function() {
+                    const teacherId = this.getAttribute('data-id');
+                    deleteTeacher(teacherId);
+                });
             });
             
-            // إضافة مادة
-            document.getElementById('add-subject').addEventListener('click', () => {
+            // إضافة أحداث لأزرار الحذف للمواد والفصول
+            document.querySelectorAll('.delete-subject').forEach(button => {
+                button.addEventListener('click', function() {
+                    const subjectId = this.getAttribute('data-id');
+                    if (confirm('هل أنت متأكد من أنك تريد حذف هذه المادة؟')) {
+                        alert(`سيتم حذف المادة ذات الرقم ${subjectId}`);
+                    }
+                });
+            });
+            
+            document.querySelectorAll('.delete-class').forEach(button => {
+                button.addEventListener('click', function() {
+                    const classId = this.getAttribute('data-id');
+                    if (confirm('هل أنت متأكد من أنك تريد حذف هذا الفصل؟')) {
+                        alert(`سيتم حذف الفصل ذو الرقم ${classId}`);
+                    }
+                });
+            });
+            
+            // إضافة أحداث لأزرار التعديل
+            document.querySelectorAll('.edit-teacher').forEach(button => {
+                button.addEventListener('click', function() {
+                    const teacherId = this.getAttribute('data-id');
+                    alert(`سيتم فتح نموذج تعديل المعلم ذو الرقم ${teacherId}`);
+                });
+            });
+            
+            document.querySelectorAll('.edit-subject').forEach(button => {
+                button.addEventListener('click', function() {
+                    const subjectId = this.getAttribute('data-id');
+                    alert(`سيتم فتح نموذج تعديل المادة ذات الرقم ${subjectId}`);
+                });
+            });
+            
+            document.querySelectorAll('.edit-class').forEach(button => {
+                button.addEventListener('click', function() {
+                    const classId = this.getAttribute('data-id');
+                    alert(`سيتم فتح نموذج تعديل الفصل ذو الرقم ${classId}`);
+                });
+            });
+            
+            // إضافة أحداث لأزرار الإضافة
+            document.getElementById('add-subject-btn').addEventListener('click', () => {
                 alert('سيتم فتح نموذج إضافة مادة جديدة');
             });
             
-            // إضافة فصل
-            document.getElementById('add-class').addEventListener('click', () => {
+            document.getElementById('add-class-btn').addEventListener('click', () => {
                 alert('سيتم فتح نموذج إضافة فصل جديد');
             });
         });
